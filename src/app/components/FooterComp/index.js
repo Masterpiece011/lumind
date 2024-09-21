@@ -1,0 +1,1 @@
+export {FooterComp} from "./FooterComp"

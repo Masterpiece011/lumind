@@ -1,0 +1,1 @@
+export { MainComp } from "./MainComp";
