@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const {Users, Roles, Groups, Users_Groups} = require('../models/models')
 const { Sequelize, model } = require('../db')
+const ROLES = require('../rolesConfing')
 
 const generateJwt = (id, email, role) => {
     return jwt.sign(
@@ -16,7 +17,12 @@ const generateJwt = (id, email, role) => {
 
 class UserController {
     async registration(req, res) {
-        const {email, password, role} = req.body
+        const {email, password, role, user_role} = req.body
+
+          // Only admin can register users and instructors
+        if (user_role !== ROLES.ADMIN) {
+            return next(ApiError.forbidden("Нет доступа"));
+        }
 
         if (!email || !password) {
             return next(ApiError.badRequest('Некорректный email или password'))
@@ -134,7 +140,12 @@ class UserController {
     }
 
     async update(req, res) {
-        const {id, first_name, middle_name, last_name, group_id, role_id} = req.body
+        const {id, first_name, middle_name, last_name, group_id, role_id, user_role} = req.body
+
+        if (user_role !== ROLES.ADMIN || user_role !== ROLES.MODERATOR) {
+            return next(ApiError.forbidden("Нет доступа"));
+        }
+        
         try {
             const user = await Users.findOne({
                 where: {id: id},
@@ -176,6 +187,12 @@ class UserController {
     }
 
     async delete(req, res) {
+        const {user_role} = req.body
+        
+        if (user_role !== ROLES.ADMIN || user_role !== ROLES.MODERATOR) {
+            return next(ApiError.forbidden('Нет доступа для удаления пользователя'));
+        }
+
         const {id} = req.body
         
         try {
