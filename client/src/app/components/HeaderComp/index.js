@@ -1,0 +1,1 @@
+export { HeaderComp } from "./HeaderComp";

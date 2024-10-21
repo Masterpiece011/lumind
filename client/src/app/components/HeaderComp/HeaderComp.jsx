@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function HeaderComp() {
+ function HeaderComp() {
     return (
         <div>
             <p>HeaderComp</p>
@@ -8,3 +8,6 @@ export default function HeaderComp() {
         </div>
     )
 }
+
+
+export {HeaderComp}
