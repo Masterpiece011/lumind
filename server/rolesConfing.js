@@ -1,7 +1,7 @@
 // export const USER_ROLES = 
 
 module.exports = {
-    USER: "UESR",
+    USER: "USER",
     INSTRUCTOR: "INSTRUCTOR",
     ADMIN: "ADMIN",
     MODERATOR: "MODERATOR"

@@ -10,9 +10,9 @@ router.post('/login', userController.login)
 router.get('/auth', authMiddleware, userController.check)
 router.get('/', userController.getAll)
 router.get('/:id', userController.getOne)
-router.delete('/', userController.delete)
+router.delete('/', authMiddleware, checkRoleMiddleware, userController.delete)
 
-router.put('/', userController.update)
+router.put('/', authMiddleware, checkRoleMiddleware, userController.update)
 
 
 module.exports = router
