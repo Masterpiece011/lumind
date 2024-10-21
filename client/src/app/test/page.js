@@ -1,5 +1,5 @@
 import React from "react"
-import HeaderComp from "../components/HeaderComp/HeaderComp"
+import { HeaderComp } from '../components/HeaderComp/HeaderComp';
 import { URLS } from "../routes"
 
 export default function Page() {
