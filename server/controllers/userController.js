@@ -198,6 +198,11 @@ class UserController {
             model: Roles,
             attributes: ["name"],
           },
+          {
+            model: Groups,
+            attributes: ["id", "title"],
+            through: { attributes: [] }
+        }
         ],
       });
 
@@ -208,20 +213,38 @@ class UserController {
           middle_name: middle_name,
           last_name: last_name,
           password: hashPassword,
-          group_id: group_id,
           role: role_name
         });
 
-        const user_data = {
-          id: user.id,
-          img: user.img,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-          password: user.password,
-          role: user.role,
-          groups: user.groups,
-        };
+        if (group_id) {
+          await user.setGroups([group_id]);
+      }
+
+       const updatedUser = await Users.findOne({
+        where: { id },
+        include: [
+            {
+                model: Groups,
+                attributes: ["id", "title", "creator_id"],
+                through: { attributes: [] }
+            },
+            {
+                model: Roles,
+                attributes: ["name"]
+            }
+        ]
+    });
+
+         const user_data = {
+          id: updatedUser.id,
+          img: updatedUser.img,
+          first_name: updatedUser.first_name,
+          last_name: updatedUser.last_name,
+          email: updatedUser.email,
+          password: updatedUser.password,
+          role: updatedUser.role,
+          groups: updatedUser.groups
+      };
 
         return res.json({ user: user_data });
       } else {
