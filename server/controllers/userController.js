@@ -254,33 +254,6 @@ class UserController {
       return ApiError.badRequest("Невозможно обновить пользователя");
     }
   }
-
-  async update(req, res) {
-    const { id, first_name, middle_name, last_name, group_id, role_id, token } =
-      req.body;
-
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    req.user = decoded;
-
-    if (token !== ROLES.ADMIN || token !== ROLES.MODERATOR) {
-      return next(ApiError.forbidden("Нет доступа"));
-    }
-
-    try {
-      const user = await Users.findOne({
-        where: { id: id },
-        include: [
-          {
-            model: Roles,
-            attributes: ["name"],
-          },
-        ],
-      });
-    } catch (e) {
-      return next(ApiError.forbidden("Не получилось найти пользователя"));
-    }
-  }
-
   async delete(req, res) {
     const { id } = req.body;
 
@@ -311,5 +284,4 @@ class UserController {
     }
   }
 }
-
 module.exports = new UserController();
