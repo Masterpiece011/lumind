@@ -254,7 +254,6 @@ class UserController {
       return ApiError.badRequest("Невозможно обновить пользователя");
     }
   }
-
   async delete(req, res) {
     const { id } = req.body;
 
