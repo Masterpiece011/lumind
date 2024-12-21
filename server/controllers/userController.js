@@ -48,6 +48,19 @@ class UserController {
       return next(ApiError.badRequest("Некорректная роль"));
     }
 
+<<<<<<< HEAD
+    async check(req, res, next) {
+        const token = generateJwt(req.user.id, req.user.email, req.user.role)
+        
+        return res.json({
+            token,
+            user: {
+                id: req.user.id,
+                email: req.user.email,
+                role: req.user.role
+            }
+        });
+=======
     const user = await Users.create({
       email,
       password: hashPassword,
@@ -75,6 +88,7 @@ class UserController {
 
     if (!user) {
       return next(ApiError.internal("Пользователь не найден"));
+>>>>>>> 5bdabd1a2c4421db7dc1aea43238390ee7b3142b
     }
 
     let comparePassword = await bcrypt.compareSync(password, user.password);
@@ -255,9 +269,32 @@ class UserController {
     }
   }
 
+<<<<<<< HEAD
+    async update(req, res) {
+        const {id, first_name, middle_name, last_name, group_id, role_id, token} = req.body
+
+        const decoded = jwt.verify(token, process.env.SECRET_KEY)
+        req.user = decoded
+
+        if (token !== ROLES.ADMIN || token !== ROLES.MODERATOR) {
+            return next(ApiError.forbidden("Нет доступа"));
+        }
+        
+        try {
+            const user = await Users.findOne({
+                where: {id: id},
+                include: [
+                    {
+                        model: Roles,
+                        attributes: ['name'],
+                    }
+                ]
+            })
+=======
   async delete(req, res) {
 
     const { id } = req.body;
+>>>>>>> 5bdabd1a2c4421db7dc1aea43238390ee7b3142b
 
     try {
       await Users.destroy({

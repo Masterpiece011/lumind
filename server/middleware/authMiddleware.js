@@ -15,6 +15,7 @@ module.exports = function (req, res, next) {
       console.log("No token found");
       return res.status(401).json({ message: "Не авторизован" });
     }
+
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     req.user = decoded;
     console.log("Decoded User:", req.user); // Логирование для отладки
@@ -23,3 +24,4 @@ module.exports = function (req, res, next) {
     return res.status(401).json({ message: "Не авторизован" });
   }
 };
+
