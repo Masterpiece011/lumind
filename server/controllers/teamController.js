@@ -5,14 +5,15 @@ const {
   Users_Groups,
   Teams,
   Users_Teams,
+  Groups_Teams,
 } = require("../models/models");
-const { Sequelize, model } = require("../db");
 const ApiError = require("../error/ApiError");
 
 class TeamController {
+  // Создание команды с учетом таблицы Groups_Teams
   async create(req, res, next) {
     try {
-      const { name, description, creator_id, group_id, user_id } = req.body;
+      const { name, description, creator_id, group_ids, user_ids } = req.body;
 
       if (!name || !creator_id) {
         return next(
@@ -20,7 +21,7 @@ class TeamController {
         );
       }
 
-      // Проверяем наличие пользователя-создателя
+      // Проверка существования пользователя-создателя
       const creator = await Users.findByPk(creator_id);
       if (!creator) {
         return next(ApiError.badRequest("Создатель с указанным ID не найден"));
@@ -30,23 +31,31 @@ class TeamController {
       const team = await Teams.create({
         name,
         description,
-        creator_id: creator_id,
+        creator_id,
       });
 
-      // Добавляем пользователей в команду, если они указаны
-      if (user_id && user_id.length) {
-        const teamUsersData = user_id.map((userId) => ({
+      // Если есть указанные пользователи, добавляем их в команду
+      if (user_ids && user_ids.length) {
+        const teamUsersData = user_ids.map((userId) => ({
           team_id: team.id,
           user_id: userId,
         }));
         await Users_Teams.bulkCreate(teamUsersData);
       }
 
-      // Добавляем всех пользователей из указанной группы в команду, если группа указана
-      if (group_id) {
+      // Если есть указанные группы, добавляем их в таблицу Groups_Teams
+      if (group_ids && group_ids.length) {
+        const groupTeamsData = group_ids.map((groupId) => ({
+          group_id: groupId,
+          team_id: team.id,
+        }));
+        await Groups_Teams.bulkCreate(groupTeamsData);
+
+        // Добавляем всех пользователей из указанных групп в команду
         const groupUsers = await Users_Groups.findAll({
-          where: { group_id: group_id },
+          where: { group_id: group_ids },
         });
+
         if (groupUsers.length) {
           const teamGroupUsersData = groupUsers.map((groupUser) => ({
             team_id: team.id,
@@ -62,8 +71,7 @@ class TeamController {
     }
   }
 
-  // Получение команды по ID
-  // Получение одной команды по ID с пользователями и группами
+  // Получение одной команды с пользователями и группами
   async getOne(req, res, next) {
     try {
       const { id } = req.params;
@@ -71,14 +79,16 @@ class TeamController {
       const team = await Teams.findByPk(id, {
         include: [
           {
-            model: Users,
-            through: { attributes: [] }, // убирает лишние поля из промежуточной таблицы
-            attributes: ["id", "name"], // подставьте реальные атрибуты из модели Users
-          },
-          {
             model: Groups,
-            through: { attributes: [] },
-            attributes: ["id", "name"], // подставьте реальные атрибуты из модели Groups
+            through: { model: Groups_Teams, attributes: [] },
+            attributes: ["id", "title"],
+            include: [
+              {
+                model: Users,
+                through: { attributes: [] },
+                attributes: ["id", "first_name", "middle_name", "last_name"],
+              },
+            ],
           },
         ],
       });
@@ -99,14 +109,16 @@ class TeamController {
       const teams = await Teams.findAll({
         include: [
           {
-            model: Users,
-            through: { attributes: [] },
-            attributes: ["id", "name"],
-          },
-          {
             model: Groups,
-            through: { attributes: [] },
-            attributes: ["id", "name"],
+            through: { model: Groups_Teams, attributes: [] },
+            attributes: ["id", "title"],
+            include: [
+              {
+                model: Users,
+                through: { attributes: [] },
+                attributes: ["id", "first_name", "middle_name", "last_name"],
+              },
+            ],
           },
         ],
       });

@@ -195,6 +195,25 @@ const Users_Teams = sequelize.define(
   }
 );
 
+const Groups_Teams = sequelize.define(
+  "groups_teams",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      unique: true,
+      autoIncrement: true,
+    },
+    created_at: { type: DataTypes.DATE, defaultValue: now(), allowNull: true },
+    updated_at: { type: DataTypes.DATE, defaultValue: now(), allowNull: true },
+  },
+  {
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at",
+  }
+);
+
 //Задания
 const Assignments = sequelize.define(
   "assignments",
@@ -398,6 +417,10 @@ Users.belongsToMany(Chats, { through: Chat_Members, foreignKey: "user_id" });
 Users.belongsToMany(Teams, { through: Users_Teams, foreignKey: "user_id" });
 Teams.belongsToMany(Users, { through: Users_Teams, foreignKey: "team_id" });
 
+//Связка между Командой и Группой
+Groups.belongsToMany(Teams, { through: Groups_Teams, foreignKey: "group_id" });
+Teams.belongsToMany(Groups, { through: Groups_Teams, foreignKey: "team_id" });
+
 //Связка Чата с Сообщениями чата
 
 Chats.hasMany(Chat_messages, { foreignKey: "chat_id" });
@@ -493,6 +516,7 @@ module.exports = {
   Teams,
   Users_Groups,
   Users_Teams,
+  Groups_Teams,
   Groups_Assignments,
   Chat_Members,
   Notifications,
