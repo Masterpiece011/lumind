@@ -14,9 +14,18 @@ module.exports = function () {
             }
             const decoded = jwt.verify(token, process.env.SECRET_KEY);
             req.user = decoded;
+<<<<<<< HEAD
 
             if (req.user.role !== ROLES.ADMIN || req.user.role !== ROLES.MODERATOR) {
             return res.status(403).json({ message: "Нет доступа, недостаточно прав" });
+=======
+            const userRole = req.user.role;
+             // Log the decoded token for debugging
+             console.log("Decoded token:", req.user);
+             
+            if (userRole !== ROLES.ADMIN && userRole !== ROLES.MODERATOR) {
+                return res.status(403).json({ message: "Нет доступа, недостаточно прав" });
+>>>>>>> 5bdabd1a2c4421db7dc1aea43238390ee7b3142b
             }
 
             next();
