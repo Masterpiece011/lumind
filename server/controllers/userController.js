@@ -59,8 +59,15 @@ class UserController {
 
     async check(req, res, next) {
         const token = generateJwt(req.user.id, req.user.email, req.user.role)
-
-        return res.json({token})
+        
+        return res.json({
+            token,
+            user: {
+                id: req.user.id,
+                email: req.user.email,
+                role: req.user.role
+            }
+        });
     }
 
     async getAll(req, res) {
@@ -140,9 +147,12 @@ class UserController {
     }
 
     async update(req, res) {
-        const {id, first_name, middle_name, last_name, group_id, role_id, user_role} = req.body
+        const {id, first_name, middle_name, last_name, group_id, role_id, token} = req.body
 
-        if (user_role !== ROLES.ADMIN || user_role !== ROLES.MODERATOR) {
+        const decoded = jwt.verify(token, process.env.SECRET_KEY)
+        req.user = decoded
+
+        if (token !== ROLES.ADMIN || token !== ROLES.MODERATOR) {
             return next(ApiError.forbidden("Нет доступа"));
         }
         
