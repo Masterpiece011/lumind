@@ -3,7 +3,7 @@ const ROLES = require("../rolesConfing");
 
 const roleRequirements = {
     //Пользователи
-    "/registration": ROLES.ADMIN,
+    "POST /api/users/registration": ROLES.ADMIN,
     "PUT /api/users/": [ROLES.ADMIN, ROLES.INSTRUCTOR],
     "DELETE /api/users/": ROLES.ADMIN,
     //Группы
@@ -30,12 +30,14 @@ module.exports = function () {
         console.log("Normalized Route Key:", routeKey);
 
         const requiredRole = roleRequirements[routeKey];
+        const userRole = (req.user.role.name || req.user.role).toUpperCase();
 
-        const userRole = req.user.role.name || req.user.role;
+        console.log("Required Role:", requiredRole);
+        console.log("User Role:", userRole);
 
         const isAuthorized = Array.isArray(requiredRole)
-            ? requiredRole.includes(userRole)
-            : userRole === requiredRole;
+            ? requiredRole.map(r => r.toUpperCase()).includes(userRole)
+            : userRole === requiredRole.toUpperCase();
 
         if (!isAuthorized) {
             return res

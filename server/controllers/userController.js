@@ -16,13 +16,7 @@ const generateJwt = (id, email, role) => {
 
 class UserController {
     async registration(req, res, next) {
-        if (!req.user || req.user.role !== ROLES.ADMIN) {
-            return next(
-                ApiError.forbidden(
-                    "Только администратор может регистрировать пользователей"
-                )
-            );
-        }
+
 
         const { email, password, role } = req.body;
 
@@ -102,7 +96,6 @@ class UserController {
 
     async getAll(req, res) {
         try {
-            const token = req.headers.authorization.split(" ")[1];
 
             // Получаем всех пользователей из базы данных
             const users = await Users.findAll({
@@ -131,8 +124,7 @@ class UserController {
                 groups: user.groups,
             }));
 
-            // Возвращаем пользователей с токеном
-            return res.json({ users: response, user_token: token });
+            return res.json({ users: response});
         } catch (error) {
             console.error("Error fetching users:", error); // Логируем ошибку для отладки
             return res.status(500).json({ message: "Error fetching users" });
