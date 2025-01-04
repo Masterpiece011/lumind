@@ -18,7 +18,6 @@ app.use(express.json())
 
 app.use('/api', router)
 
-//Обработка ошибор
 app.use(errorHandler)
 
 app.use(fileUpload({}))
