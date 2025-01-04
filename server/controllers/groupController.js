@@ -82,35 +82,30 @@ class GroupController {
     const { id, title, users } = req.body; 
     try {
       const group = await Groups.findOne({ where: { id: id }, include: Users });
-      
+  
       if (group) {
-        
-        await group.update({
-          title: title,
-        });
+        await group.update({ title: title });
   
-        if (users && users.length > 0) {
-          
-          await group.addUsers(users);  
+        if (users) {
+          const usersArray = Array.isArray(users) ? users : [users];
   
-          
+          await group.addUsers(usersArray);
+  
           const updatedUsers = await group.getUsers();
   
-          
           const userDetails = updatedUsers.map(user => ({
             id: user.id,
             first_name: user.first_name,
             middle_name: user.middle_name,
-            last_name: user.last_name
+            last_name: user.last_name,
           }));
   
-          
           return res.json({
             group: {
               id: group.id,
               title: group.title,
-              users: userDetails 
-            }
+              users: userDetails, 
+            },
           });
         }
   
@@ -118,14 +113,14 @@ class GroupController {
           group: {
             id: group.id,
             title: group.title,
-            users: [] 
-          }
+            users: [], 
+          },
         });
       } else {
         return ApiError.badRequest("Группа не найдена");
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return ApiError.badRequest("Невозможно обновить группу");
 
     async delete(req, res) {
