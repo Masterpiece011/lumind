@@ -16,6 +16,7 @@ router.use("/roles", roleRouter);
 router.use("/notifications", notificationRouter);
 router.use("/groups", groupRouter);
 router.use("/conferences", assignmentRouter);
+router.use("/assignments", assignmentRouter);
 router.use("/publications", publicationRouter);
 router.use("/comments", commentRouter);
 router.use("/investments", investmentRouter);

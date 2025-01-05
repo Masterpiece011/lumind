@@ -14,6 +14,10 @@ const roleRequirements = {
     "POST /api/teams/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
     "PUT /api/teams/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
     "DELETE /api/teams/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
+     // Задания
+    "POST /api/assignments/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
+    "PUT /api/assignments/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
+    "DELETE /api/assignments/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
 };
 
 module.exports = function () {
