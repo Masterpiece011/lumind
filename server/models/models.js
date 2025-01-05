@@ -24,8 +24,8 @@ const Users = sequelize.define(
   },
   {
     timestamps: true,
-    createdAt: "created_at", // необязательно, если названия совпадают
-    updatedAt: "updated_at", // необязательно, если названия совпадают
+    createdAt: "created_at", 
+    updatedAt: "updated_at", 
   }
 );
 
@@ -41,8 +41,8 @@ const Roles = sequelize.define(
   },
   {
     timestamps: true,
-    createdAt: "created_at", // необязательно, если названия совпадают
-    updatedAt: "updated_at", // необязательно, если названия совпадают
+    createdAt: "created_at", 
+    updatedAt: "updated_at", 
   }
 );
 
@@ -250,8 +250,8 @@ const Assignments_investments = sequelize.define(
 
 //Задания_Группы
 
-const Groups_Assignments = sequelize.define(
-  "groups_assignments",
+const Assignments_Teams = sequelize.define(
+  "assignments_teams",
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   },
@@ -478,16 +478,10 @@ Publication_comments_investments.belongsTo(Publication_comments, {
 Groups.belongsToMany(Users, { through: Users_Groups, foreignKey: "group_id" });
 Users.belongsToMany(Groups, { through: Users_Groups, foreignKey: "user_id" });
 
-//Связка Заданий с Группой
+//Связка Заданий с Командой
 
-Groups.belongsToMany(Assignments, {
-  through: Groups_Assignments,
-  foreignKey: "group_id",
-});
-Assignments.belongsToMany(Groups, {
-  through: Groups_Assignments,
-  foreignKey: "assignment_id",
-});
+Assignments.belongsToMany(Teams, { through: Assignments_Teams, foreignKey: "assignment_id" });
+Teams.belongsToMany(Assignments, { through: Assignments_Teams, foreignKey: "team_id" });
 
 //Связка Вложений заданий с Заданием
 
@@ -517,7 +511,7 @@ module.exports = {
   Users_Groups,
   Users_Teams,
   Groups_Teams,
-  Groups_Assignments,
+  Assignments_Teams,
   Chat_Members,
   Notifications,
   Assignments,

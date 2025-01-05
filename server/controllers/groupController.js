@@ -76,7 +76,7 @@ class GroupController {
             });
         }
     }
-  }
+  
 
   async update(req, res) {
     const { id, title, users } = req.body; 
@@ -122,6 +122,8 @@ class GroupController {
     } catch (e) {
       console.error(e);
       return ApiError.badRequest("Невозможно обновить группу");
+    }
+}  
 
     async delete(req, res) {
         const { id } = req.body;
