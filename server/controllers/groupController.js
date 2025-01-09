@@ -32,7 +32,12 @@ class GroupController {
                 include: [
                     {
                         model: Users,
-                        attributes: ["id", "first_name", "middle_name", "last_name"],
+                        attributes: [
+                            "id",
+                            "first_name",
+                            "middle_name",
+                            "last_name",
+                        ],
                         through: {
                             attributes: [],
                         },
@@ -54,7 +59,12 @@ class GroupController {
                 include: [
                     {
                         model: Users,
-                        attributes: ["id", "first_name", "middle_name", "last_name"],
+                        attributes: [
+                            "id",
+                            "first_name",
+                            "middle_name",
+                            "last_name",
+                        ],
                         through: {
                             attributes: [],
                         },
@@ -76,54 +86,56 @@ class GroupController {
             });
         }
     }
-  
 
-  async update(req, res) {
-    const { id, title, users } = req.body; 
-    try {
-      const group = await Groups.findOne({ where: { id: id }, include: Users });
-  
-      if (group) {
-        await group.update({ title: title });
-  
-        if (users) {
-          const usersArray = Array.isArray(users) ? users : [users];
-  
-          await group.addUsers(usersArray);
-  
-          const updatedUsers = await group.getUsers();
-  
-          const userDetails = updatedUsers.map(user => ({
-            id: user.id,
-            first_name: user.first_name,
-            middle_name: user.middle_name,
-            last_name: user.last_name,
-          }));
-  
-          return res.json({
-            group: {
-              id: group.id,
-              title: group.title,
-              users: userDetails, 
-            },
-          });
+    async update(req, res) {
+        const { id, title, users } = req.body;
+        try {
+            const group = await Groups.findOne({
+                where: { id: id },
+                include: Users,
+            });
+
+            if (group) {
+                await group.update({ title: title });
+
+                if (users) {
+                    const usersArray = Array.isArray(users) ? users : [users];
+
+                    await group.addUsers(usersArray);
+
+                    const updatedUsers = await group.getUsers();
+
+                    const userDetails = updatedUsers.map((user) => ({
+                        id: user.id,
+                        first_name: user.first_name,
+                        middle_name: user.middle_name,
+                        last_name: user.last_name,
+                    }));
+
+                    return res.json({
+                        group: {
+                            id: group.id,
+                            title: group.title,
+                            users: userDetails,
+                        },
+                    });
+                }
+
+                return res.json({
+                    group: {
+                        id: group.id,
+                        title: group.title,
+                        users: [],
+                    },
+                });
+            } else {
+                return ApiError.badRequest("Группа не найдена");
+            }
+        } catch (e) {
+            console.error(e);
+            return ApiError.badRequest("Невозможно обновить группу");
         }
-  
-        return res.json({
-          group: {
-            id: group.id,
-            title: group.title,
-            users: [], 
-          },
-        });
-      } else {
-        return ApiError.badRequest("Группа не найдена");
-      }
-    } catch (e) {
-      console.error(e);
-      return ApiError.badRequest("Невозможно обновить группу");
     }
-}  
 
     async delete(req, res) {
         const { id } = req.body;

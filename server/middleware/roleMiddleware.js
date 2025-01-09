@@ -14,10 +14,33 @@ const roleRequirements = {
     "POST /api/teams/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
     "PUT /api/teams/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
     "DELETE /api/teams/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
-     // Задания
+    // Задания
     "POST /api/assignments/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
     "PUT /api/assignments/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
-    "DELETE /api/assignments/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
+    "DELETE /api/assignments/": [
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    // Сдача Заданий
+    "POST /api/submissions/": [
+        ROLES.USER,
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    "PUT /api/submissions/": [
+        ROLES.USER,
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    "DELETE /api/submissions/": [
+        ROLES.USER,
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
 };
 
 module.exports = function () {
@@ -40,7 +63,7 @@ module.exports = function () {
         console.log("User Role:", userRole);
 
         const isAuthorized = Array.isArray(requiredRole)
-            ? requiredRole.map(r => r.toUpperCase()).includes(userRole)
+            ? requiredRole.map((r) => r.toUpperCase()).includes(userRole)
             : userRole === requiredRole.toUpperCase();
 
         if (!isAuthorized) {
