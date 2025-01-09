@@ -13,15 +13,23 @@ class TeamController {
     // Создание команды с учетом таблицы Groups_Teams
     async create(req, res, next) {
         try {
-            let { name, description, creator_id, group_ids = [], user_ids = [] } = req.body;
-    
+            let {
+                name,
+                description,
+                creator_id,
+                group_ids = [],
+                user_ids = [],
+            } = req.body;
+
             // Проверка обязательных полей
             if (!name || !creator_id) {
                 return next(
-                    ApiError.badRequest("Необходимо указать название команды и создателя")
+                    ApiError.badRequest(
+                        "Необходимо указать название команды и создателя"
+                    )
                 );
             }
-    
+
             // Преобразование group_ids и user_ids в массив, если они переданы как одиночное значение
             if (!Array.isArray(group_ids)) {
                 group_ids = [group_ids];
@@ -29,7 +37,7 @@ class TeamController {
             if (!Array.isArray(user_ids)) {
                 user_ids = [user_ids];
             }
-    
+
             // Проверка существования пользователя-создателя
             const creator = await Users.findByPk(creator_id);
             if (!creator) {
@@ -37,14 +45,14 @@ class TeamController {
                     ApiError.badRequest("Создатель с указанным ID не найден")
                 );
             }
-    
+
             // Создание команды
             const team = await Teams.create({
                 name,
                 description,
                 creator_id,
             });
-    
+
             // Добавление пользователей в команду
             if (user_ids.length > 0) {
                 const uniqueUserIds = [...new Set(user_ids)];
@@ -54,7 +62,7 @@ class TeamController {
                 }));
                 await Users_Teams.bulkCreate(userRecords);
             }
-    
+
             // Добавление групп в команду
             if (group_ids.length > 0) {
                 const uniqueGroupIds = [...new Set(group_ids)];
@@ -63,38 +71,40 @@ class TeamController {
                     team_id: team.id,
                 }));
                 await Groups_Teams.bulkCreate(groupRecords);
-    
+
                 // Извлечение пользователей из групп и добавление их в команду
                 const groupUsers = await Users_Groups.findAll({
                     where: { group_id: uniqueGroupIds },
                 });
-    
+
                 if (groupUsers.length > 0) {
                     const groupUserRecords = groupUsers.map((groupUser) => ({
                         team_id: team.id,
                         user_id: groupUser.user_id,
                     }));
-    
+
                     // Исключение пользователей, которые уже есть в команде
                     const existingUserIds = new Set(user_ids);
                     const filteredGroupUserRecords = groupUserRecords.filter(
                         (record) => !existingUserIds.has(record.user_id)
                     );
-    
+
                     // Добавляем пользователей из групп, если они не дублируются
                     if (filteredGroupUserRecords.length > 0) {
                         await Users_Teams.bulkCreate(filteredGroupUserRecords);
                     }
                 }
             }
-    
+
             return res.json({
                 message: "Команда успешно создана",
                 team,
             });
         } catch (error) {
             next(
-                ApiError.internal("Ошибка при создании команды: " + error.message)
+                ApiError.internal(
+                    "Ошибка при создании команды: " + error.message
+                )
             );
         }
     }
@@ -148,17 +158,33 @@ class TeamController {
                 include: [
                     {
                         model: Users,
-                        attributes: ["id", "img", "email", "first_name", "middle_name", "last_name", "role_id"], 
+                        attributes: [
+                            "id",
+                            "img",
+                            "email",
+                            "first_name",
+                            "middle_name",
+                            "last_name",
+                            "role_id",
+                        ],
                         through: { attributes: [] },
                     },
                     {
                         model: Groups,
-                        attributes: ["id", "title"], 
+                        attributes: ["id", "title"],
                         through: { model: Groups_Teams, attributes: [] },
                         include: [
                             {
                                 model: Users,
-                                attributes: ["id", "img", "email", "first_name", "middle_name", "last_name", "role_id"], 
+                                attributes: [
+                                    "id",
+                                    "img",
+                                    "email",
+                                    "first_name",
+                                    "middle_name",
+                                    "last_name",
+                                    "role_id",
+                                ],
                                 through: { attributes: [] },
                             },
                         ],
@@ -199,122 +225,172 @@ class TeamController {
     async update(req, res, next) {
         try {
             const { id, name, description, newUsers, newGroups } = req.body;
-    
+
             // Найти команду по ID
             const team = await Teams.findByPk(id, {
                 include: [
                     {
                         model: Users,
-                        attributes: ["id", "img", "email", "first_name", "middle_name", "last_name", "role_id"], 
+                        attributes: [
+                            "id",
+                            "img",
+                            "email",
+                            "first_name",
+                            "middle_name",
+                            "last_name",
+                            "role_id",
+                        ],
                         through: { attributes: [] },
                     },
                     {
                         model: Groups,
-                        attributes: ["id", "title"], 
+                        attributes: ["id", "title"],
                         through: { model: Groups_Teams, attributes: [] },
                         include: [
                             {
                                 model: Users,
-                                attributes: ["id", "img", "email", "first_name", "middle_name", "last_name", "role_id"], 
+                                attributes: [
+                                    "id",
+                                    "img",
+                                    "email",
+                                    "first_name",
+                                    "middle_name",
+                                    "last_name",
+                                    "role_id",
+                                ],
                                 through: { attributes: [] },
                             },
                         ],
                     },
                 ],
             });
-    
+
             if (!team) {
-                return next(ApiError.badRequest("Команда с указанным ID не найдена"));
+                return next(
+                    ApiError.badRequest("Команда с указанным ID не найдена")
+                );
             }
-    
+
             // Обновление данных команды
             if (name) team.name = name;
             if (description) team.description = description;
             await team.save();
-    
+
             // Приведение newUsers к массиву, если это одно значение
-            const userIds = Array.isArray(newUsers) ? newUsers : newUsers ? [newUsers] : [];
-            const groupIds = Array.isArray(newGroups) ? newGroups : newGroups ? [newGroups] : [];
-    
+            const userIds = Array.isArray(newUsers)
+                ? newUsers
+                : newUsers
+                ? [newUsers]
+                : [];
+            const groupIds = Array.isArray(newGroups)
+                ? newGroups
+                : newGroups
+                ? [newGroups]
+                : [];
+
             // Добавление новых пользователей
             if (userIds.length > 0) {
                 const usersToAdd = await Users.findAll({
                     where: { id: userIds },
                 });
-    
+
                 const existingUsersInGroups = await Users_Groups.findAll({
                     where: { group_id: groupIds },
                     attributes: ["user_id"],
                 });
-    
-                const existingUserIds = existingUsersInGroups.map((user) => user.user_id);
-    
+
+                const existingUserIds = existingUsersInGroups.map(
+                    (user) => user.user_id
+                );
+
                 const usersNotInGroups = usersToAdd.filter(
                     (user) =>
                         !existingUserIds.includes(user.id) &&
                         !team.users.some((u) => u.id === user.id)
                 );
-    
+
                 if (usersNotInGroups.length > 0) {
                     await team.addUsers(usersNotInGroups);
                 }
             }
-    
+
             // Добавление новых групп
             if (groupIds.length > 0) {
-                const groupsToAdd = await Groups.findAll({ where: { id: groupIds } });
-    
+                const groupsToAdd = await Groups.findAll({
+                    where: { id: groupIds },
+                });
+
                 await team.addGroups(groupsToAdd);
-    
+
                 const groupUsers = await Users_Groups.findAll({
                     where: { group_id: groupIds },
                 });
-    
-                const usersInGroups = groupUsers.map((groupUser) => groupUser.user_id);
-    
+
+                const usersInGroups = groupUsers.map(
+                    (groupUser) => groupUser.user_id
+                );
+
                 const usersAlreadyInGroup = await Users.findAll({
                     where: { id: usersInGroups },
                 });
-    
+
                 const usersNotInGroups = usersAlreadyInGroup.filter(
                     (user) => !team.users.some((u) => u.id === user.id)
                 );
-    
+
                 if (usersNotInGroups.length > 0) {
                     await team.addUsers(usersNotInGroups);
                 }
             }
-    
+
             // Обновление данных команды и связанных моделей
             const updatedTeam = await Teams.findByPk(id, {
                 include: [
                     {
                         model: Users,
-                        attributes: ["id", "img", "email", "first_name", "middle_name", "last_name", "role_id"], 
+                        attributes: [
+                            "id",
+                            "img",
+                            "email",
+                            "first_name",
+                            "middle_name",
+                            "last_name",
+                            "role_id",
+                        ],
                         through: { attributes: [] },
                     },
                     {
                         model: Groups,
-                        attributes: ["id", "title"], 
+                        attributes: ["id", "title"],
                         through: { model: Groups_Teams, attributes: [] },
                         include: [
                             {
                                 model: Users,
-                                attributes: ["id", "img", "email", "first_name", "middle_name", "last_name", "role_id"], 
+                                attributes: [
+                                    "id",
+                                    "img",
+                                    "email",
+                                    "first_name",
+                                    "middle_name",
+                                    "last_name",
+                                    "role_id",
+                                ],
                                 through: { attributes: [] },
                             },
                         ],
                     },
                 ],
             });
-    
+
             const allUsersInGroups = updatedTeam.groups.reduce((acc, group) => {
                 group.users.forEach((user) => acc.add(user.id));
                 return acc;
             }, new Set());
-    
-            const usersNotInGroups = updatedTeam.users.filter((user) => !allUsersInGroups.has(user.id));
-    
+
+            const usersNotInGroups = updatedTeam.users.filter(
+                (user) => !allUsersInGroups.has(user.id)
+            );
+
             return res.json({
                 message: "Команда успешно обновлена",
                 team: {
@@ -324,7 +400,9 @@ class TeamController {
                 },
             });
         } catch (error) {
-            next(ApiError.internal("Ошибка обновления команды: " + error.message));
+            next(
+                ApiError.internal("Ошибка обновления команды: " + error.message)
+            );
         }
     }
 }

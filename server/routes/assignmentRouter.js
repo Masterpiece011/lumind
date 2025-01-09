@@ -8,7 +8,12 @@ const roleMiddleware = require("../middleware/roleMiddleware");
 router.post("/", authMiddleware, roleMiddleware(), assignmentController.create);
 router.get("/:id", authMiddleware, assignmentController.getOne);
 router.get("/", authMiddleware, assignmentController.getAll);
-router.delete("/", authMiddleware, roleMiddleware(), assignmentController.delete);
+router.delete(
+    "/",
+    authMiddleware,
+    roleMiddleware(),
+    assignmentController.delete
+);
 
 router.put("/", authMiddleware, roleMiddleware(), assignmentController.update);
 
