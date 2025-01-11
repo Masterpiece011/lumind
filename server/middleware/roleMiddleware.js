@@ -41,6 +41,25 @@ const roleRequirements = {
         ROLES.MODERATOR,
         ROLES.INSTRUCTOR,
     ],
+    // Публикации
+    "POST /api/publications/": [
+        ROLES.USER,
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    "PUT /api/publications/": [
+        ROLES.USER,
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    "DELETE /api/publications/": [
+        ROLES.USER,
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
 };
 
 module.exports = function () {
