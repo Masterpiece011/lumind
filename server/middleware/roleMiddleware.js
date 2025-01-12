@@ -1,19 +1,33 @@
-const { Roles } = require("../models/models");
 const ROLES = require("../rolesConfing");
 
 const roleRequirements = {
     //Пользователи
-    "POST /api/users/registration": ROLES.ADMIN,
+    "POST /api/users/registration": [ROLES.ADMIN],
     "PUT /api/users/": [ROLES.ADMIN, ROLES.INSTRUCTOR],
-    "DELETE /api/users/": ROLES.ADMIN,
+    "DELETE /api/users/": [ROLES.ADMIN],
     //Группы
-    "POST /api/groups/": ROLES.ADMIN,
+    "POST /api/groups/": [ROLES.ADMIN],
     "PUT /api/groups/": [ROLES.ADMIN, ROLES.MODERATOR],
-    "DELETE /api/groups/": ROLES.ADMIN,
+    "DELETE /api/groups/": [ROLES.ADMIN],
     // Команды
-    "POST /api/teams/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
-    "PUT /api/teams/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
-    "DELETE /api/teams/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
+    "POST /api/teams/": [
+        ROLES.USER,
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    "PUT /api/teams/": [
+        ROLES.USER,
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    "DELETE /api/teams/": [
+        ROLES.USER,
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
     // Задания
     "POST /api/assignments/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
     "PUT /api/assignments/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
@@ -60,6 +74,10 @@ const roleRequirements = {
         ROLES.MODERATOR,
         ROLES.INSTRUCTOR,
     ],
+    //Звонки пользователям
+    "GET /api/conferences/": [ROLES.ADMIN, ROLES.MODERATOR],
+    //Собрания внутри команды
+    "GET /api/teamconferences/": [ROLES.ADMIN, ROLES.MODERATOR],
 };
 
 module.exports = function () {
@@ -86,6 +104,7 @@ module.exports = function () {
             : userRole === requiredRole.toUpperCase();
 
         if (!isAuthorized) {
+            console.log(12345);
             return res
                 .status(403)
                 .json({ message: "Нет доступа, недостаточно прав" });
