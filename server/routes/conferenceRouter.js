@@ -1,10 +1,14 @@
-const Router = require('express')
-const router = new Router()
+const Router = require("express");
+const router = new Router();
 
-router.post('/', )
-router.get('/:id', )
-router.get('/', )
+const conferenceController = require("../controllers/conferenceController");
+const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
 
-router.put('/', )
+router.post("/", authMiddleware, conferenceController.create);
+router.get("/:id", authMiddleware, conferenceController.getOne);
+router.get("/", roleMiddleware(), authMiddleware, conferenceController.getAll);
 
-module.exports = router
+router.put("/", authMiddleware, conferenceController.update);
+
+module.exports = router;
