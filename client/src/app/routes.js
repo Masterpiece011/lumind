@@ -1,5 +1,3 @@
-
-
 export const URLS = {
     TEST_URL: 'http://localhost:3000/test',
     MAIN_URL: 'http://localhost:3000/',
