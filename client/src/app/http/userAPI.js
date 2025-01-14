@@ -1,14 +1,23 @@
+import { jwtDecode } from "jwt-decode";
 import { $authHost, $host } from "./page";
 
 export const login = async (email, password) => {
-    const response = await $host.post("api/users/login", {
+    const { data } = await $host.post("api/users/login", {
         email,
         password,
     });
-    return response;
+
+    if (!data.token) {
+        throw new Error("Токен отсутствует в ответе сервера.");
+    }
+
+    const decodedToken = jwtDecode(data.token);
+    localStorage.setItem("token", data.token);
+    return { user: decodedToken, token: data.token };
 };
 
 export const check = async () => {
-    const response = await $host.post("api/users/auth");
-    return response;
+    const { data } = await $authHost.post("api/users/auth");
+    localStorage.setItem("token", data.token);
+    return { user: decodedToken, token: data.token };
 };
