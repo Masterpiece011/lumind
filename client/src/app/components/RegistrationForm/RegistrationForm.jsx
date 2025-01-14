@@ -1,21 +1,33 @@
+"use client";
+
 import React, { useState } from "react";
-import "./RegistrationForm.css";
+import { useDispatch } from "react-redux";
+import { setIsAuth, setUser } from "@/app/store/userStore";
 import { MyButton } from "../UI";
 import { login } from "@/app/http/userAPI";
+import "./RegistrationForm.css";
+import { URLS } from "@/app/routes";
+import { useRouter } from "next/navigation";
 
 function RegistrationForm() {
+    const dispatch = useDispatch();
     const [form, setForm] = useState({
         email: "",
         password: "",
     });
+    const router = useRouter();
 
     const signIn = async () => {
         const { email, password } = form;
         console.log("Отправляемые данные:", { email, password });
 
         try {
-            const response = await login(email, password);
-            console.log("Ответ сервера:", response.data);
+            const { user, token } = await login(email, password);
+            console.log("Ответ с сервера:", user);
+
+            dispatch(setIsAuth(true));
+            dispatch(setUser(user));
+            router.push(URLS.MAIN_URL);
         } catch (error) {
             console.error(
                 "Ошибка авторизации:",
