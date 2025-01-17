@@ -27,6 +27,7 @@ function RegistrationForm() {
 
             dispatch(setIsAuth(true));
             dispatch(setUser(user));
+            localStorage.setItem("token", token);
             router.push(URLS.MAIN_URL);
         } catch (error) {
             console.error(
