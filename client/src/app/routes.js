@@ -1,5 +1,6 @@
-import { ADMIN_ROUTE, MAIN_ROUTE } from "@/utils/consts";
+import AdminPage from "./components/AdminComp/AdminComp";
 import { MainComp } from "./components/MainComp";
+
 
 export const URLS = {
     TEST_URL: "http://localhost:3000/test",
@@ -10,13 +11,14 @@ export const URLS = {
 
 export const authRoutes = [
     {
-        path: ADMIN_ROUTE,
+        path: "/admin",
+        Component: AdminPage,
     },
 ];
 
 export const publicRoutes = [
     {
-        path: MAIN_ROUTE,
+        path: "/",
         Component: MainComp,
     },
 ];

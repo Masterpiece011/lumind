@@ -9,11 +9,12 @@ const $authHost = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
-const authInterceptor = (config) => {
-    config.headers.authorization = `Bearer ${localStorage.getItem("token")}`;
+$authHost.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
-};
-
-$authHost.interceptors.request.use(authInterceptor);
+});
 
 export { $host, $authHost };
