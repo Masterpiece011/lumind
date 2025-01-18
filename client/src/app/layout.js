@@ -1,4 +1,4 @@
-import "./globals.css";
+import './scss/global.scss';
 import { Roboto } from "next/font/google";
 import ReduxProvider from "./store/ReduxProvider";
 import AppRouter from "./Router/AppRouter";
