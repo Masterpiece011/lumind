@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { setIsAuth, setUser } from "@/app/store/userStore";
 import { MyButton } from "../UI";
 import { login } from "@/app/http/userAPI";
-import "./RegistrationForm.css";
+import * as styles from "./RegistrationForm.module.scss";
 import { URLS } from "@/app/routes";
 import { useRouter } from "next/navigation";
 
@@ -53,7 +53,7 @@ function RegistrationForm() {
 
     return (
         <form
-            className="form"
+            className={styles.form}
             onSubmit={(event) => {
                 event.preventDefault();
                 signIn();
