@@ -1,0 +1,29 @@
+.loginButton {
+    width: 200px;
+    height: 33px;
+    position: absolute;
+    left: 130px; 
+    top: 340px;
+    margin-bottom: 83px;
+    border-radius: 8px;
+    border: 1px solid #AEAEAE80; 
+    background-color: transparent; 
+    color: #AEAEAE; 
+    font-size: 18px;
+    cursor: pointer; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease; 
+
+    &:hover {
+        opacity: 1; 
+        background-color: #9F70FD; 
+        color: #171717; 
+    }
+
+    &:active {
+        background-color: #505050; 
+        border-color: #FFFFFF; 
+    }
+}

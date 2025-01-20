@@ -1,13 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { useDispatch } from "react-redux";
 import { setIsAuth, setUser } from "@/app/store/userStore";
 import { MyButton } from "../UI";
 import { login } from "@/app/http/userAPI";
 import * as styles from "./RegistrationForm.module.scss";
+import * as buttonStyles from "../UI/MyButton/MyButton.module.scss";
 import { URLS } from "@/app/routes";
 import { useRouter } from "next/navigation";
+import UserIcon from "@/app/assets/icons/user-icon.png";
+import LockIcon from "@/app/assets/icons/lock-icon.png";
+import Logo from "@/app/assets/img/logo.svg";
 
 function RegistrationForm() {
     const dispatch = useDispatch();
@@ -15,6 +20,7 @@ function RegistrationForm() {
         email: "",
         password: "",
     });
+    const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
     const signIn = async () => {
@@ -52,33 +58,80 @@ function RegistrationForm() {
     }
 
     return (
-        <form
-            className={styles.form}
-            onSubmit={(event) => {
-                event.preventDefault();
-                signIn();
-            }}
-        >
-            <label htmlFor="email">Почта</label>
-            <input
-                id="email"
-                type="email"
-                required
-                onChange={handleInputEmail}
-                value={form.email}
-            />
+        <div className={styles.container}>
+            <div className={styles.formWrapper}>
+                <form
+                    className={styles.form}
+                    onSubmit={(event) => {
+                        event.preventDefault();
+                        signIn();
+                    }}
+                >
+                    <div className={styles.formContent}>
+                        <div className={styles.fieldsWrapper}>
+                            <h1 className={styles.title}>Авторизация</h1>
+                            <div className={styles.inputWrapper}>
+                                <Image
+                                    src={UserIcon}
+                                    alt="User Icon"
+                                    className={styles.icon}
+                                />
+                                <input
+                                    id="email"
+                                    type="email"
+                                    required
+                                    placeholder="Логин"
+                                    onChange={handleInputEmail}
+                                    value={form.email}
+                                />
+                            </div>
 
-            <label htmlFor="password">Пароль</label>
-            <input
-                id="password"
-                type="password"
-                required
-                onChange={handleInputPassword}
-                value={form.password}
-            />
+                            <div className={styles.inputWrapper}>
+                                <Image
+                                    src={LockIcon}
+                                    alt="User Icon"
+                                    className={styles.icon}
+                                />
+                                <input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    placeholder="Пароль"
+                                    onChange={handleInputPassword}
+                                    value={form.password}
+                                />
+                            </div>
 
-            <MyButton text="Войти" />
-        </form>
+                            <div className={styles.options}>
+                                <div className={styles.checkboxWrapper}>
+                                    <input
+                                        id="showPassword"
+                                        type="checkbox"
+                                        checked={showPassword}
+                                        onChange={() =>
+                                            setShowPassword(!showPassword)
+                                        }
+                                    />
+                                    <label htmlFor="showPassword">
+                                        Показать пароль
+                                    </label>
+                                </div>
+                                <a href="#" className={styles.forgotPassword}>
+                                    Забыли пароль? Восстановить
+                                </a>
+                            </div>
+                        </div>
+                        <div className={styles.logoWrapper}>
+                            <Image src={Logo} alt="Logo" />
+                        </div>
+                    </div>
+                    <MyButton
+                        text="Войти"
+                        className={buttonStyles.loginButton}
+                    />
+                </form>
+            </div>
+        </div>
     );
 }
 
