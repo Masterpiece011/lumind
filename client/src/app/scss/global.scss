@@ -11,6 +11,12 @@
   }
 }
 
+.container {
+  width: 1600px;
+  height: 1800px;
+  background-color: #202020;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
@@ -19,7 +25,8 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  min-height: 100vh;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 @layer utilities {
