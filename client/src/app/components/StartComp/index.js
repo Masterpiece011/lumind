@@ -1,0 +1,1 @@
+export { StartComp } from "./StartComp";

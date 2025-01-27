@@ -8,7 +8,6 @@ import { MyButton } from "../UI";
 import { login } from "@/app/http/userAPI";
 import * as styles from "./RegistrationForm.module.scss";
 import * as buttonStyles from "../UI/MyButton/MyButton.module.scss";
-import { URLS } from "@/app/routes";
 import { useRouter } from "next/navigation";
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import LockIcon from "@/app/assets/icons/lock-icon.png";
@@ -34,7 +33,7 @@ function RegistrationForm() {
             dispatch(setIsAuth(true));
             dispatch(setUser(user));
             localStorage.setItem("token", token);
-            router.push(URLS.MAIN_URL);
+            router.push("/main");
         } catch (error) {
             console.error(
                 "Ошибка авторизации:",

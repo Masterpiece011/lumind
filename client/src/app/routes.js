@@ -1,12 +1,12 @@
 import AdminPage from "./components/AdminComp/AdminComp";
 import { MainComp } from "./components/MainComp";
 
-
 export const URLS = {
     TEST_URL: "http://localhost:3000/test",
-    MAIN_URL: "http://localhost:3000/",
+    MAIN_URL: "http://localhost:3000/main",
     DOCUMENTATION_URL: "http://localhost:3000/documentation",
     DASHBOARD_URL: "http://localhost:3000/dashboard",
+    Start_URL: "http://localhost:3000/",
 };
 
 export const authRoutes = [
@@ -18,7 +18,7 @@ export const authRoutes = [
 
 export const publicRoutes = [
     {
-        path: "/",
+        path: "/main",
         Component: MainComp,
     },
 ];
