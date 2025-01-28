@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import RegistrationForm from "../components/RegistrationForm/RegistrationForm";
+import LoginForm from "../components/LoginForm/LoginForm";
 
 export default function page() {
-    return <RegistrationForm />;
+    return <LoginForm />;
 }

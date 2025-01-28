@@ -6,14 +6,14 @@ import { useDispatch } from "react-redux";
 import { setIsAuth, setUser } from "@/app/store/userStore";
 import { MyButton } from "../UI";
 import { login } from "@/app/http/userAPI";
-import * as styles from "./RegistrationForm.module.scss";
+import * as styles from "./LoginForm.module.scss";
 import * as buttonStyles from "../UI/MyButton/MyButton.module.scss";
 import { useRouter } from "next/navigation";
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import LockIcon from "@/app/assets/icons/lock-icon.png";
 import Logo from "@/app/assets/img/logo.svg";
 
-function RegistrationForm() {
+function LoginForm() {
     const dispatch = useDispatch();
     const [form, setForm] = useState({
         email: "",
@@ -134,4 +134,4 @@ function RegistrationForm() {
     );
 }
 
-export default RegistrationForm;
+export default LoginForm;
