@@ -14,14 +14,16 @@ const AppRouter = ({ children }) => {
 
     useEffect(() => {
         const verifyAuth = async () => {
+            setLoading(true); 
             const token = localStorage.getItem("token");
+    
             if (!token) {
                 dispatch(setIsAuth(false));
-                router.push("/");
+                await router.push("/"); 
                 setLoading(false);
                 return;
             }
-
+    
             try {
                 const { user: authUser } = await check();
                 dispatch(setUser(authUser));
@@ -29,13 +31,13 @@ const AppRouter = ({ children }) => {
             } catch {
                 localStorage.removeItem("token");
                 dispatch(setIsAuth(false));
-                router.push("/");
+                await router.push("/");  
             } finally {
-                setLoading(false);
+                setLoading(false); 
             }
         };
-
-        if (!isAuth) verifyAuth();
+    
+        verifyAuth();
     }, [dispatch, isAuth, router]);
 
     if (loading) {
