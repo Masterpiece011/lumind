@@ -2,16 +2,16 @@ import { $authHost, $host } from "./page";
 
 export const getGroups = async () => {
   try {
-    const response = await $host.get("/api/groups/");
+    const response = await $host.get("/api/groups");
     return response.data.groups;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Ошибка получения групп");
+    throw new Error(error.response?.data?.message || "Ошибка получения группы");
   }
 };
 
 export const createGroup = async (groupData) => {
   try {
-    const response = await $authHost.post("/api/groups/", groupData);
+    const response = await $authHost.post("/api/groups", groupData);
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Ошибка создания группы");
@@ -20,7 +20,7 @@ export const createGroup = async (groupData) => {
 
 export const updateGroup = async (groupData) => {
   try {
-    const response = await $authHost.put("/api/groups/", groupData);
+    const response = await $authHost.put("/api/groups", groupData);
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Ошибка обновления группы");
