@@ -116,19 +116,33 @@ class TeamController {
             const team = await Teams.findByPk(id, {
                 include: [
                     {
+                        model: Users,
+                        attributes: [
+                            "id",
+                            "img",
+                            "email",
+                            "first_name",
+                            "middle_name",
+                            "last_name",
+                            "role_id",
+                        ],
+                        through: { attributes: [] },
+                    },
+                    {
                         model: Groups,
                         through: { model: Groups_Teams, attributes: [] },
                         attributes: ["id", "title"],
                         include: [
                             {
                                 model: Users,
-                                through: { attributes: [] },
                                 attributes: [
                                     "id",
                                     "first_name",
                                     "middle_name",
                                     "last_name",
+                                    "email",
                                 ],
+                                through: { attributes: [] },
                             },
                         ],
                     },
