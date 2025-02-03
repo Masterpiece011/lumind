@@ -3,9 +3,8 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getTeams } from "@/app/http/teamAPI";
-import Link from "next/link";
 
-const TeamsPage = () => {
+const TeamsPage = ({ onSelectTeam }) => {
     const dispatch = useDispatch();
     const { teams = [], loading, error } = useSelector((state) => state.teams);
 
@@ -24,8 +23,8 @@ const TeamsPage = () => {
             <ul>
                 {teams.length > 0 ? (
                     teams.map((team) => (
-                        <li key={team.id}>
-                            <Link href={`/teams/${team.id}`}>{team.name}</Link>
+                        <li key={team.id} onClick={() => onSelectTeam(team.id)}>
+                            {team.name}
                         </li>
                     ))
                 ) : (

@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 import { getTeamById } from "@/app/http/teamAPI";
 
-const TeamDetailPage = () => {
-    const { id } = useParams();
+const TeamDetailPage = ({ id }) => {
     const [team, setTeam] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -47,8 +45,7 @@ const TeamDetailPage = () => {
                 <ul>
                     {team.users.map((user) => (
                         <li key={user.id}>
-                            {user.first_name}
-                            {user.middle_name}
+                            {user.first_name} {user.middle_name}{" "}
                             {user.last_name} ({user.email})
                         </li>
                     ))}
@@ -66,8 +63,8 @@ const TeamDetailPage = () => {
                             <ul>
                                 {group.users.map((user) => (
                                     <li key={user.id}>
-                                        {user.first_name}
-                                        {user.last_name}({user.email})
+                                        {user.first_name} {user.last_name} (
+                                        {user.email})
                                     </li>
                                 ))}
                             </ul>
