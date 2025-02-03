@@ -29,7 +29,7 @@ class SubmissionController {
 
             // Получение всех команд, к которым относится пользователь
             const userTeams = await Users_Teams.findAll({
-                where: { user_id },
+                where: { user_id: user_id },
                 attributes: ["team_id"],
             });
 
@@ -45,7 +45,7 @@ class SubmissionController {
             // Проверка связи задания с командами пользователя через Assignments_Teams
             const assignmentTeamLink = await Assignments_Teams.findOne({
                 where: {
-                    assignment_id,
+                    assignment_id: assignment_id,
                     team_id: teamIds,
                 },
             });
@@ -92,15 +92,15 @@ class SubmissionController {
     // Обновление отправки
     async update(req, res, next) {
         try {
-            const { id, comment, investments = [] } = req.body;
+            const { submission_id, comment, investments = [] } = req.body;
 
-            if (!id) {
+            if (!submission_id) {
                 return next(
                     ApiError.badRequest("Необходимо указать ID отправки")
                 );
             }
 
-            const submission = await Submissions.findByPk(id);
+            const submission = await Submissions.findByPk(submission_id);
 
             if (!submission) {
                 return next(ApiError.notFound("Отправка не найдена"));
@@ -112,10 +112,10 @@ class SubmissionController {
             // Обновление вложений
             if (investments.length > 0) {
                 await Submissions_investments.destroy({
-                    where: { submission_id: id },
+                    where: { submission_id: submission_id },
                 });
                 const investmentRecords = investments.map((fileUrl) => ({
-                    submission_id: id,
+                    submission_id: submission_id,
                     file_url: fileUrl,
                 }));
                 await Submissions_investments.bulkCreate(investmentRecords);
@@ -123,7 +123,7 @@ class SubmissionController {
 
             return res.json({
                 message: "Отправка успешно обновлена",
-                submission,
+                submission: submission,
             });
         } catch (error) {
             next(
@@ -137,22 +137,22 @@ class SubmissionController {
     // Удаление отправки
     async delete(req, res, next) {
         try {
-            const { id } = req.params;
+            const { submission_id } = req.body;
 
-            if (!id) {
+            if (!submission_id) {
                 return next(
                     ApiError.badRequest("Необходимо указать ID отправки")
                 );
             }
 
-            const submission = await Submissions.findByPk(id);
+            const submission = await Submissions.findByPk(submission_id);
 
             if (!submission) {
                 return next(ApiError.notFound("Отправка не найдена"));
             }
 
             await Submissions_investments.destroy({
-                where: { submission_id: id },
+                where: { submission_id: submission_id },
             });
             await submission.destroy();
 
@@ -167,21 +167,23 @@ class SubmissionController {
     }
 
     // Получение всех отправок для задания
+
     async getAll(req, res, next) {}
 
     // Получение одной отправки
+
     async getOne(req, res, next) {
         try {
-            const { id } = req.params;
+            const { submission_id } = req.params;
 
-            if (!id) {
+            if (!submission_id) {
                 return next(
                     ApiError.badRequest("Необходимо указать ID отправки")
                 );
             }
 
             const submission = await Submissions.findOne({
-                where: { id },
+                where: { id: submission_id },
                 include: [
                     {
                         model: Submissions_investments,
@@ -194,8 +196,10 @@ class SubmissionController {
                 return next(ApiError.notFound("Отправка не найдена"));
             }
 
-            return res.json(submission);
+            return res.json({ submission: submission });
         } catch (error) {
+            console.log("Ошибка получения назначения", error);
+
             next(
                 ApiError.internal(
                     `Ошибка при получении отправки: ${error.message}`

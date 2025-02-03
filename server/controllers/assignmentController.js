@@ -31,7 +31,7 @@ class AssignmentController {
 
             // Проверка, состоит ли пользователь в команде
             const userInTeam = await Users_Teams.findOne({
-                where: { user_id: creator_id, team_id },
+                where: { user_id: creator_id, team_id: team_id },
             });
 
             if (!userInTeam) {
@@ -54,7 +54,7 @@ class AssignmentController {
             // Привязка задания к команде через Assignments_Teams
             await Assignments_Teams.create({
                 assignment_id: assignment.id,
-                team_id,
+                team_id: team_id,
             });
 
             // Добавление вложений
@@ -92,7 +92,7 @@ class AssignmentController {
 
             // Получаем команды, в которых состоит пользователь
             const userTeams = await Users_Teams.findAll({
-                where: { user_id },
+                where: { user_id: user_id },
                 attributes: ["team_id"],
             });
 
@@ -134,10 +134,9 @@ class AssignmentController {
     // Получение задания по ID и команде
     async getOne(req, res, next) {
         try {
-            const { id } = req.params;
-            const { user_id } = req.query;
+            const { task_id, user_id } = req.body;
 
-            if (!id || !user_id) {
+            if (!task_id || !user_id) {
                 return next(
                     ApiError.badRequest(
                         "Необходимо указать ID задания и ID пользователя"
@@ -147,7 +146,7 @@ class AssignmentController {
 
             // Проверяем, в каких командах состоит пользователь
             const userTeams = await Users_Teams.findAll({
-                where: { user_id },
+                where: { user_id: user_id },
                 attributes: ["team_id"],
             });
 
@@ -162,7 +161,7 @@ class AssignmentController {
             }
 
             const assignment = await Assignments.findOne({
-                where: { id },
+                where: { id: task_id },
                 include: [
                     {
                         model: Teams,
@@ -199,7 +198,7 @@ class AssignmentController {
     async update(req, res, next) {
         try {
             const {
-                id,
+                task_id,
                 title,
                 description,
                 due_date,
@@ -207,13 +206,13 @@ class AssignmentController {
                 investments = [],
             } = req.body;
 
-            if (!id) {
+            if (!task_id) {
                 return next(
                     ApiError.badRequest("Необходимо указать ID задания")
                 );
             }
 
-            const assignment = await Assignments.findByPk(id);
+            const assignment = await Assignments.findByPk(task_id);
 
             if (!assignment) {
                 return next(ApiError.notFound("Задание не найдено"));
@@ -229,11 +228,11 @@ class AssignmentController {
 
             // Обновление вложений (удаляем старые и добавляем новые)
             if (investments.length > 0) {
-                await Assignments_investments.destroy({
-                    where: { assignment_id: id },
+                await Assignments_investments.update({
+                    where: { assignment_id: task_id },
                 });
                 const investmentRecords = investments.map((fileUrl) => ({
-                    assignment_id: id,
+                    assignment_id: task_id,
                     file_url: fileUrl,
                 }));
                 await Assignments_investments.bulkCreate(investmentRecords);
@@ -255,26 +254,28 @@ class AssignmentController {
     // Удаление задания
     async delete(req, res, next) {
         try {
-            const { id } = req.params;
+            const { task_id } = req.body;
 
-            if (!id) {
+            if (!task_id) {
                 return next(
                     ApiError.badRequest("Необходимо указать ID задания")
                 );
             }
 
-            const assignment = await Assignments.findByPk(id);
+            const assignment = await Assignments.findByPk(task_id);
 
             if (!assignment) {
                 return next(ApiError.notFound("Задание не найдено"));
             }
 
             // Удаление связей в Assignments_Teams
-            await Assignments_Teams.destroy({ where: { assignment_id: id } });
+            await Assignments_Teams.destroy({
+                where: { assignment_id: task_id },
+            });
 
             // Удаление задания и связанных вложений
             await Assignments_investments.destroy({
-                where: { assignment_id: id },
+                where: { assignment_id: task_id },
             });
             await assignment.destroy();
 

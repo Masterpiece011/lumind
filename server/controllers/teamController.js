@@ -11,9 +11,10 @@ const ApiError = require("../error/ApiError");
 
 class TeamController {
     // Создание команды с учетом таблицы Groups_Teams
+
     async create(req, res, next) {
         try {
-            let {
+            const {
                 name,
                 description,
                 creator_id,
@@ -48,9 +49,9 @@ class TeamController {
 
             // Создание команды
             const team = await Teams.create({
-                name,
-                description,
-                creator_id,
+                name: name,
+                description: description,
+                creator_id: creator_id,
             });
 
             // Добавление пользователей в команду
@@ -98,7 +99,7 @@ class TeamController {
 
             return res.json({
                 message: "Команда успешно создана",
-                team,
+                team: team,
             });
         } catch (error) {
             next(
@@ -111,9 +112,9 @@ class TeamController {
     // Получение одной команды с пользователями и группами
     async getOne(req, res, next) {
         try {
-            const { id } = req.params;
+            const { team_id } = req.body;
 
-            const team = await Teams.findByPk(id, {
+            const team = await Teams.findByPk(team_id, {
                 include: [
                     {
                         model: Users,
@@ -151,7 +152,9 @@ class TeamController {
 
             if (!team) {
                 return next(
-                    ApiError.notFound("Команда с указанным ID не найдена")
+                    ApiError.notFound(
+                        `Команда с указанным ID: ${team_id} не найдена`
+                    )
                 );
             }
 
@@ -206,7 +209,7 @@ class TeamController {
                 ],
             });
 
-            return res.json(teams);
+            return res.json({ teams: teams });
         } catch (error) {
             next(
                 ApiError.internal(
@@ -219,8 +222,8 @@ class TeamController {
     // Удаление команды
     async delete(req, res, next) {
         try {
-            const { id } = req.body;
-            const team = await Teams.findByPk(id);
+            const { team_id } = req.body;
+            const team = await Teams.findByPk(team_id);
             if (!team) {
                 return next(
                     ApiError.notFound("Команда с указанным ID не найдена")

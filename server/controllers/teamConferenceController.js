@@ -12,18 +12,18 @@ class teamConferenceController {
     // Создание собрания для команды
     async create(req, res, next) {
         try {
-            const { teamId, title, link, duration, session_date, creatorId } =
+            const { team_id, title, link, duration, session_date, creatorId } =
                 req.body;
 
             // Проверяем, существует ли команда
-            const team = await Teams.findByPk(teamId);
+            const team = await Teams.findByPk(team_id);
             if (!team) {
                 return next(ApiError.badRequest("Команда не найдена"));
             }
 
             // Получаем участников команды
             const teamMembers = await Users_Teams.findAll({
-                where: { team_id: teamId },
+                where: { team_id: team_id },
             });
             if (!teamMembers.length) {
                 return next(ApiError.badRequest("В команде нет участников"));
@@ -48,17 +48,20 @@ class teamConferenceController {
 
             return res.status(201).json(conference);
         } catch (error) {
+            console.log("Ошибка создания записи", error);
+
             next(ApiError.internal(error.message));
         }
     }
 
     // Обновление собрания
+
     async update(req, res, next) {
         try {
-            const { id } = req.params;
-            const { title, link, duration, session_date } = req.body;
+            const { team_conference_id, title, link, duration, session_date } =
+                req.body;
 
-            const conference = await Conferences.findByPk(id);
+            const conference = await Conferences.findByPk(team_conference_id);
             if (!conference) {
                 return next(ApiError.badRequest("Конференция не найдена"));
             }
@@ -76,9 +79,10 @@ class teamConferenceController {
     }
 
     // Получение всех собраний команды
+
     async getAll(req, res, next) {
         try {
-            const { teamId } = req.query;
+            const { team_id } = req.body;
 
             const conferences = await Conferences.findAll({
                 include: [
@@ -87,7 +91,7 @@ class teamConferenceController {
                         include: [{ model: Users }],
                     },
                 ],
-                where: teamId ? { team_id: teamId } : {},
+                where: team_id ? { team_id: team_id } : {},
             });
 
             return res.json(conferences);
@@ -97,11 +101,12 @@ class teamConferenceController {
     }
 
     // Получение конкретного собрания
+
     async getOne(req, res, next) {
         try {
-            const { id } = req.params;
+            const { team_conference_id } = req.body;
 
-            const conference = await Conferences.findByPk(id, {
+            const conference = await Conferences.findByPk(team_conference_id, {
                 include: [
                     {
                         model: Conference_Members,
@@ -114,8 +119,10 @@ class teamConferenceController {
                 return next(ApiError.badRequest("Конференция не найдена"));
             }
 
-            return res.json(conference);
+            return res.json({conference: conference});
         } catch (error) {
+            console.log("Ошибка получения", error);
+            
             next(ApiError.internal(error.message));
         }
     }
