@@ -9,6 +9,7 @@ const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const path = require("path");
 const app = express();
+const WebSocket = require("ws");
 
 const sequelize = require("./db");
 const PORT = process.env.PORT || 8080;
@@ -41,5 +42,21 @@ const start = async () => {
         console.log(e);
     }
 };
+
+const wss = new WebSocket.Server({ port: 9000 });
+
+wss.on("connection", (ws) => {
+    ws.on("message", (msg) => {
+        wss.clients.forEach((client) => {
+            client.send(msg);
+        });
+    });
+
+    ws.on("error", (e) => {
+        ws.send(e);
+    });
+
+    ws.send("WsServer started!");
+});
 
 start();
