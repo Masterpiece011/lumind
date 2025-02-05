@@ -3,6 +3,7 @@ import userReducer from "../store/userStore";
 import groupReducer from "../store/groupStore";
 import teamReducer from "../store/teamStore";
 import assignmentReducer from "../store/assignmentStore";
+import submissionReducer from "../store/submissionStore";
 
 export const store = configureStore({
     reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
         group: groupReducer,
         teams: teamReducer,
         assignments: assignmentReducer,
+        submissions: submissionReducer,
     },
 });

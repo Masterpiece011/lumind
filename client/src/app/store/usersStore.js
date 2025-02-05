@@ -1,21 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getTeams } from "../api/teamAPI";
+import { getUsers } from "../api/userAPI";
 
 const initialState = {
-    teams: [],
+    users: [],
     loading: false,
     error: null,
 };
 
-const teamSlice = createSlice({
-    name: "teams",
+const userSlice = createSlice({
+    name: "users",
     initialState,
     reducers: {
         setLoading: (state) => {
             state.loading = true;
         },
         setTeams: (state, action) => {
-            state.teams = action.payload;
+            state.users = action.payload;
             state.loading = false;
         },
         setError: (state, action) => {
@@ -26,20 +26,20 @@ const teamSlice = createSlice({
 
     extraReducers: (builder) => {
         builder
-            .addCase(getTeams.pending, (state) => {
+            .addCase(getUsers.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getTeams.fulfilled, (state, action) => {
-                state.teams = action.payload;
+            .addCase(getUsers.fulfilled, (state, action) => {
+                state.users = action.payload;
                 state.loading = false;
             })
-            .addCase(getTeams.rejected, (state, action) => {
+            .addCase(getUsers.rejected, (state, action) => {
                 state.error = action.error.message;
                 state.loading = false;
             });
     },
 });
 
-export const { setLoading, setTeams, setError } = teamSlice.actions;
+export const { setLoading, setUsers, setError } = userSlice.actions;
 
-export default teamSlice.reducer;
+export default userSlice.reducer;
