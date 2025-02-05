@@ -54,7 +54,7 @@ class AssignmentController {
             // Привязка задания к команде через Assignments_Teams
             await Assignments_Teams.create({
                 assignment_id: assignment.id,
-                team_id,
+                team_id: team_id,
             });
 
             // Добавление вложений
@@ -82,7 +82,7 @@ class AssignmentController {
     // Получение всех заданий пользователя
     async getAll(req, res, next) {
         try {
-            const { user_id } = req.query;
+            const { user_id } = req.body;
 
             if (!user_id) {
                 return next(
@@ -92,7 +92,7 @@ class AssignmentController {
 
             // Получаем команды, в которых состоит пользователь
             const userTeams = await Users_Teams.findAll({
-                where: { user_id },
+                where: { user_id: user_id },
                 attributes: ["team_id"],
             });
 
@@ -134,10 +134,9 @@ class AssignmentController {
     // Получение задания по ID и команде
     async getOne(req, res, next) {
         try {
-            const { id } = req.params;
-            const { user_id } = req.query;
+            const { user_id, task_id } = req.body;
 
-            if (!id || !user_id) {
+            if (!task_id || !user_id) {
                 return next(
                     ApiError.badRequest(
                         "Необходимо указать ID задания и ID пользователя"
@@ -147,7 +146,7 @@ class AssignmentController {
 
             // Проверяем, в каких командах состоит пользователь
             const userTeams = await Users_Teams.findAll({
-                where: { user_id },
+                where: { user_id: user_id },
                 attributes: ["team_id"],
             });
 
@@ -162,7 +161,7 @@ class AssignmentController {
             }
 
             const assignment = await Assignments.findOne({
-                where: { id },
+                where: { id: task_id },
                 include: [
                     {
                         model: Teams,
