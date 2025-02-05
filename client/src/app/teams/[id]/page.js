@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getTeamById } from "@/app/http/teamAPI";
+import { getTeamById } from "@/app/api/teamAPI";
 
 const TeamDetailPage = ({ id }) => {
     const [team, setTeam] = useState(null);

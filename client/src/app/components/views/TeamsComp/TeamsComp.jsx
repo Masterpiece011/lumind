@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getTeams } from "@/app/http/teamAPI";
+import { getTeams } from "@/app/api/teamAPI";
 
 const TeamsPage = ({ onSelectTeam }) => {
     const dispatch = useDispatch();

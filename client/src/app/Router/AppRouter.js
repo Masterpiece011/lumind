@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { check } from "@/app/http/userAPI";
+import { check } from "@/app/api/userAPI";
 import { setUser, setIsAuth } from "@/app/store/userStore";
 
 const AppRouter = ({ children }) => {
@@ -14,16 +14,16 @@ const AppRouter = ({ children }) => {
 
     useEffect(() => {
         const verifyAuth = async () => {
-            setLoading(true); 
+            setLoading(true);
             const token = localStorage.getItem("token");
-    
+
             if (!token) {
                 dispatch(setIsAuth(false));
-                await router.push("/"); 
+                await router.push("/");
                 setLoading(false);
                 return;
             }
-    
+
             try {
                 const { user: authUser } = await check();
                 dispatch(setUser(authUser));
@@ -31,12 +31,12 @@ const AppRouter = ({ children }) => {
             } catch {
                 localStorage.removeItem("token");
                 dispatch(setIsAuth(false));
-                await router.push("/");  
+                await router.push("/");
             } finally {
-                setLoading(false); 
+                setLoading(false);
             }
         };
-    
+
         verifyAuth();
     }, [dispatch, isAuth, router]);
 
