@@ -575,6 +575,7 @@ module.exports = {
     Chats,
     Chat_messages,
     Conferences,
+    Conference_Members,
     Publications,
     Publication_comments,
     Publication_comments_investments,

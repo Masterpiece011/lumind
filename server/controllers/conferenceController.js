@@ -5,12 +5,18 @@ class ConferenceController {
     // Создание звонка
     async create(req, res, next) {
         try {
-            const { userIds, title, link, duration, session_date, creatorId } =
-                req.body;
+            const {
+                user_ids,
+                title,
+                link,
+                duration,
+                session_date,
+                creator_id,
+            } = req.body;
 
             // Проверяем, существуют ли пользователи
-            const users = await Users.findAll({ where: { id: userIds } });
-            if (users.length !== userIds.length) {
+            const users = await Users.findAll({ where: { id: user_ids } });
+            if (users.length !== user_ids.length) {
                 return next(
                     ApiError.badRequest("Некоторые пользователи не найдены")
                 );
@@ -18,16 +24,16 @@ class ConferenceController {
 
             // Создаём конференцию
             const conference = await Conferences.create({
-                title,
-                link,
-                duration,
-                session_date,
-                creator_id: creatorId,
+                title: title,
+                link: link,
+                duration: duration,
+                sesstion_date: session_date,
+                creator_id: creator_id,
             });
 
             // Добавляем участников в конференцию
             await Conference_Members.bulkCreate(
-                userIds.map((userId) => ({
+                user_ids.map((userId) => ({
                     user_id: userId,
                     conference_id: conference.id,
                 }))
@@ -42,10 +48,10 @@ class ConferenceController {
     // Обновление звонка
     async update(req, res, next) {
         try {
-            const { id } = req.params;
-            const { title, link, duration, session_date } = req.body;
+            const { conference_id, title, link, duration, session_date } =
+                req.body;
 
-            const conference = await Conferences.findByPk(id);
+            const conference = await Conferences.findByPk(conference_id);
             if (!conference) {
                 return next(ApiError.badRequest("Конференция не найдена"));
             }
@@ -56,7 +62,7 @@ class ConferenceController {
             conference.session_date = session_date || conference.session_date;
 
             await conference.save();
-            return res.json(conference);
+            return res.json({conference: conference});
         } catch (error) {
             next(ApiError.internal(error.message));
         }

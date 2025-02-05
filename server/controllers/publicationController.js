@@ -2,6 +2,8 @@ const ApiError = require("../error/ApiError");
 const { Publications } = require("../models/models");
 
 class PublicationController {
+    // Создание публикации
+
     async create(req, res) {
         const { title, content, description, creator_id } = req.body;
         try {
@@ -19,11 +21,13 @@ class PublicationController {
         }
     }
 
+    // Обновление публикации
+
     async update(req, res) {
         const { publication_id, title, content, description } = req.body;
         try {
             const publication = await Publications.findOne({
-                where: publication_id,
+                where: { id: publication_id },
             });
             if (publication) {
                 await publication.update({
@@ -38,51 +42,59 @@ class PublicationController {
         }
     }
 
+    // Удаление публикации
+
     async delete(req, res) {
         const { publication_id } = req.body;
         try {
             await Publications.destroy({
                 where: { publication_id },
             });
+
+            return res.json({ message: "Публикация успешно удалена" });
         } catch (error) {
-            console.log("Error delete publication", error);
-            return ApiError.badRequest("Error delete publication");
+            console.log("Ошибка удаления публикации:", error);
+            return ApiError.badRequest("Ошибка удаления публикации");
         }
     }
+
+    // Получение всех публикаций группы
 
     async getAll(req, res) {
         const { group_id } = req.body;
         try {
             const publications = await Publications.findAll({
-                where: { group_id },
+                where: { group_id: group_id },
             });
 
-            return res.json({ publications });
+            return res.json({ publications: publications });
         } catch (error) {
-            console.log("Error fetching publications", error);
-            return ApiError.badRequest("Error fetching publications");
+            console.log("Ошибка получения публикаций", error);
+            return ApiError.badRequest("Ошибка получения публикаций");
         }
     }
 
+    // Получение одной публикации по ID
+
     async getOne(req, res) {
-        const { id } = req.params;
+        const { publication_id } = req.params;
 
         try {
             const publication = await Publications.findOne({
-                where: { id },
+                where: { id: publication_id },
             });
 
             if (!publication) {
                 return res.status(404).json({
-                    message: "Publication not found",
+                    message: "Публикация не найдена",
                 });
             }
 
             return res.json(group);
         } catch (error) {
-            console.log("Error fetching publication", error);
+            console.log("Ошибка получения публикации", error);
             return res.status(500).json({
-                message: "Error fetching publication",
+                message: "Ошибка получения публикации",
             });
         }
     }

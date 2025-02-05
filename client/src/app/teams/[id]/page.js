@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 import { getTeamById } from "@/app/http/teamAPI";
 
-const TeamDetailPage = () => {
-    const { id } = useParams();
+const TeamDetailPage = ({ id }) => {
     const [team, setTeam] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -35,14 +33,20 @@ const TeamDetailPage = () => {
         <div>
             <h1>{team.name}</h1>
             <p>{team.description || "Описание отсутствует"}</p>
-            <p>Создана: {team.created_at ? new Date(team.created_at).toLocaleDateString() : "Дата неизвестна"}</p>
+            <p>
+                Создана:{" "}
+                {team.created_at
+                    ? new Date(team.created_at).toLocaleDateString()
+                    : "Дата неизвестна"}
+            </p>
 
             <h2>Участники:</h2>
             {team.users && team.users.length > 0 ? (
                 <ul>
                     {team.users.map((user) => (
                         <li key={user.id}>
-                            {user.email} (Роль ID: {user.role_id})
+                            {user.first_name} {user.middle_name}{" "}
+                            {user.last_name} ({user.email})
                         </li>
                     ))}
                 </ul>
@@ -56,6 +60,14 @@ const TeamDetailPage = () => {
                     {team.groups.map((group) => (
                         <li key={group.id}>
                             {group.title} ({group.users.length} участников)
+                            <ul>
+                                {group.users.map((user) => (
+                                    <li key={user.id}>
+                                        {user.first_name} {user.last_name} (
+                                        {user.email})
+                                    </li>
+                                ))}
+                            </ul>
                         </li>
                     ))}
                 </ul>

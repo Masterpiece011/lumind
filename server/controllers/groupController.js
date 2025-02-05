@@ -1,11 +1,13 @@
 const { json } = require("sequelize");
-const { Groups, Users } = require("../models/models");
+const { Groups, Users, Users_Groups } = require("../models/models");
 const ApiError = require("../error/ApiError");
 
 class GroupController {
+    // Создание группы
+
     async create(req, res) {
         try {
-            const { id, title, creator_id } = req.body;
+            const { title, creator_id } = req.body;
 
             if (!title || !creator_id) {
                 return res.status(400).json({
@@ -13,13 +15,12 @@ class GroupController {
                 });
             }
             const group = await Groups.create({
-                id: id,
                 title: title,
                 creator_id: creator_id,
             });
 
             return res.json(group);
-        } catch (e) {
+        } catch (error) {
             return res.status(500).json({
                 message: "Server error",
             });
@@ -44,18 +45,23 @@ class GroupController {
                     },
                 ],
             });
-            return res.json({ groups });
+            return res.json({ groups: groups });
         } catch (error) {
             console.log("Error fetchgin groups ", error);
+            return res.status(500).json({
+                message: "Ошибка при получении групп",
+            });
         }
     }
 
+    // Получение одной группы
+
     async getOne(req, res) {
         try {
-            const { id } = req.params;
+            const { group_id } = req.params;
 
             const group = await Groups.findOne({
-                where: { id },
+                where: { id: group_id },
                 include: [
                     {
                         model: Users,
@@ -78,7 +84,7 @@ class GroupController {
                 });
             }
 
-            return res.json(group);
+            return res.json({ group: group });
         } catch (error) {
             console.log("Ошибка при получении группы:", error);
             return res.status(500).json({
@@ -87,11 +93,13 @@ class GroupController {
         }
     }
 
+    // Обновление группы
+
     async update(req, res) {
-        const { id, title, users } = req.body;
+        const { group_id, title, users } = req.body;
         try {
             const group = await Groups.findOne({
-                where: { id: id },
+                where: { id: group_id },
                 include: Users,
             });
 
@@ -137,32 +145,33 @@ class GroupController {
         }
     }
 
+    // Удаление группы
+
     async delete(req, res) {
-        const { id } = req.body;
+        const { group_id } = req.body;
 
         try {
-            await Groups.destroy({
+            const group_with_users = await Users_Groups.findAll({
                 where: {
-                    id: id,
+                    group_id: group_id,
                 },
             });
 
-            const group = Groups.findOne({
-                where: {
-                    id: id,
-                },
-            });
-
-            if (group.user) {
+            if (group_with_users) {
                 await Users_Groups.destroy({
                     where: {
-                        user_id: id,
+                        group_id: group_id,
                     },
                 });
             }
+            await Groups.destroy({
+                where: {
+                    id: group_id,
+                },
+            });
 
             return res.json({
-                message: `Группа по id ${id} была удалена`,
+                message: `Группа по id ${group_id} была удалена`,
             });
         } catch (e) {
             return ApiError.badRequest("Невозможно удалить группу");
