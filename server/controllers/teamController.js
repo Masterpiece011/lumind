@@ -23,6 +23,7 @@ class TeamController {
             } = req.body;
 
             // Проверка обязательных полей
+
             if (!name || !creator_id) {
                 return next(
                     ApiError.badRequest(
@@ -32,6 +33,7 @@ class TeamController {
             }
 
             // Преобразование group_ids и user_ids в массив, если они переданы как одиночное значение
+
             if (!Array.isArray(group_ids)) {
                 group_ids = [group_ids];
             }
@@ -40,6 +42,7 @@ class TeamController {
             }
 
             // Проверка существования пользователя-создателя
+
             const creator = await Users.findByPk(creator_id);
             if (!creator) {
                 return next(
@@ -48,6 +51,7 @@ class TeamController {
             }
 
             // Создание команды
+
             const team = await Teams.create({
                 name: name,
                 description: description,
@@ -55,6 +59,7 @@ class TeamController {
             });
 
             // Добавление пользователей в команду
+
             if (user_ids.length > 0) {
                 const uniqueUserIds = [...new Set(user_ids)];
                 const userRecords = uniqueUserIds.map((userId) => ({
@@ -65,6 +70,7 @@ class TeamController {
             }
 
             // Добавление групп в команду
+
             if (group_ids.length > 0) {
                 const uniqueGroupIds = [...new Set(group_ids)];
                 const groupRecords = uniqueGroupIds.map((groupId) => ({
@@ -74,6 +80,7 @@ class TeamController {
                 await Groups_Teams.bulkCreate(groupRecords);
 
                 // Извлечение пользователей из групп и добавление их в команду
+
                 const groupUsers = await Users_Groups.findAll({
                     where: { group_id: uniqueGroupIds },
                 });
@@ -85,12 +92,14 @@ class TeamController {
                     }));
 
                     // Исключение пользователей, которые уже есть в команде
+
                     const existingUserIds = new Set(user_ids);
                     const filteredGroupUserRecords = groupUserRecords.filter(
                         (record) => !existingUserIds.has(record.user_id)
                     );
 
                     // Добавляем пользователей из групп, если они не дублируются
+
                     if (filteredGroupUserRecords.length > 0) {
                         await Users_Teams.bulkCreate(filteredGroupUserRecords);
                     }
@@ -110,6 +119,7 @@ class TeamController {
         }
     }
     // Получение одной команды с пользователями и группами
+
     async getOne(req, res, next) {
         try {
             const { team_id } = req.body;
@@ -169,6 +179,7 @@ class TeamController {
     }
 
     // Получение всех команд с пользователями и группами
+
     async getAll(req, res, next) {
         try {
             const teams = await Teams.findAll({
@@ -220,6 +231,7 @@ class TeamController {
     }
 
     // Удаление команды
+
     async delete(req, res, next) {
         try {
             const { team_id } = req.body;
@@ -239,11 +251,13 @@ class TeamController {
     }
 
     // Обновление данных команды
+
     async update(req, res, next) {
         try {
             const { id, name, description, newUsers, newGroups } = req.body;
 
             // Найти команду по ID
+
             const team = await Teams.findByPk(id, {
                 include: [
                     {
@@ -289,11 +303,13 @@ class TeamController {
             }
 
             // Обновление данных команды
+
             if (name) team.name = name;
             if (description) team.description = description;
             await team.save();
 
             // Приведение newUsers к массиву, если это одно значение
+
             const userIds = Array.isArray(newUsers)
                 ? newUsers
                 : newUsers
@@ -306,6 +322,7 @@ class TeamController {
                 : [];
 
             // Добавление новых пользователей
+
             if (userIds.length > 0) {
                 const usersToAdd = await Users.findAll({
                     where: { id: userIds },
@@ -332,6 +349,7 @@ class TeamController {
             }
 
             // Добавление новых групп
+
             if (groupIds.length > 0) {
                 const groupsToAdd = await Groups.findAll({
                     where: { id: groupIds },
@@ -361,6 +379,7 @@ class TeamController {
             }
 
             // Обновление данных команды и связанных моделей
+
             const updatedTeam = await Teams.findByPk(id, {
                 include: [
                     {

@@ -15,13 +15,15 @@ const generateJwt = (id, email, role) => {
 };
 
 class UserController {
+    // Регистрация пользователя (доступна только АДМИНАМ и МОДЕРАТОРАМ)
+
     async registration(req, res, next) {
         const { email, password, role } = req.body;
 
         if (!email || !password) {
             return next(ApiError.badRequest("Некорректный email или password"));
         }
-        const candidate = await Users.findOne({ where: { email } });
+        const candidate = await Users.findOne({ where: { email: email } });
         if (candidate) {
             return next(
                 ApiError.badRequest("Пользователь с таким email уже существует")
@@ -42,12 +44,14 @@ class UserController {
         const user = await Users.create({
             email,
             password: hashPassword,
-            role_id: roleId.id, 
+            role_id: roleId.id,
         });
 
         const token = generateJwt(user.id, user.email, newUserRole);
         return res.json({ token });
     }
+
+    // Авторизация пользователя
 
     async login(req, res, next) {
         const { email, password } = req.body;
@@ -76,26 +80,33 @@ class UserController {
 
         const token = generateJwt(user.id, user.email, user.role);
 
-        return res.json({ token });
+        return res.json({ token: token });
     }
 
+    // Проверка формирования токена
+
     async check(req, res, next) {
-        const token = generateJwt(req.user.id, req.user.email, req.user.role);
+        const userId = req.user.id;
+        const userEmail = req.user.email;
+        const userRole = req.user.role;
+        const token = generateJwt(userId, userEmail, userRole);
 
         return res.json({
-            token,
+            token: token,
             user: {
-                id: req.user.id,
-                email: req.user.email,
-                role: req.user.role,
+                id: userId,
+                email: userEmail,
+                role: userRole,
             },
         });
     }
 
+    // Получение всех пользователей
+
     async getAll(req, res) {
         try {
-
             // Получаем всех пользователей из базы данных
+
             const users = await Users.findAll({
                 include: [
                     {
@@ -111,6 +122,7 @@ class UserController {
             });
 
             // Формируем ответ
+
             const response = users.map((user) => ({
                 id: user.id,
                 img: user.img,
@@ -122,21 +134,24 @@ class UserController {
                 groups: user.groups,
             }));
 
-            return res.json({ users: response});
+            return res.json({ users: response });
         } catch (error) {
-            console.error("Error fetching users:", error); // Логируем ошибку для отладки
+            console.error("Error fetching users:", error);
+
             return res.status(500).json({ message: "Error fetching users" });
         }
     }
 
+    // Получение одного пользователя по ID
+
     async getOne(req, res) {
-        const { id } = req.params;
+        const { user_id } = req.params;
 
         try {
             const token = req.headers.authorization.split(" ")[1];
             const user = await Users.findOne({
                 where: {
-                    id: id,
+                    id: user_id,
                 },
                 include: [
                     {
@@ -163,14 +178,18 @@ class UserController {
             };
 
             return res.json({ user_data: user_data, user_token: token });
-        } catch (e) {
+        } catch (error) {
+            console.log("Не удалось найти пользователя", error);
+
             return ApiError.internal("Ошибка поиска");
         }
     }
 
+    // Обновление пользователя
+
     async update(req, res) {
         const {
-            id,
+            user_id,
             first_name,
             middle_name,
             last_name,
@@ -181,7 +200,7 @@ class UserController {
 
         try {
             const user = await Users.findOne({
-                where: { id: id },
+                where: { id: user_id },
                 include: [
                     {
                         model: Roles,
@@ -197,6 +216,7 @@ class UserController {
 
             if (user) {
                 const hashPassword = await bcrypt.hash(password, 5);
+
                 await user.update({
                     first_name: first_name,
                     middle_name: middle_name,
@@ -210,7 +230,7 @@ class UserController {
                 }
 
                 const updatedUser = await Users.findOne({
-                    where: { id },
+                    where: { id: user_id },
                     include: [
                         {
                             model: Groups,
@@ -239,37 +259,45 @@ class UserController {
             } else {
                 return ApiError.badRequest("Пользователь не найден");
             }
-        } catch (e) {
+        } catch (error) {
+            console.log("Невозможно получить данные пользователя", error);
+
             return ApiError.badRequest("Невозможно обновить пользователя");
         }
     }
-    
+
     async delete(req, res) {
-        const { id } = req.body;
+        const { user_id } = req.body;
 
         try {
-            await Users.destroy({
+            const user = await Users.findOne({
                 where: {
-                    id: id,
+                    id: user_id,
                 },
             });
 
-            const user = Users.findOne({
+            const userName = `${user.first_name} ${user.last_name}`;
+
+            await Users.destroy({
                 where: {
-                    id: id,
+                    id: user_id,
                 },
             });
 
             if (user.groups) {
                 await Users_Groups.destroy({
                     where: {
-                        user_id: id,
+                        user_id: user_id,
                     },
                 });
             }
 
-            return res.json({ message: `Пользователь по id ${id} был удален` });
-        } catch (e) {
+            return res.json({
+                message: `Пользователь ${userName} был удален`,
+            });
+        } catch (error) {
+            console.log("Невозможно удалить пользователя", error);
+
             return ApiError.badRequest("Невозможно удалить пользователя");
         }
     }
