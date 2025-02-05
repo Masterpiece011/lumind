@@ -1,7 +1,9 @@
 const { json } = require("sequelize");
 const { Groups } = require("../models/models");
 
-class GroupController {
+class UsersGroupsController {
+    // Создание связи группы с пользователями
+
     async create(req, res) {
         try {
             const { id, title, creator_id } = req.body;
@@ -10,12 +12,9 @@ class GroupController {
             console.log("Создатель группы", creator_id);
 
             if (!title || !creator_id) {
-                return res
-                    .status(400)
-                    .json({
-                        message:
-                            "Нельзя создать группу без названия или создателя",
-                    });
+                return res.status(400).json({
+                    message: "Нельзя создать группу без названия или создателя",
+                });
             }
             const group = await Groups.create({
                 id: id,
@@ -29,9 +28,15 @@ class GroupController {
         }
     }
 
+    // Обновление связи группы с пользователями
+
     async update(req, res) {}
 
+    // Удаление связи группы с пользователями
+
     async delete(req, res) {}
+
+    // Получение всех связей групп с пользователями
 
     async getAll(req, res) {
         try {
@@ -45,4 +50,4 @@ class GroupController {
     async getOne(req, res) {}
 }
 
-module.exports = new GroupController();
+module.exports = new UsersGroupsController();
