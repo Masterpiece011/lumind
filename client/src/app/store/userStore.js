@@ -14,7 +14,7 @@ const userStore = createSlice({
         },
         setUser: (state, action) => {
             state.user = action.payload;
-        }, 
+        },
         logout: (state) => {
             state.isAuth = false;
             state.user = null;

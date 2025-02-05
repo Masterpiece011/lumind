@@ -1,4 +1,4 @@
-import { check } from "@/app/http/userAPI";
+import { check } from "@/app/api/userAPI";
 
 export async function getServerSideProps(context) {
     try {

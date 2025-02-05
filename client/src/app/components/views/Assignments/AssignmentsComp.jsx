@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAssignments } from "@/app/http/assignmentsAPI";
+import { getAssignments } from "@/app/api/assignmentsAPI";
 
 const AssignmentsPage = ({ onSelectAssignment }) => {
     const dispatch = useDispatch();

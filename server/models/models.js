@@ -526,6 +526,10 @@ Publication_comments_investments.belongsTo(Publication_comments, {
 Groups.belongsToMany(Users, { through: Users_Groups, foreignKey: "group_id" });
 Users.belongsToMany(Groups, { through: Users_Groups, foreignKey: "user_id" });
 
+//Связка Пользователя с Заданием
+Users.hasMany(Assignments, { foreignKey: "creator_id", as: "assignments" });
+Assignments.belongsTo(Users, { foreignKey: "creator_id", as: "creator" });
+
 //Связка Заданий с Командой
 
 Assignments.belongsToMany(Teams, {

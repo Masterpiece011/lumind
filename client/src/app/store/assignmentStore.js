@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getAssignments } from "../http/assignmentsAPI";
+import { getAssignments } from "../api/assignmentsAPI";
 
 const initialState = {
     assignments: [],

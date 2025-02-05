@@ -5,6 +5,7 @@ const {
     Users_Teams,
     Teams,
     Assignments_Teams,
+    Users,
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 
@@ -166,10 +167,20 @@ class AssignmentController {
                 where: { id: task_id },
                 include: [
                     {
+                        model: Users,
+                        as: "creator",
+                        attributes: [
+                            "id",
+                            "first_name",
+                            "middle_name",
+                            "last_name",
+                            "email",
+                        ],
+                    },
+                    {
                         model: Teams,
                         attributes: ["id", "name"],
                         through: { attributes: [] },
-                        where: { id: teamIds },
                     },
                     {
                         model: Assignments_investments,

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useDispatch } from "react-redux";
 import { setIsAuth, setUser } from "@/app/store/userStore";
 import { MyButton } from "../UI";
-import { login } from "@/app/http/userAPI";
+import { login } from "@/app/api/userAPI";
 import * as styles from "./LoginForm.module.scss";
 import * as buttonStyles from "../UI/MyButton/MyButton.module.scss";
 import { useRouter } from "next/navigation";
