@@ -1,4 +1,7 @@
-import * as MESSAGES from "./messages-types";
-import * as ACTIONS from "./actions";
+// import * as MESSAGES from "./messages-types.js";
+// import * as ACTIONS from "./actions.js";
 
-export { MESSAGES, ACTIONS };
+const MESSAGES = require("./messages-types.js");
+const ACTIONS = require("./actions.js");
+
+module.exports = { MESSAGES, ACTIONS };
