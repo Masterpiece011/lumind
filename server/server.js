@@ -15,7 +15,8 @@ const aWss = WSServer.getWss();
 const sequelize = require("./db");
 const PORT = process.env.PORT || 8080;
 
-import { MESSAGES, ACTIONS } from "./ws";
+// import { MESSAGES_TYPES, ACTIONS } from "./ws/index.js";
+const { MESSAGES, ACTIONS } = require("./ws/index.js");
 
 app.use(
     cors({
@@ -50,7 +51,7 @@ const start = async () => {
                     case MESSAGES.UPDATE_CHATS:
                         connectionHandler(ws, msg);
                         break;
-                    case MESSAGES.CONNECTION:
+                    case MESSAGES.UPDATE_CHAT_MESSAGES:
                         connectionHandler(ws, msg);
                         break;
 
