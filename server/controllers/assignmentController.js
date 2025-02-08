@@ -84,7 +84,7 @@ class AssignmentController {
     // Получение всех заданий пользователя
     async getAll(req, res, next) {
         try {
-            const { user_id } = req.body;
+            const { user_id } = req.query;
 
             if (!user_id) {
                 return next(
@@ -92,7 +92,7 @@ class AssignmentController {
                 );
             }
 
-            // Получаем команды, в которых состоит пользователь
+            // Проверяем команды пользователя
             const userTeams = await Users_Teams.findAll({
                 where: { user_id: user_id },
                 attributes: ["team_id"],
@@ -139,7 +139,7 @@ class AssignmentController {
             const { id } = req.params;
             const { user_id } = req.query;
 
-            if (!task_id || !user_id) {
+            if (!id || !user_id) {
                 return next(
                     ApiError.badRequest(
                         "Необходимо указать ID задания и ID пользователя"
@@ -164,7 +164,7 @@ class AssignmentController {
             }
 
             const assignment = await Assignments.findOne({
-                where: { id: task_id },
+                where: { id },
                 include: [
                     {
                         model: Users,

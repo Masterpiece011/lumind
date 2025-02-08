@@ -13,8 +13,8 @@ router.post(
 );
 router.post("/login", userController.login);
 router.get("/auth", authMiddleware, userController.check);
-router.get("/", userController.getAll);
-router.get("/:id", userController.getOne);
+router.get("/", authMiddleware, userController.getAll);
+router.get("/:id", authMiddleware, userController.getOne);
 router.delete("/", authMiddleware, roleMiddleware(), userController.delete);
 
 router.put("/", authMiddleware, roleMiddleware(), userController.update);

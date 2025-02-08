@@ -7,15 +7,15 @@ const initialState = {
     error: null,
 };
 
-const userSlice = createSlice({
+const usersSlice = createSlice({
     name: "users",
     initialState,
     reducers: {
         setLoading: (state) => {
             state.loading = true;
         },
-        setTeams: (state, action) => {
-            state.users = action.payload;
+        setUsers: (state, action) => {
+            state.users = action.payload.users;
             state.loading = false;
         },
         setError: (state, action) => {
@@ -30,7 +30,7 @@ const userSlice = createSlice({
                 state.loading = true;
             })
             .addCase(getUsers.fulfilled, (state, action) => {
-                state.users = action.payload;
+                state.users = action.payload.users;
                 state.loading = false;
             })
             .addCase(getUsers.rejected, (state, action) => {
@@ -40,6 +40,6 @@ const userSlice = createSlice({
     },
 });
 
-export const { setLoading, setUsers, setError } = userSlice.actions;
+export const { setLoading, setUsers, setError } = usersSlice.actions;
 
-export default userSlice.reducer;
+export default usersSlice.reducer;

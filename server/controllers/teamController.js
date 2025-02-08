@@ -122,9 +122,9 @@ class TeamController {
 
     async getOne(req, res, next) {
         try {
-            const { team_id } = req.body;
+            const { id } = req.params;
 
-            const team = await Teams.findByPk(team_id, {
+            const team = await Teams.findByPk(id, {
                 include: [
                     {
                         model: Users,
@@ -163,7 +163,7 @@ class TeamController {
             if (!team) {
                 return next(
                     ApiError.notFound(
-                        `Команда с указанным ID: ${team_id} не найдена`
+                        `Команда с указанным ID: ${id} не найдена`
                     )
                 );
             }
@@ -220,7 +220,7 @@ class TeamController {
                 ],
             });
 
-            return res.json({ teams: teams });
+            return res.json(teams);
         } catch (error) {
             next(
                 ApiError.internal(

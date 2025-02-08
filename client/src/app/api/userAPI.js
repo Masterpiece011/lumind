@@ -25,7 +25,7 @@ export const check = async () => {
 
 export const getUsers = createAsyncThunk("users/getUsers", async () => {
     try {
-        const response = await $host.get("/api/users");
+        const response = await $authHost.get("/api/users");
         return response.data;
     } catch (error) {
         throw new Error(
@@ -36,7 +36,7 @@ export const getUsers = createAsyncThunk("users/getUsers", async () => {
 
 export const getUserById = async (userId) => {
     try {
-        const response = await $host.get(`/api/users/${userId}`);
+        const response = await $authHost.get(`/api/users/${userId}`);
         return response.data;
     } catch (error) {
         throw new Error(

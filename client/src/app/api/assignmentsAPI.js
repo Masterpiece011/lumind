@@ -1,13 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { $authHost, $host } from "./page";
+import { $authHost } from "./page";
 
 export const getAssignments = createAsyncThunk(
     "assignments/getAssignments",
-    async (user_id) => {
+    async (userId) => {
         try {
-            const response = await $authHost.get(
-                `/api/assignments?user_id=${user_id}`,
-            );
+            const response = await $authHost.get("/api/assignments", {
+                params: { user_id: userId },
+            });
             return response.data;
         } catch (error) {
             throw new Error(
