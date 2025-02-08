@@ -12,23 +12,36 @@
 } 
 
 .sidebar {
-    width: 150px;
-    height: 100%;
-    background-color: #2c2c2c;; 
-    padding: 20px;
-    border-radius: 8px;
-    border: 2px solid #AEAEAE80;
-    margin-top: 3px;
+    background-color: transparent; 
 }
 
 .sidebar ul {
+    display: flex;
+    flex-direction: column;
     list-style: none;
-    padding: 0;
+    margin-top: 40px;
 }
 
-.sidebar li {
-    margin: 15px 0;
-    cursor: pointer;
+.sidebar {
+
+     img {
+        margin: 0 0 15px 0;
+        cursor: pointer;
+        border: 1px solid #AEAEAE80;
+        box-shadow: 0px 4px 4px 0px #00000040;
+        border-radius: 8px;
+        padding: 10px;
+
+        &:hover {
+            background: #4914A5;
+            border: 1px solid #4914A5;
+            box-shadow: 0px 4px 4px 0px #00000040;
+        }
+
+        &:active {
+            background: #000000A6;
+        }
+    }
 }
 
 .pageContent {
