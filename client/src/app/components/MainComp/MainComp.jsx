@@ -1,13 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
+
 import { HeaderComp } from "../HeaderComp";
-import * as styles from "./MainComp.module.scss";
-import TeamDetailPage from "@/app/teams/[id]/page";
 import { TeamsPage } from "../views/TeamsComp";
-import AssignmentsDetailPage from "@/app/assignments/[id]/page";
 import { AssignmentsPage } from "../views/Assignments";
 import { UsersPage } from "../views/UsersComp";
+import Icon from "@/app/ui/icons/Icon";
+
+import TeamDetailPage from "@/app/teams/[id]/page";
+import AssignmentsDetailPage from "@/app/assignments/[id]/page";
+
+import * as styles from "./MainComp.module.scss";
+
+import Home from "@/app/assets/icons/home-icon.svg";
+import Chat from "@/app/assets/icons/chat-icon.svg";
+import Teams from "@/app/assets/icons/teams-icon.svg";
+import Assignments from "@/app/assets/icons/assignments-icon.svg";
+import Notifications from "@/app/assets/icons/notification-icon.svg";
 
 const MainComp = () => {
     const [selectedComponent, setSelectedComponent] = useState("teams");
@@ -22,21 +32,40 @@ const MainComp = () => {
             <div className={styles.mainContent}>
                 <aside className={styles.sidebar}>
                     <ul>
-                        <li onClick={() => setSelectedComponent("teams")}>
-                            Команды
-                        </li>
-                        <li onClick={() => setSelectedComponent("assignments")}>
-                            Задания
-                        </li>
-                        <li
+                        <Icon
+                            src={Home}
+                            alt="home"
+                            onClick={() => setSelectedComponent("teams")}
+                        />
+
+                        <Icon
+                            src={Notifications}
+                            alt="notifications"
                             onClick={() =>
                                 setSelectedComponent("notifications")
                             }
-                        >
-                            Уведомления
-                        </li>
+                        />
+
+                        <Icon
+                            src={Teams}
+                            alt="teams"
+                            onClick={() => setSelectedComponent("teams")}
+                        />
+
+                        <Icon
+                            src={Chat}
+                            alt="chat"
+                            onClick={() => setSelectedComponent("chat")}
+                        />
+
+                        <Icon
+                            src={Assignments}
+                            alt="assignments"
+                            onClick={() => setSelectedComponent("assignments")}
+                        />
                     </ul>
                 </aside>
+
                 <section className={styles.pageContent}>
                     {selectedComponent === "teams" && (
                         <TeamsPage
@@ -65,6 +94,8 @@ const MainComp = () => {
                     {selectedComponent === "notifications" && (
                         <div>Страница уведомлений</div>
                     )}
+
+                    {selectedComponent === "chats" && <div>Страница чата</div>}
 
                     {selectedComponent === "users" && <UsersPage />}
                 </section>

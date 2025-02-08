@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { MyButton } from "../../UI";
+import { MyButton } from "../../uikit";
 import { fetchSubmissionById } from "@/app/store/submissionStore";
 import { createSubmission, updateSubmission } from "@/app/api/submissionAPI";
 

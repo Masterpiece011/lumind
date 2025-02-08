@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getUsers } from "@/app/api/userAPI";
 import * as styles from "./UsersComp.module.scss";
-import { MyButton } from "../../UI";
+import { MyButton } from "../../uikit";
 
 const UsersPage = () => {
     const dispatch = useDispatch();
