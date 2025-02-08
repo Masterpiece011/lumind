@@ -7,6 +7,7 @@ import TeamDetailPage from "@/app/teams/[id]/page";
 import { TeamsPage } from "../views/TeamsComp";
 import AssignmentsDetailPage from "@/app/assignments/[id]/page";
 import { AssignmentsPage } from "../views/Assignments";
+import { UsersPage } from "../views/UsersComp";
 
 const MainComp = () => {
     const [selectedComponent, setSelectedComponent] = useState("teams");
@@ -16,7 +17,7 @@ const MainComp = () => {
     return (
         <div className={styles.container}>
             <header>
-                <HeaderComp />
+                <HeaderComp setSelectedComponent={setSelectedComponent} />
             </header>
             <div className={styles.mainContent}>
                 <aside className={styles.sidebar}>
@@ -64,6 +65,8 @@ const MainComp = () => {
                     {selectedComponent === "notifications" && (
                         <div>Страница уведомлений</div>
                     )}
+
+                    {selectedComponent === "users" && <UsersPage />}
                 </section>
             </div>
         </div>
