@@ -4,24 +4,27 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 module.exports = function (req, res, next) {
-  console.log("Auth Middleware Triggered"); // Логирование для отладки
-  console.log("Request Headers:", req.headers); // Логирование всех заголовков
-  if (req.method === "OPTIONS") {
-    return next();
-  }
-  try {
-    const token = req.headers.authorization.split(" ")[1]; // Bearer token
-    if (!token) {
-      console.log("No token found");
-      return res.status(401).json({ message: "Не авторизован" });
+    console.log("Auth Middleware Triggered"); // Логирование для отладки
+    console.log("Request Headers:", req.headers); // Логирование всех заголовков
+
+    if (req.method === "OPTIONS") {
+        return next();
     }
 
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    req.user = decoded;
-    console.log("Decoded User:", req.user); // Логирование для отладки
-    next();
-  } catch (e) {
-    return res.status(401).json({ message: "Не авторизован" });
-  }
-};
+    try {
+        // Извлечение токена из cookies
+        const token = req.cookies.token;
 
+        if (!token) {
+            console.log("No token found");
+            return res.status(401).json({ message: "Не авторизован" });
+        }
+
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        req.user = decoded;
+        console.log("Decoded User:", req.user); // Логирование для отладки
+        next();
+    } catch (e) {
+        return res.status(401).json({ message: "Не авторизован" });
+    }
+};

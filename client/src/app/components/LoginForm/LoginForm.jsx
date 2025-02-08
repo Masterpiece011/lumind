@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Cookies from "js-cookie";
 import Image from "next/image";
 import { useDispatch } from "react-redux";
 import { setIsAuth, setUser } from "@/app/store/userStore";
@@ -32,7 +33,7 @@ function LoginForm() {
 
             dispatch(setIsAuth(true));
             dispatch(setUser(user));
-            localStorage.setItem("token", token);
+            Cookies.set("token", token, { expires: 1, path: "/" });
             router.push("/main");
         } catch (error) {
             console.error(
