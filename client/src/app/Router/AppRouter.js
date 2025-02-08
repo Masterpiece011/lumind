@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import Cookies from "js-cookie";
 import { check } from "@/app/api/userAPI";
 import { setUser, setIsAuth } from "@/app/store/userStore";
 
@@ -15,7 +16,7 @@ const AppRouter = ({ children }) => {
     useEffect(() => {
         const verifyAuth = async () => {
             setLoading(true);
-            const token = localStorage.getItem("token");
+            const token = Cookies.get("token");
 
             if (!token) {
                 dispatch(setIsAuth(false));
@@ -29,7 +30,7 @@ const AppRouter = ({ children }) => {
                 dispatch(setUser(authUser));
                 dispatch(setIsAuth(true));
             } catch {
-                localStorage.removeItem("token");
+                Cookies.remove("token");
                 dispatch(setIsAuth(false));
                 await router.push("/");
             } finally {
@@ -38,7 +39,7 @@ const AppRouter = ({ children }) => {
         };
 
         verifyAuth();
-    }, [dispatch, isAuth, router]);
+    }, [dispatch, router]);
 
     if (loading) {
         return <div>Loading...</div>;

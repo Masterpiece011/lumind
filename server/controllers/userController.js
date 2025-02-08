@@ -57,30 +57,28 @@ class UserController {
         const { email, password } = req.body;
 
         const user = await Users.findOne({
-            where: {
-                email: email,
-            },
-            include: [
-                {
-                    model: Roles,
-                    attributes: ["name"],
-                },
-            ],
+            where: { email },
+            include: [{ model: Roles, attributes: ["name"] }],
         });
 
         if (!user) {
             return next(ApiError.internal("Пользователь не найден"));
         }
 
-        let comparePassword = await bcrypt.compareSync(password, user.password);
-
+        const comparePassword = bcrypt.compareSync(password, user.password);
         if (!comparePassword) {
             return next(ApiError.internal("Указан неверный пароль"));
         }
 
         const token = generateJwt(user.id, user.email, user.role);
 
-        return res.json({ token: token });
+        res.cookie("token", token, {
+            httpOnly: true, // Защита от XSS
+            secure: process.env.NODE_ENV === "production", // В проде только HTTPS
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
+        return res.json({ success: true, token });
     }
 
     // Проверка формирования токена
