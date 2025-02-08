@@ -9,10 +9,14 @@ const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const path = require("path");
 const app = express();
-const WebSocket = require("ws");
+const WSServer = require("express-ws")(app);
+const aWss = WSServer.getWss();
 
 const sequelize = require("./db");
 const PORT = process.env.PORT || 8080;
+
+// import { MESSAGES_TYPES, ACTIONS } from "./ws/index.js";
+const { MESSAGES, ACTIONS } = require("./ws/index.js");
 
 app.use(
     cors({
@@ -35,6 +39,29 @@ const start = async () => {
         await sequelize.authenticate();
         await sequelize.sync({ alter: true });
 
+        app.ws("/", (ws, req) => {
+            console.log("ПОДКЛЮЧЕНИЕ УСТАНОВЛЕНО");
+            ws.send("Ты успешно подключился");
+            ws.on("message", (msg) => {
+                msg = JSON.parse(msg);
+                switch (msg.method) {
+                    case MESSAGES.CONNECTION:
+                        ACTIONS.connectionHandler();
+                        break;
+                    case MESSAGES.UPDATE_CHATS:
+                        connectionHandler(ws, msg);
+                        break;
+                    case MESSAGES.UPDATE_CHAT_MESSAGES:
+                        connectionHandler(ws, msg);
+                        break;
+
+                    default:
+                        break;
+                }
+                console.log(JSON.parse(msg));
+            });
+        });
+
         app.listen(PORT, () => {
             console.log(`Server started on port ${PORT}`);
         });
@@ -42,21 +69,5 @@ const start = async () => {
         console.log(e);
     }
 };
-
-const wss = new WebSocket.Server({ port: 9000 });
-
-wss.on("connection", (ws) => {
-    ws.on("message", (msg) => {
-        wss.clients.forEach((client) => {
-            client.send(msg);
-        });
-    });
-
-    ws.on("error", (e) => {
-        ws.send(e);
-    });
-
-    ws.send("WsServer started!");
-});
 
 start();
