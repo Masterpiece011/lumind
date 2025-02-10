@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "@/app/store/userStore";
 import Logo from "@/app/assets/img/logo.svg";
 import Settings from "@/app/assets/icons/settings.svg";
 import SearchIcon from "@/app/assets/icons/search-icon.svg";
@@ -13,6 +12,7 @@ import * as buttonStyles from "../uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "../uikit";
 import { getUsers } from "@/app/api/userAPI";
 import { getTeams } from "@/app/api/teamAPI";
+import { logout } from "@/app/store/userStore";
 
 function HeaderComp({ setSelectedComponent }) {
     const router = useRouter();
