@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Cookies from "js-cookie";
@@ -10,6 +10,8 @@ import { setUser, setIsAuth } from "@/app/store/userStore";
 const AppRouter = ({ children }) => {
     const dispatch = useDispatch();
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const { isAuth } = useSelector((state) => state.user);
     const [loading, setLoading] = useState(true);
 
@@ -20,7 +22,7 @@ const AppRouter = ({ children }) => {
 
             if (!token) {
                 dispatch(setIsAuth(false));
-                await router.push("/");
+                router.push("/");
                 setLoading(false);
                 return;
             }
@@ -32,7 +34,7 @@ const AppRouter = ({ children }) => {
             } catch {
                 Cookies.remove("token");
                 dispatch(setIsAuth(false));
-                await router.push("/");
+                router.push("/");
             } finally {
                 setLoading(false);
             }
@@ -40,6 +42,24 @@ const AppRouter = ({ children }) => {
 
         verifyAuth();
     }, [dispatch, router]);
+
+    useEffect(() => {
+        if (!loading) {
+            const currentURL = `${pathname}${searchParams ? `?${searchParams}` : ""}`;
+            window.history.pushState({ path: currentURL }, "", currentURL);
+        }
+    }, [pathname, searchParams, loading]);
+
+    useEffect(() => {
+        const handlePopState = (event) => {
+            if (event.state?.path) {
+                router.replace(event.state.path);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [router]);
 
     if (loading) {
         return <div>Loading...</div>;

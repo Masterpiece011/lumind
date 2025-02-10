@@ -6,11 +6,9 @@ import { StartComp } from "./components/StartComp";
 export default function Home() {
     return (
         <div>
-            <header></header>
             <main>
                 <StartComp />
             </main>
-            <footer></footer>
         </div>
     );
 }
