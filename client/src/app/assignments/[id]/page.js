@@ -4,8 +4,10 @@ import { SubmissionForm } from "@/app/components/views/Submissions/SubmissionsFo
 import { getAssignmentById } from "@/app/api/assignmentsAPI";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useParams } from "next/navigation";
 
-const AssignmentsDetailPage = ({ id }) => {
+const AssignmentsDetailPage = () => {
+    const { id } = useParams();
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

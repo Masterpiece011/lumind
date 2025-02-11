@@ -2,13 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import { getTeamById } from "@/app/api/teamAPI";
+import { useParams } from "next/navigation";
 
-const TeamDetailPage = ({ id }) => {
+const TeamDetailPage = () => {
+    const { id } = useParams();
     const [team, setTeam] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (!id) return;
         const fetchTeam = async () => {
             try {
                 const data = await getTeamById(id);
@@ -19,10 +22,7 @@ const TeamDetailPage = ({ id }) => {
                 setLoading(false);
             }
         };
-
-        if (id) {
-            fetchTeam();
-        }
+        fetchTeam();
     }, [id]);
 
     if (loading) return <div>Загрузка...</div>;

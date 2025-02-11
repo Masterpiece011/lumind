@@ -1,11 +1,12 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import Cookies from "js-cookie";
 import { check } from "@/app/api/userAPI";
 import { setUser, setIsAuth } from "@/app/store/userStore";
+import { MainComp } from "@/app/components/MainComp";
 
 const AppRouter = ({ children }) => {
     const dispatch = useDispatch();
@@ -14,6 +15,11 @@ const AppRouter = ({ children }) => {
     const searchParams = useSearchParams();
     const { isAuth } = useSelector((state) => state.user);
     const [loading, setLoading] = useState(true);
+
+    const shouldRenderMainComp =
+        pathname.startsWith("/teams") ||
+        pathname.startsWith("/assignments") ||
+        pathname.startsWith("/users");
 
     useEffect(() => {
         const verifyAuth = async () => {
@@ -63,6 +69,10 @@ const AppRouter = ({ children }) => {
 
     if (loading) {
         return <div>Loading...</div>;
+    }
+
+    if (shouldRenderMainComp) {
+        return <MainComp>{children}</MainComp>;
     }
 
     return <>{children}</>;
