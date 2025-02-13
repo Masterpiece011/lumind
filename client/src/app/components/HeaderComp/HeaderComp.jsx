@@ -13,8 +13,9 @@ import { MyButton } from "../uikit";
 import { getUsers } from "@/app/api/userAPI";
 import { getTeams } from "@/app/api/teamAPI";
 import { logout } from "@/app/store/userStore";
+import { SearchMenu } from "../views/SearchMenu";
 
-function HeaderComp({ setSelectedComponent }) {
+function HeaderComp({ onSelectSearch }) {
     const router = useRouter();
     const dispatch = useDispatch();
     const { isAuth } = useSelector((state) => state.user);
@@ -79,18 +80,16 @@ function HeaderComp({ setSelectedComponent }) {
                                 <p className={styles.dropdownTitle}></p>
                                 {filteredResults.length > 0 ? (
                                     <>
-                                        {filteredResults.map((item) => (
+                                        {filteredResults.map((item, index) => (
                                             <div
-                                                key={item.id}
+                                                key={`${item.id}-${index}`}
                                                 className={styles.userItem}
                                             >
                                                 {item.email || item.name}{" "}
                                             </div>
                                         ))}
                                         <MyButton
-                                            onClick={() =>
-                                                setSelectedComponent("users")
-                                            }
+                                            onClick={onSelectSearch}
                                             text="Подробнее"
                                         />
                                     </>

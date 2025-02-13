@@ -45,6 +45,8 @@
 }
 
 .pageContent {
+    display: flex;
+    justify-content: center;
     flex: 1;
     padding: 20px;
 }
