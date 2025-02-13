@@ -30,12 +30,12 @@ const MainComp = () => {
         setShowSearchMenu(true);
     };
 
-    const handleSelectTeam = (teamId) => {
-        router.push(`/teams/${teamId}`);
-    };
+    useEffect(() => {
+        setShowSearchMenu(false);
+    }, [pathname]);
 
-    const handleSelectAssignment = (assignmentId) => {
-        router.push(`/assignments/${assignmentId}`);
+    const handleNavigation = (path) => {
+        router.push(path);
     };
 
     return (
@@ -49,43 +49,56 @@ const MainComp = () => {
                         <Icon
                             src={Home}
                             alt="home"
-                            onClick={() => router.push("/")}
+                            onClick={() => handleNavigation("/")}
                         />
                         <Icon
                             src={Notifications}
                             alt="notifications"
-                            onClick={() => router.push("/notifications")}
+                            onClick={() => handleNavigation("/notifications")}
                         />
                         <Icon
                             src={Teams}
                             alt="teams"
-                            onClick={() => router.push("/teams")}
+                            onClick={() => handleNavigation("/teams")}
                         />
                         <Icon
                             src={Chat}
                             alt="chat"
-                            onClick={() => router.push("/chat")}
+                            onClick={() => handleNavigation("/chat")}
                         />
                         <Icon
                             src={Assignments}
                             alt="assignments"
-                            onClick={() => router.push("/assignments")}
+                            onClick={() => handleNavigation("/assignments")}
                         />
                     </ul>
                 </aside>
 
                 <section className={styles.pageContent}>
                     {showSearchMenu ? (
-                        <SearchMenu />
+                        <SearchMenu
+                            onSelectUser={(userId) =>
+                                handleNavigation(`/users/${userId}`)
+                            }
+                            onSelectTeam={(teamId) =>
+                                handleNavigation(`/teams/${teamId}`)
+                            }
+                        />
                     ) : pathname.startsWith("/teams/") && params.id ? (
                         <TeamDetailPage id={params.id} />
                     ) : pathname.startsWith("/assignments/") && params.id ? (
                         <AssignmentsDetailPage id={params.id} />
                     ) : pathname.startsWith("/teams") ? (
-                        <TeamsPage onSelectTeam={handleSelectTeam} />
+                        <TeamsPage
+                            onSelectTeam={(teamId) =>
+                                handleNavigation(`/teams/${teamId}`)
+                            }
+                        />
                     ) : pathname.startsWith("/assignments") ? (
                         <AssignmentsPage
-                            onSelectAssignment={handleSelectAssignment}
+                            onSelectAssignment={(assignmentId) =>
+                                handleNavigation(`/assignments/${assignmentId}`)
+                            }
                         />
                     ) : pathname.startsWith("/users") ? (
                         <UsersPage />

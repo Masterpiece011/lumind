@@ -16,9 +16,9 @@ const SearchMenu = ({ onSelectTeam, onSelectUser }) => {
     const usersArray = useSelector((state) => state.users.users) || [];
 
     useEffect(() => {
-        dispatch(getTeams());
-        dispatch(getUsers());
-    }, [dispatch]);
+        if (!teams.length) dispatch(getTeams());
+        if (!usersArray.length) dispatch(getUsers());
+    }, [dispatch, teams.length, usersArray.length]);
 
     return (
         <div className={styles.menuWrapper}>
@@ -29,6 +29,7 @@ const SearchMenu = ({ onSelectTeam, onSelectUser }) => {
                     </span>
                     <span className={styles.tittleInfo}>Люди</span>
                 </h2>
+
                 <div className={styles.usersContent}>
                     {usersArray.map((user) => (
                         <div
