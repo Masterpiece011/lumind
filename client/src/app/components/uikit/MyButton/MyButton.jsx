@@ -1,10 +1,11 @@
 import React from "react";
 import "./MyButton.module.scss";
 
-function MyButton({ text, className, onClick }) {
+function MyButton({ text, children, className, onClick }) {
+    const content = children || text;
     return (
         <button className={className} onClick={onClick}>
-            {text}
+            {content}
         </button>
     );
 }
