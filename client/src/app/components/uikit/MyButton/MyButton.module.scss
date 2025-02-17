@@ -90,3 +90,22 @@
       color: #FFFFFF;
     }
   }
+
+  .teamsButton {
+    width: 100%;
+    background: transparent;
+    border: none;
+
+    .tittleInfo {
+        display: flex;
+        align-items: center;
+        color: #FFFFFF;
+
+        & .teamTittle {
+            font-weight: 400;
+            font-size: 24px;
+            line-height: 22px;
+            margin-right: 15px;
+        }
+    }
+  }

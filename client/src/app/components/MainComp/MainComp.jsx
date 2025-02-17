@@ -27,12 +27,12 @@ const MainComp = () => {
     const [showSearchMenu, setShowSearchMenu] = useState(false);
 
     const onSelectSearch = () => {
-        setShowSearchMenu(true);
+        setShowSearchMenu((prev) => !prev);
     };
 
     useEffect(() => {
         setShowSearchMenu(false);
-    }, [pathname]);
+    }, [pathname, params]); 
 
     const handleNavigation = (path) => {
         router.push(path);
