@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import Logo from "@/app/assets/img/logo.svg";
 import Settings from "@/app/assets/icons/settings.svg";
 import SearchIcon from "@/app/assets/icons/search-icon.svg";
 import * as styles from "./HeaderComp.module.scss";
@@ -13,7 +12,8 @@ import { MyButton } from "../uikit";
 import { getUsers } from "@/app/api/userAPI";
 import { getTeams } from "@/app/api/teamAPI";
 import { logout } from "@/app/store/userStore";
-import { SearchMenu } from "../views/SearchMenu";
+import Logo from "@/app/assets/img/logo.svg";
+import Logout from "@/app/assets/icons/logout-icon.svg";
 
 function HeaderComp({ onSelectSearch }) {
     const router = useRouter();
@@ -104,20 +104,22 @@ function HeaderComp({ onSelectSearch }) {
                 )}
                 <div className={styles.contentWrapper}>
                     <div className={styles.settingsWrapper}>
-                        <Image src={Settings} alt="settings" />
+                        <Image src={Settings} alt="settings-icon" />
                     </div>
                     {isAuth ? (
                         <MyButton
-                            text="ВЫХОД"
                             className={buttonStyles.headerButton}
                             onClick={handleLogoutClick}
-                        />
+                        >
+                            <Image src={Logout} alt="logout-icon" />
+                        </MyButton>
                     ) : (
                         <MyButton
-                            text="ВОЙТИ"
                             className={buttonStyles.headerButton}
                             onClick={handleLoginClick}
-                        />
+                        >
+                            <Image src={Logout} alt="logout-icon" />
+                        </MyButton>
                     )}
                 </div>
             </div>

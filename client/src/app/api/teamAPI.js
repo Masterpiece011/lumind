@@ -1,10 +1,11 @@
-
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { $authHost, $host } from "./page";
 
-export const getTeams = createAsyncThunk("teams/getTeams", async () => {
+export const getTeams = createAsyncThunk("teams/getTeams", async (userId) => {
     try {
-        const response = await $host.get("/api/teams");
+        const response = await $authHost.get("/api/teams", {
+            params: { user_id: userId },
+        });
         return response.data;
     } catch (error) {
         throw new Error(
@@ -13,9 +14,11 @@ export const getTeams = createAsyncThunk("teams/getTeams", async () => {
     }
 });
 
-export const getTeamById = async (teamId) => {
+export const getTeamById = async (teamId, userId) => {
     try {
-        const response = await $host.get(`/api/teams/${teamId}`);
+        const response = await $authHost.get(`/api/teams/${teamId}`, {
+            params: { user_id: userId },
+        });
         return response.data;
     } catch (error) {
         throw new Error(

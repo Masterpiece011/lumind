@@ -1,22 +1,30 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getTeamById } from "@/app/api/teamAPI";
 import * as styles from "@/app/teams/team.module.scss";
+import * as buttonStyles from "@/app/components/uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "@/app/components/uikit";
 import Icon from "@/app/ui/icons/Icon";
 import UserIcon from "@/app/assets/icons/user-icon.png";
-import Assignments from "@/app/assets/icons/assignments-icon.svg";
+import Assignment from "@/app/assets/icons/assignments-icon.svg";
 import File from "@/app/assets/icons/file-icon.svg";
 import Publication from "@/app/assets/icons/publication-icon.svg";
 
+import { useDispatch, useSelector } from "react-redux";
+import { getAssignments } from "@/app/api/assignmentsAPI";
+
 const TeamDetailPage = () => {
     const { id } = useParams();
+    const router = useRouter();
+    const dispatch = useDispatch();
+
     const [team, setTeam] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState("posts");
+    const { assignments = [] } = useSelector((state) => state.assignments);
 
     useEffect(() => {
         if (!id) return;
@@ -32,6 +40,16 @@ const TeamDetailPage = () => {
         };
         fetchTeam();
     }, [id]);
+
+    useEffect(() => {
+        if (activeTab === "assignments" && team) {
+            dispatch(getAssignments(team.id));
+        }
+    }, [activeTab, team, dispatch]);
+
+    const handleSidebarClick = (path) => {
+        router.push(path);
+    };
 
     if (loading) return <div>Загрузка...</div>;
     if (error) return <div>Ошибка: {error}</div>;
@@ -51,6 +69,29 @@ const TeamDetailPage = () => {
                     <p>Нет участников</p>
                 )}
             </ul>
+        ),
+        assignments: (
+            <div>
+                <h3>Задания</h3>
+                <ul>
+                    {assignments && assignments.length > 0 ? (
+                        assignments.map((assignment) => (
+                            <li
+                                key={assignment.id}
+                                onClick={() =>
+                                    handleSidebarClick(
+                                        `/assignments/${assignment.id}`,
+                                    )
+                                }
+                            >
+                                {assignment.title}
+                            </li>
+                        ))
+                    ) : (
+                        <p>Нет заданий</p>
+                    )}
+                </ul>
+            </div>
         ),
         groups: (
             <ul>
@@ -86,32 +127,50 @@ const TeamDetailPage = () => {
                 <div className={styles.dividerSidebar}></div>
                 <h2>{team.name}</h2>
                 <ul>
-                    <MyButton onClick={() => setActiveTab("members")}>
-                        <span className={styles.buttonIcon}>
+                    <MyButton
+                        className={buttonStyles.teamButton}
+                        onClick={() => setActiveTab("members")}
+                    >
+                        <span className={buttonStyles.sidebarIcon}>
                             <Icon src={UserIcon} alt="user-icon" />
                         </span>
-                        <span className={styles.buttonInfo}>Участники</span>
-                    </MyButton>
-
-                    <MyButton onClick={() => setActiveTab("assignments")}>
-                        <span className={styles.buttonIcon}>
-                            <Icon src={Assignments} alt="assignment-icon" />
+                        <span className={buttonStyles.sidebarInfo}>
+                            Участники
                         </span>
-                        <span className={styles.buttonInfo}>Задания</span>
                     </MyButton>
 
-                    <MyButton onClick={() => setActiveTab("groups")}>
-                        <span className={styles.buttonIcon}>
+                    <MyButton
+                        className={buttonStyles.teamButton}
+                        onClick={() => setActiveTab("assignments")}
+                    >
+                        <span className={buttonStyles.sidebarIcon}>
+                            <Icon src={Assignment} alt="assignment-icon" />
+                        </span>
+                        <span className={buttonStyles.sidebarInfo}>
+                            Задания
+                        </span>
+                    </MyButton>
+
+                    <MyButton
+                        className={buttonStyles.teamButton}
+                        onClick={() => setActiveTab("groups")}
+                    >
+                        <span className={buttonStyles.sidebarIcon}>
                             <Icon src={File} alt="file-icon" />
                         </span>
-                        <span className={styles.buttonInfo}>Файлы</span>
+                        <span className={buttonStyles.sidebarInfo}>Файлы</span>
                     </MyButton>
 
-                    <MyButton onClick={() => setActiveTab("posts")}>
-                        <span className={styles.buttonIcon}>
+                    <MyButton
+                        className={buttonStyles.teamButton}
+                        onClick={() => setActiveTab("posts")}
+                    >
+                        <span className={buttonStyles.sidebarIcon}>
                             <Icon src={Publication} alt="publication-icon" />
                         </span>
-                        <span className={styles.buttonInfo}>Публикации</span>
+                        <span className={buttonStyles.sidebarInfo}>
+                            Публикации
+                        </span>
                     </MyButton>
                 </ul>
             </aside>
