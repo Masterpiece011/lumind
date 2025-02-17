@@ -28,7 +28,7 @@ function HeaderComp({ onSelectSearch }) {
     useEffect(() => {
         dispatch(getUsers());
         dispatch(getTeams());
-    }, [dispatch, searchQuery]);
+    }, [dispatch]);
 
     const handleLoginClick = () => {
         router.push("/login");
