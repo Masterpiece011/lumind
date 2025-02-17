@@ -29,19 +29,20 @@
 }
 
 .headerButton {
-    width: 80px;
+    display: flex;
+    justify-content: center;
+    width: 34px;
     height: 34px;
     border-radius: 8px;
     border: 1px solid #AEAEAE80;
     background-color: transparent; 
     color: #FFFFFF; 
-    font-size: 12px;
     cursor: pointer; 
     transition: opacity 0.3s ease; 
 
     &:hover {
         opacity: 1; 
-        background-color: #9F70FD; 
+        background: #4914A5;
         color: #171717; 
     }
 
@@ -50,3 +51,42 @@
         border-color: #FFFFFF; 
     }
 }
+
+.teamButton {
+    width: 200px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+    margin-bottom: 15px;
+  
+    .sidebarIcon {
+        width: 20px;
+        height: 20px;
+        display: flex; 
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #AEAEAE80;
+        border-radius: 4px;
+        margin-right: 5px;
+        cursor: pointer;
+        box-shadow: 0px 4px 4px 0px #00000040;
+
+        & img {
+            width: 12px; 
+            height: 14px;
+            object-fit: contain; 
+        }
+    }
+  
+    .sidebarInfo {
+      font-size: 18px;
+      font-weight: 400;
+      color: #FFFFFF;
+    }
+  }
