@@ -5,15 +5,16 @@ const cookieParser = require("cookie-parser");
 const models = require("./models/models");
 const router = require("./routes/index");
 const errorHandler = require("./middleware/ErrorHandlingMiddleware");
-
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const path = require("path");
+
 const app = express();
 const WSServer = require("express-ws")(app);
 const aWss = WSServer.getWss();
-
 const sequelize = require("./db");
+const uploadRoutes = require("./routes/uploadRouter.js");
+
 const PORT = process.env.PORT || 8080;
 
 // import { MESSAGES_TYPES, ACTIONS } from "./ws/index.js";
@@ -35,7 +36,10 @@ app.use("/api", router);
 app.use(errorHandler);
 
 app.use(fileUpload({}));
-app.use(express.static(path.resolve(__dirname, "static")));
+
+app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
+
+app.use("/upload", uploadRoutes);
 
 const start = async () => {
     try {
