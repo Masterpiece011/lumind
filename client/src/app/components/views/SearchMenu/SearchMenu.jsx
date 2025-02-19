@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import * as styles from "./SearchMenu.module.scss";
 import { getTeams } from "@/app/api/teamAPI";
@@ -9,11 +9,14 @@ import Icon from "@/app/ui/icons/Icon";
 import nonAvatar from "@/app/assets/img/non-avatar.png";
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import TeamsIcon from "@/app/assets/icons/teams-icon-search.svg";
+import { UserModal } from "../Profile";
 
-const SearchMenu = ({ onSelectTeam, onSelectUser }) => {
+const SearchMenu = ({ onSelectTeam }) => {
     const dispatch = useDispatch();
     const { teams = [] } = useSelector((state) => state.teams);
     const usersArray = useSelector((state) => state.users.users) || [];
+
+    const [selectedUser, setSelectedUser] = useState(null);
 
     useEffect(() => {
         if (!teams.length) dispatch(getTeams());
@@ -35,10 +38,9 @@ const SearchMenu = ({ onSelectTeam, onSelectUser }) => {
                         <div
                             key={user.id}
                             className={styles.userItem}
-                            onClick={() => onSelectUser(user.id)}
+                            onClick={() => setSelectedUser(user)}
                         >
                             <span className={styles.avatarItem}>
-                                {" "}
                                 <Icon src={nonAvatar} alt="none-avatar" />
                             </span>
                             <span className={styles.userName}>
@@ -69,19 +71,13 @@ const SearchMenu = ({ onSelectTeam, onSelectUser }) => {
                 </div>
             </div>
 
-            <div className={styles.cardWrapper}>
-                <h2 className={styles.sectionTitle}>Файлы</h2>
-                <div className={styles.filesContent}>
-                    <div className={styles.fileItem}>Файлы</div>
-                </div>
-            </div>
-
-            <div className={styles.cardWrapper}>
-                <h2 className={styles.sectionTitle}>Что-то еще</h2>
-                <div className={styles.filesContent}>
-                    <div className={styles.fileItem}>Файлы</div>
-                </div>
-            </div>
+            {selectedUser && (
+                <UserModal
+                    user={selectedUser}
+                    isOpen={!!selectedUser}
+                    onClose={() => setSelectedUser(null)}
+                />
+            )}
         </div>
     );
 };

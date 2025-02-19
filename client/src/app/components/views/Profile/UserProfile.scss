@@ -1,0 +1,62 @@
+.user-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 20px 0 20px;;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 80%;
+    text-align: center;
+    border: 3px solid #AEAEAE80; 
+    background-color:#FFFFFF;
+
+    &__avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 15px;
+        border: 2px solid #ddd;
+    }
+
+    &__name {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    &__group {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 15px;
+        
+        background-color: transparent;
+    }
+
+    &__contact {
+        font-size: 14px;
+        color: #666;
+        background-color: transparent;
+        width: 100%;
+        text-align: left;
+
+        p {
+            margin: 5px 0;
+        }
+    }
+
+    &__close-button {
+        position: absolute;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        background-color: transparent; 
+        transition: color 0.2s;
+
+        &:hover {
+            opacity: 1; 
+            background-color: #4914A5;
+        }
+    }
+}
