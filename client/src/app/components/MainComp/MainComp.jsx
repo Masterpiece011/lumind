@@ -32,7 +32,7 @@ const MainComp = () => {
 
     useEffect(() => {
         setShowSearchMenu(false);
-    }, [pathname, params]); 
+    }, [pathname, params]);
 
     const handleNavigation = (path) => {
         router.push(path);
@@ -77,9 +77,6 @@ const MainComp = () => {
                 <section className={styles.pageContent}>
                     {showSearchMenu ? (
                         <SearchMenu
-                            onSelectUser={(userId) =>
-                                handleNavigation(`/users/${userId}`)
-                            }
                             onSelectTeam={(teamId) =>
                                 handleNavigation(`/teams/${teamId}`)
                             }
