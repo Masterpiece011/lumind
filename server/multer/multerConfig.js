@@ -12,7 +12,7 @@ const createUploadDir = (dirPath) => {
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const userId = req.user?.id || "anonymous";
+        const userId = req.user && req.user.id ? req.user.id : "anonymous";
         const fileType = file.mimetype.split("/")[0];
 
         let uploadPath = path.join(
@@ -58,7 +58,8 @@ const fileFilter = (req, file, cb) => {
         "image/jpeg",
         "image/png",
         "application/pdf",
-        "application/msword",
+        "application/msword", 
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
     ];
 
     if (allowedTypes.includes(file.mimetype)) {
