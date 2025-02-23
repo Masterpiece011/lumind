@@ -25,6 +25,7 @@ app.use(
         origin: "http://localhost:3000", // Клиентский адрес
         credentials: true, // Если используются куки или токены
         methods: ["GET", "POST", "PUT", "DELETE"], // Разрешённые методы
+        allowedHeaders: ["Content-Type", "Authorization"],
     })
 );
 app.use(express.json());
@@ -34,8 +35,6 @@ app.use(cookieParser());
 app.use("/api", router);
 
 app.use(errorHandler);
-
-app.use(fileUpload({}));
 
 app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
 
