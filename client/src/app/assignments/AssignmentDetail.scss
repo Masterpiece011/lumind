@@ -1,0 +1,122 @@
+
+.assignment-detail {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    font-family: sans-serif;
+    color: whitesmoke;
+  
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+  
+    &__header-left {
+      display: flex;
+      flex-direction: column;
+    }
+  
+    &__header-right {
+      display: flex;
+      align-items: center;
+    }
+  
+    &__title {
+      font-size: 24px;
+      margin: 0;
+      color: whitesmoke;
+    }
+  
+    &__meta {
+      margin-top: 8px;
+      font-size: 14px;
+      color: whitesmoke;
+    }
+  
+    &__score {
+      margin-right: 20px;
+      font-size: 16px;
+      color: whitesmoke;
+    }
+  
+    &__submit-btn {
+      background-color: #AEAEAE80;
+      color: whitesmoke;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+  
+      &:hover {
+        background-color: #444;
+      }
+    }
+  
+    &__body {
+      display: flex;
+      gap: 30px;
+    }
+  
+    &__info {
+      flex: 3; 
+    }
+  
+    &__submission {
+      flex: 2;
+      background: #f3f3f3;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    &__submission-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+  
+    &__submission-title {
+      margin: 0;
+      font-size: 18px;
+    }
+  
+    &__submission-status {
+      font-size: 14px;
+      color: whitesmoke;
+    }
+  
+    &__section {
+      margin-bottom: 20px;
+  
+      &-title {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+  
+      &-text {
+        margin: 0 0 8px 0;
+        line-height: 1.4;
+      }
+    }
+  
+    &__attachment-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+  
+      li {
+        margin-bottom: 8px;
+  
+        a {
+          color: #0078d4;
+          text-decoration: none;
+  
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }

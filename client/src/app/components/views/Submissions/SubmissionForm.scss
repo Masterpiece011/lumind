@@ -1,0 +1,87 @@
+
+.submission-form {
+    display: flex;
+    flex-direction: column;
+  
+    &__group {
+      margin-bottom: 16px;
+  
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+  
+      textarea {
+        width: 100%;
+        min-height: 80px;
+        padding: 8px;
+        resize: vertical;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+  
+      input[type="file"] {
+        margin-top: 8px;
+      }
+    }
+  
+    &__file-list {
+      margin-top: 8px;
+      list-style: none;
+      padding: 0;
+  
+      li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+  
+        a {
+          margin-right: 12px;
+          color: #0078d4;
+          text-decoration: none;
+  
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+  
+        &-delete {
+          background: transparent;
+          border: none;
+          color: #c00;
+          cursor: pointer;
+          padding: 4px 8px;
+          border-radius: 4px;
+  
+          &:hover {
+            background: #ffcfcf;
+          }
+        }
+      }
+    }
+  
+    &__error {
+      color: #d9534f;
+      margin-bottom: 8px;
+    }
+  
+    &__submit-btn {
+      align-self: flex-end;
+      background-color: #0078d4;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+  
+      &:hover {
+        background-color: #005a9e;
+      }
+  
+      &:disabled {
+        background-color: #c2e0ff;
+        cursor: not-allowed;
+      }
+    }
+  }
