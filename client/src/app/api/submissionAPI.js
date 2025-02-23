@@ -1,8 +1,9 @@
 import { $authHost, $host } from "./page";
-export const getSubmissionById = async (submissionId, userId) => {
+
+export const getSubmissionById = async (submission_id, userId) => {
     try {
         const response = await $authHost.get(
-            `/api/submissions/${submissionId}`,
+           `/api/submissions/${submission_id}`,
             {
                 params: { user_id: userId },
             },
@@ -40,17 +41,13 @@ export const createSubmission = async ({
     }
 };
 
-export const updateSubmission = async ({ id, comment, investments }) => {
-    if (!id) {
+export const updateSubmission = async ({ submission_id, comment, investments }) => {
+    if (!submission_id) {
         throw new Error("Необходимо указать ID отправки");
     }
 
     try {
-        const response = await $authHost.put("/api/submissions/", {
-            id,
-            comment,
-            investments,
-        });
+        const response = await $authHost.put(`/api/submissions/${submission_id}`, { comment, investments });
         return response.data;
     } catch (error) {
         throw new Error(
@@ -59,14 +56,14 @@ export const updateSubmission = async ({ id, comment, investments }) => {
     }
 };
 
-export const deleteSubmission = async (submissionId) => {
-    if (!submissionId) {
+export const deleteSubmission = async (submission_id) => {
+    if (!submission_id) {
         throw new Error("Необходимо указать ID отправки");
     }
 
     try {
         const response = await $authHost.delete(
-            `/api/submissions/${submissionId}`,
+            `/api/submissions/${submission_id}`,
         );
         return response.data;
     } catch (error) {

@@ -3,9 +3,9 @@ import { getSubmissionById } from "../api/submissionAPI";
 
 export const fetchSubmissionById = createAsyncThunk(
     "submissions/fetchById",
-    async ({ submissionId, userId }, thunkAPI) => {
+    async ({ submission_id, userId }, thunkAPI) => {
         try {
-            return await getSubmissionById(submissionId, userId);
+            return await getSubmissionById(submission_id, userId);
         } catch (error) {
             return thunkAPI.rejectWithValue(error.message);
         }
