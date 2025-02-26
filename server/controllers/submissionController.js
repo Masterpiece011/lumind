@@ -1,4 +1,5 @@
 require("dotenv").config();
+const path = require("path");
 const {
     Submissions,
     Submissions_investments,
@@ -6,6 +7,7 @@ const {
     Users_Teams,
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
+const FileService = require("../multer/fileService");
 
 class SubmissionController {
     // Метод создания отправки задания
@@ -26,6 +28,17 @@ class SubmissionController {
                     )
                 );
             }
+
+            // Фильтруем null или недопустимые значения
+            const validInvestments = investments.filter((fileUrl) => {
+                return typeof fileUrl === "string" && fileUrl.trim() !== "";
+            });
+
+            // Перемещение файлов из временной папки в основную
+            const movedFiles = await FileService.moveFilesFromTemp(
+                validInvestments,
+                path.resolve(__dirname, "..", "uploads")
+            )
 
             // Получение всех команд, к которым относится пользователь
             const userTeams = await Users_Teams.findAll({
@@ -67,8 +80,8 @@ class SubmissionController {
             });
 
             // Добавление вложений, если они указаны
-            if (investments.length > 0) {
-                const investmentRecords = investments.map((fileUrl) => ({
+            if (movedFiles.length > 0) {
+                const investmentRecords = movedFiles.map((fileUrl) => ({
                     submission_id: submission.id,
                     file_url: fileUrl,
                 }));

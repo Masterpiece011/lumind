@@ -42,7 +42,12 @@ const SubmissionForm = ({ assignment_id, submission_id }) => {
             const uploadedData = await Promise.all(
                 uploadedFiles.map(async (file) => {
                     try {
-                        return await uploadFile(file);
+                        const uploadedFile = await uploadFile(file);
+                        return {
+                            id: Date.now(),
+                            file_url:
+                                uploadedFile.filePath || uploadedFile.path,
+                        };
                     } catch (err) {
                         console.error("Ошибка загрузки файла:", file.name, err);
                         return null;
@@ -68,7 +73,10 @@ const SubmissionForm = ({ assignment_id, submission_id }) => {
         setLoading(true);
 
         try {
-            const fileIds = files.map((file) => file.file_url);
+            const fileIds = files
+                .map((file) => file.file_url)
+                .filter((url) => url !== null && url !== undefined);
+
             let response;
 
             if (submission && submission.id) {
@@ -124,13 +132,12 @@ const SubmissionForm = ({ assignment_id, submission_id }) => {
                                 >
                                     {file.file_url}
                                 </a>
-                                <button
-                                    type="button"
+                                <MyButton
                                     className="submission-form__file-list-delete"
                                     onClick={() => handleDeleteFile(file.id)}
                                 >
                                     Удалить
-                                </button>
+                                </MyButton>
                             </li>
                         ))}
                     </ul>
@@ -140,7 +147,6 @@ const SubmissionForm = ({ assignment_id, submission_id }) => {
             {error && <div className="submission-form__error">{error}</div>}
 
             <MyButton
-                type="submit"
                 className="submission-form__submit-btn"
                 disabled={loading}
             >
