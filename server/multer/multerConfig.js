@@ -2,7 +2,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-const BASE_UPLOADS_DIR = path.resolve(__dirname, "..", "uploads");
+const TEMP_UPLOADS_DIR = path.resolve(__dirname, "..", "temp_uploads");
 
 const createUploadDir = (dirPath) => {
     if (!fs.existsSync(dirPath)) {
@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
         const fileType = file.mimetype.split("/")[0];
 
         let uploadPath = path.join(
-            BASE_UPLOADS_DIR,
+            TEMP_UPLOADS_DIR,
             "users",
             userId,
             "uploads"
@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
         switch (fileType) {
             case "image":
                 uploadPath = path.join(
-                    BASE_UPLOADS_DIR,
+                    TEMP_UPLOADS_DIR,
                     "users",
                     userId,
                     "profile"
@@ -33,7 +33,7 @@ const storage = multer.diskStorage({
                 break;
             case "application":
                 uploadPath = path.join(
-                    BASE_UPLOADS_DIR,
+                    TEMP_UPLOADS_DIR,
                     "users",
                     userId,
                     "documents"
@@ -58,8 +58,8 @@ const fileFilter = (req, file, cb) => {
         "image/jpeg",
         "image/png",
         "application/pdf",
-        "application/msword", 
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
     if (allowedTypes.includes(file.mimetype)) {
