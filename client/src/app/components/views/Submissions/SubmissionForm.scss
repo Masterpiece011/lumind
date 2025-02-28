@@ -15,10 +15,13 @@
       textarea {
         width: 100%;
         min-height: 80px;
+        background-color: transparent; 
+        border: 2px solid #AEAEAE80; 
         padding: 8px;
         resize: vertical;
-        border: 1px solid #ccc;
         border-radius: 4px;
+        cursor: pointer; 
+        color: #AEAEAE;
       }
   
       input[type="file"] {
