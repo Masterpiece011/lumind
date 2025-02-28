@@ -11,8 +11,7 @@ import { UsersPage } from "../views/UsersComp";
 import { SearchMenu } from "../views/SearchMenu";
 import TeamDetailPage from "@/app/teams/[id]/page";
 import AssignmentsDetailPage from "@/app/assignments/[id]/page";
-
-import Icon from "@/app/ui/icons/Icon";
+import { Icon } from "../ui/icons";
 import Home from "@/app/assets/icons/home-icon.svg";
 import Chat from "@/app/assets/icons/chat-icon.svg";
 import Teams from "@/app/assets/icons/teams-icon.svg";

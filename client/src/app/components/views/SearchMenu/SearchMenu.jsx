@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import * as styles from "./SearchMenu.module.scss";
 import { getTeams } from "@/app/api/teamAPI";
 import { getUsers } from "@/app/api/userAPI";
-import Icon from "@/app/ui/icons/Icon";
+import { Icon } from "../../ui/icons";
 import nonAvatar from "@/app/assets/img/non-avatar.png";
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import TeamsIcon from "@/app/assets/icons/teams-icon-search.svg";

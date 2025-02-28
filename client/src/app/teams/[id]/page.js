@@ -6,7 +6,7 @@ import { getTeamById } from "@/app/api/teamAPI";
 import * as styles from "@/app/teams/team.module.scss";
 import * as buttonStyles from "@/app/components/uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "@/app/components/uikit";
-import Icon from "@/app/ui/icons/Icon";
+import { Icon } from "@/app/components/ui/icons";
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import Assignment from "@/app/assets/icons/assignments-icon.svg";
 import File from "@/app/assets/icons/file-icon.svg";

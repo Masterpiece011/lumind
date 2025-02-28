@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
 import { getAssignmentById } from "@/app/api/assignmentsAPI";
@@ -14,6 +14,8 @@ const AssignmentsDetailPage = () => {
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showSubmissionForm, setShowSubmissionForm] = useState(false);
+    const submissionFormRef = useRef(null);
 
     const user_id = useSelector((state) => state.user.user?.id);
 
@@ -39,6 +41,16 @@ const AssignmentsDetailPage = () => {
         }
     }, [id, user_id]);
 
+    const handleMyWorkClick = () => {
+        setShowSubmissionForm(!showSubmissionForm);
+    };
+
+    const handleSubmitClick = () => {
+        if (submissionFormRef.current) {
+            submissionFormRef.current.handleSubmit();
+        }
+    };
+
     if (loading) return <div>Загрузка...</div>;
     if (error) return <div>Ошибка: {error}</div>;
     if (!assignment) return <div>Задание не найдено</div>;
@@ -61,7 +73,12 @@ const AssignmentsDetailPage = () => {
                     <div className="assignment-detail__score">
                         Оценка: {score}
                     </div>
-                    <MyButton className="assignment-detail__submit-btn">
+                    <MyButton
+                        className="assignment-detail__submit-btn"
+                        onClick={handleSubmitClick}
+                        disabled={loading}
+                    >
+                        {loading}
                         Сдать
                     </MyButton>
                 </div>
@@ -130,6 +147,12 @@ const AssignmentsDetailPage = () => {
                         <h2 className="assignment-detail__submission-title">
                             Моя работа
                         </h2>
+                        <MyButton
+                            className="assignment-detail__my-work-btn"
+                            onClick={handleMyWorkClick}
+                        >
+                            {showSubmissionForm ? "Скрыть" : "Моя работа"}
+                        </MyButton>
                         {submissionExists ? (
                             <span className="assignment-detail__submission-status">
                                 Уже отправлено
@@ -141,10 +164,13 @@ const AssignmentsDetailPage = () => {
                         )}
                     </div>
 
-                    <SubmissionForm
-                        assignment_id={id}
-                        submission_id={submission_id}
-                    />
+                    {showSubmissionForm && (
+                        <SubmissionForm
+                            ref={submissionFormRef}
+                            assignment_id={id}
+                            submission_id={submission_id}
+                        />
+                    )}
                 </div>
             </div>
         </div>

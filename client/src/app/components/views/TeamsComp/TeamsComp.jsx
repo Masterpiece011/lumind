@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getTeams } from "@/app/api/teamAPI";
 import { MyButton } from "../../uikit";
-import Icon from "@/app/ui/icons/Icon";
+import { Icon } from "../../ui/icons";
 import Arrow from "@/app/assets/icons/arrow-icon.svg";
 
 import "./TeamsComp.scss";

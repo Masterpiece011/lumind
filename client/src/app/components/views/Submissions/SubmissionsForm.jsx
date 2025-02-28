@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, {
+    useEffect,
+    useState,
+    forwardRef,
+    useImperativeHandle,
+} from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { MyButton } from "../../uikit";
 import { fetchSubmissionById } from "@/app/store/submissionStore";
 import { createSubmission, updateSubmission } from "@/app/api/submissionAPI";
 import { uploadFile, uploadMultipleFiles } from "@/app/api/uploadFileAPI";
+import { FileItem } from "../../FileComp";
 
-const SubmissionForm = ({ assignment_id, submission_id }) => {
+const SubmissionForm = forwardRef(({ assignment_id, submission_id }, ref) => {
     const [comment, setComment] = useState("");
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -69,7 +75,7 @@ const SubmissionForm = ({ assignment_id, submission_id }) => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         setLoading(true);
 
         try {
@@ -103,6 +109,10 @@ const SubmissionForm = ({ assignment_id, submission_id }) => {
         }
     };
 
+    useImperativeHandle(ref, () => ({
+        handleSubmit,
+    }));
+
     return (
         <form className="submission-form" onSubmit={handleSubmit}>
             <div className="submission-form__group">
@@ -125,19 +135,10 @@ const SubmissionForm = ({ assignment_id, submission_id }) => {
                     <ul className="submission-form__file-list">
                         {files.map((file, index) => (
                             <li key={file.id || index}>
-                                <a
-                                    href={file.file_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {file.file_url}
-                                </a>
-                                <MyButton
-                                    className="submission-form__file-list-delete"
-                                    onClick={() => handleDeleteFile(file.id)}
-                                >
-                                    Удалить
-                                </MyButton>
+                                <FileItem
+                                    fileUrl={file.file_url}
+                                    onDelete={() => handleDeleteFile(file.id)}
+                                />
                             </li>
                         ))}
                     </ul>
@@ -145,15 +146,8 @@ const SubmissionForm = ({ assignment_id, submission_id }) => {
             )}
 
             {error && <div className="submission-form__error">{error}</div>}
-
-            <MyButton
-                className="submission-form__submit-btn"
-                disabled={loading}
-            >
-                {loading ? "Отправка..." : "Отправить"}
-            </MyButton>
         </form>
     );
-};
+});
 
 export { SubmissionForm };
