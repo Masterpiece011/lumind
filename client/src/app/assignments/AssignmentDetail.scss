@@ -64,7 +64,7 @@
   
     &__submission {
       flex: 2;
-      background: #f3f3f3;
+      background: #aeaeae80;
       border-radius: 8px;
       padding: 20px;
     }
@@ -88,6 +88,7 @@
   
     &__section {
       margin-bottom: 20px;
+      
   
       &-title {
         font-size: 18px;
@@ -97,13 +98,21 @@
       &-text {
         margin: 0 0 8px 0;
         line-height: 1.4;
+      
       }
     }
+
+
+    &__submission-files {
+      color: black;
+    }
+
   
     &__attachment-list {
       list-style: none;
       padding: 0;
       margin: 0;
+      color: black;
   
       li {
         margin-bottom: 8px;

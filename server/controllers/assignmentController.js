@@ -2,6 +2,8 @@ require("dotenv").config();
 const {
     Assignments,
     Assignments_investments,
+    Submissions_investments,
+    Submissions,
     Users_Teams,
     Teams,
     Assignments_Teams,
@@ -185,6 +187,15 @@ class AssignmentController {
                     {
                         model: Assignments_investments,
                         attributes: ["id", "file_url"],
+                    },
+                    {
+                        model: Submissions,
+                        include: [
+                            {
+                                model: Submissions_investments,
+                                attributes: ["id", "file_url"],
+                            },
+                        ],
                     },
                 ],
             });

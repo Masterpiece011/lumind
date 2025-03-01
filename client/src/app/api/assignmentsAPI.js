@@ -17,7 +17,7 @@ export const getAssignments = createAsyncThunk(
     },
 );
 
-export const getAssignmentById = async (assignmentId, userId) => {
+export const getAssignmentById = async (assignmentId, userId, submissionId) => {
     try {
         const response = await $authHost.get(
             `/api/assignments/${assignmentId}`,
