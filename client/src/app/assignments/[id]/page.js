@@ -59,7 +59,6 @@ const AssignmentsDetailPage = () => {
                     dispatch(setError("Пользователь не авторизован."));
                 }
             }
-        };
 
         if (id) {
             fetchAssignment();
