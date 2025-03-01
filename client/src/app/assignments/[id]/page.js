@@ -7,6 +7,7 @@ import { getAssignmentById } from "@/app/api/assignmentsAPI";
 import { SubmissionForm } from "@/app/components/views/Submissions/SubmissionsForm";
 import "../AssignmentDetail.scss";
 import { MyButton } from "@/app/components/uikit";
+import { FileItem } from "@/app/components/FileComp";
 
 const AssignmentsDetailPage = () => {
     const { id } = useParams();
@@ -24,14 +25,20 @@ const AssignmentsDetailPage = () => {
             if (user_id) {
                 try {
                     const data = await getAssignmentById(id, user_id);
-                    setAssignment(data);
+
+                    setAssignment({
+                        ...data,
+                        submissions_investments: data.submission
+                            ? data.submission.submissions_investments
+                            : [],
+                    });
                 } catch (err) {
                     setError(err.message);
                 } finally {
                     setLoading(false);
                 }
             } else {
-                setError("User is not authenticated.");
+                setError("Пользователь не авторизован.");
                 setLoading(false);
             }
         };
@@ -43,6 +50,17 @@ const AssignmentsDetailPage = () => {
 
     const handleMyWorkClick = () => {
         setShowSubmissionForm(!showSubmissionForm);
+    };
+
+    const handleSubmissionSuccess = (updatedFiles) => {
+        console.log("Обновленные файлы:", updatedFiles);
+        setAssignment((prevAssignment) => ({
+            ...prevAssignment,
+            submissions_investments: updatedFiles.map((file) => ({
+                id: file.id,
+                file_url: file.file_url,
+            })),
+        }));
     };
 
     const handleSubmitClick = () => {
@@ -78,8 +96,7 @@ const AssignmentsDetailPage = () => {
                         onClick={handleSubmitClick}
                         disabled={loading}
                     >
-                        {loading}
-                        Сдать
+                        {loading ? "Отправка..." : "Сдать"}
                     </MyButton>
                 </div>
             </div>
@@ -102,7 +119,7 @@ const AssignmentsDetailPage = () => {
                         <p className="assignment-detail__section-text">
                             {assignment.creator
                                 ? `${assignment.creator.first_name} ${assignment.creator.middle_name}
-                   ${assignment.creator.last_name} (${assignment.creator.email})`
+                                   ${assignment.creator.last_name} (${assignment.creator.email})`
                                 : "Неизвестно"}
                         </p>
                     </div>
@@ -118,28 +135,18 @@ const AssignmentsDetailPage = () => {
                         </p>
                     </div>
 
-                    {assignment.Assignments_investments?.length > 0 && (
-                        <div className="assignment-detail__section">
-                            <h2 className="assignment-detail__section-title">
-                                Вложения:
-                            </h2>
-                            <ul className="assignment-detail__attachment-list">
-                                {assignment.Assignments_investments.map(
-                                    (file) => (
-                                        <li key={file.id}>
-                                            <a
-                                                href={file.file_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                {file.file_url}
-                                            </a>
-                                        </li>
-                                    ),
-                                )}
-                            </ul>
-                        </div>
-                    )}
+                    <div className="assignment-detail__section">
+                        <h2 className="assignment-detail__section-title">
+                            Вложения к заданию:
+                        </h2>
+                        <ul className="assignment-detail__attachment-list">
+                            {assignment.assignments_investments?.map((file) => (
+                                <li key={file.id}>
+                                    <FileItem fileUrl={file.file_url} />
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
 
                 <div className="assignment-detail__submission">
@@ -164,12 +171,34 @@ const AssignmentsDetailPage = () => {
                         )}
                     </div>
 
-                    {showSubmissionForm && (
+                    {showSubmissionForm ? (
                         <SubmissionForm
                             ref={submissionFormRef}
                             assignment_id={id}
                             submission_id={submission_id}
+                            onSubmissionSuccess={handleSubmissionSuccess}
                         />
+                    ) : (
+                        <div className="assignment-detail__section">
+                            <h2 className="assignment-detail__section-title">
+                                Вложения к ответу:
+                            </h2>
+                            {assignment.submissions_investments?.length > 0 ? (
+                                <ul className="assignment-detail__attachment-list">
+                                    {assignment.submissions_investments.map(
+                                        (file) => (
+                                            <li key={file.id}>
+                                                <FileItem
+                                                    fileUrl={file.file_url}
+                                                />
+                                            </li>
+                                        ),
+                                    )}
+                                </ul>
+                            ) : (
+                                <p>Нет вложений к ответу.</p>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>
