@@ -1,5 +1,7 @@
 "use client";
 
+import React, { useEffect, useRef, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -59,6 +61,7 @@ const AssignmentsDetailPage = () => {
                     dispatch(setError("Пользователь не авторизован."));
                 }
             }
+        };
 
         if (id) {
             fetchAssignment();
