@@ -5,6 +5,7 @@ import React, {
     useImperativeHandle,
 } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import "./SubmissionForm.scss";
 import { MyButton } from "../../uikit";
 import { fetchSubmissionById } from "@/app/store/submissionStore";
 import { createSubmission, updateSubmission } from "@/app/api/submissionAPI";
@@ -12,7 +13,10 @@ import { uploadFile, uploadMultipleFiles } from "@/app/api/uploadFileAPI";
 import { FileItem } from "../../FileComp";
 
 const SubmissionForm = forwardRef(
-    ({ assignment_id, submission_id, onSubmissionSuccess }, ref) => {
+    (
+        { assignment_id, submission_id, onSubmissionSuccess, isSubmitted },
+        ref,
+    ) => {
         const [comment, setComment] = useState("");
         const [files, setFiles] = useState([]);
         const [loading, setLoading] = useState(false);
@@ -135,12 +139,18 @@ const SubmissionForm = forwardRef(
                         id="comment"
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
+                        disabled={isSubmitted}
                     />
                 </div>
 
                 <div className="submission-form__group">
                     <label htmlFor="files">Прикрепить файлы:</label>
-                    <input type="file" multiple onChange={handleFileChange} />
+                    <input
+                        type="file"
+                        disabled={isSubmitted}
+                        multiple
+                        onChange={handleFileChange}
+                    />
                 </div>
 
                 {files.length > 0 && (
@@ -160,8 +170,6 @@ const SubmissionForm = forwardRef(
                         </ul>
                     </div>
                 )}
-
-                {error && <div className="submission-form__error">{error}</div>}
             </form>
         );
     },

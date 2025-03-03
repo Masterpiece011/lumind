@@ -4,7 +4,7 @@
     flex-direction: column;
     padding: 20px;
     font-family: sans-serif;
-    color: whitesmoke;
+    color: #ffffff;
   
     &__header {
       display: flex;
@@ -64,8 +64,9 @@
   
     &__submission {
       flex: 2;
-      background: #aeaeae80;
-      border-radius: 8px;
+      background: transparent;
+      border: 2px solid #9F70FD;
+      border-radius: 6px;
       padding: 20px;
     }
 
