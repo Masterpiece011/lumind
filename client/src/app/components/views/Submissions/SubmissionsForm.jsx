@@ -93,6 +93,13 @@ const SubmissionForm = forwardRef(
                     .map((file) => file.file_url)
                     .filter((url) => url !== null && url !== undefined);
 
+                if (fileIds.length === 0 && comment.trim() === "") {
+                    setError(
+                        "Необходимо прикрепить файлы или добавить комментарий.",
+                    );
+                    return;
+                }
+
                 let response;
 
                 if (submission && submission.id) {
