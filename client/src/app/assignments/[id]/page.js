@@ -25,51 +25,96 @@ const AssignmentsDetailPage = () => {
     const submissionFormRef = useRef(null);
 
     useEffect(() => {
+        let isMounted = true;
+
         const fetchAssignment = async () => {
             if (user_id) {
                 try {
                     dispatch(setLoading());
                     const data = await getAssignmentById(id, user_id);
 
-                    dispatch(
-                        setAssignment({
-                            ...data,
-                            submissions_investments: data.submission
-                                ? data.submission.submissions_investments
-                                : [],
-                        }),
-                    );
+                    if (isMounted) {
+                        dispatch(
+                            setAssignment({
+                                ...data,
+                                submissions_investments: data.submission
+                                    ? data.submission.submissions_investments
+                                    : [],
+                            }),
+                        );
 
-                    setIsSubmitted(data.submission?.submitted_date !== null);
+                        setIsSubmitted(
+                            data.submission &&
+                                data.submission.submitted_date !== null,
+                        );
+                    }
                 } catch (err) {
-                    dispatch(setError(err.message));
+                    if (isMounted) {
+                        dispatch(setError(err.message));
+                    }
                 }
             } else {
-                dispatch(setError("Пользователь не авторизован."));
+                if (isMounted) {
+                    dispatch(setError("Пользователь не авторизован."));
+                }
             }
         };
 
         if (id) {
             fetchAssignment();
         }
+
+        return () => {
+            isMounted = false;
+        };
     }, [id, user_id, dispatch]);
 
     const handleMyWorkClick = () => {
         setShowSubmissionForm(!showSubmissionForm);
     };
 
-    const handleSubmissionSuccess = (updatedFiles) => {
-        console.log("Обновленные файлы:", updatedFiles);
-        dispatch(
-            setAssignment({
-                ...assignment,
-                submissions_investments: updatedFiles.map((file) => ({
-                    id: file.id,
-                    file_url: file.file_url,
-                })),
-            }),
-        );
-        setIsSubmitted(true);
+    const handleSubmissionSuccess = async (updatedFiles) => {
+        let isMounted = true;
+
+        try {
+            console.log("Обновленные файлы:", updatedFiles);
+            dispatch(
+                setAssignment({
+                    ...assignment,
+                    submissions_investments: updatedFiles.map((file) => ({
+                        id: file.id,
+                        file_url: file.file_url,
+                    })),
+                    submission: {
+                        ...assignment.submission,
+                        id: updatedFiles.submission_id,
+                        submitted_date: new Date().toISOString(),
+                    },
+                }),
+            );
+            setIsSubmitted(true);
+
+            const data = await getAssignmentById(id, user_id);
+            if (isMounted) {
+                dispatch(
+                    setAssignment({
+                        ...data,
+                        submissions_investments: data.submission
+                            ? data.submission.submissions_investments
+                            : [],
+                    }),
+                );
+            }
+        } catch (err) {
+            if (isMounted) {
+                console.error("Ошибка при обновлении задания:", err);
+                dispatch(setError("Ошибка при обновлении задания."));
+            }
+        }
+
+        return () => {
+            isMounted = false;
+        };
     };
 
     const handleSubmitClick = () => {
@@ -79,7 +124,7 @@ const AssignmentsDetailPage = () => {
     };
 
     const handleCancelSubmission = async () => {
-        const submissionId = assignment?.submission?.id;
+        const submissionId = assignment.assignments?.submission?.id;
         console.log("Submission ID для удаления:", submissionId);
 
         if (!submissionId) {
@@ -90,8 +135,15 @@ const AssignmentsDetailPage = () => {
         try {
             await deleteSubmission(submissionId);
             setIsSubmitted(false);
+
+            const data = await getAssignmentById(id, user_id);
             dispatch(
-                setAssignment({ ...assignment, submissions_investments: [] }),
+                setAssignment({
+                    ...data,
+                    submissions_investments: data.submission
+                        ? data.submission.submissions_investments
+                        : [],
+                }),
             );
         } catch (err) {
             console.error("Ошибка при отмене сдачи задания:", err);
@@ -125,7 +177,8 @@ const AssignmentsDetailPage = () => {
                     <MyButton
                         className="assignment-detail__submit-btn"
                         onClick={
-                            isSubmitted
+                            isSubmitted &&
+                            assignment.assignments?.submission?.id
                                 ? handleCancelSubmission
                                 : handleSubmitClick
                         }
@@ -133,7 +186,8 @@ const AssignmentsDetailPage = () => {
                     >
                         {assignment.loading
                             ? "Отправка..."
-                            : isSubmitted
+                            : isSubmitted &&
+                                assignment.assignments?.submission?.id
                               ? "Отменить сдачу задания"
                               : "Сдать"}
                     </MyButton>

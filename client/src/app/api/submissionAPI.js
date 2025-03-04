@@ -69,9 +69,9 @@ export const deleteSubmission = async (submission_id) => {
     }
 
     try {
-        const response = await $authHost.delete(
-            `/api/submissions/${submission_id}`,
-        );
+        const response = await $authHost.delete("/api/submissions", {
+            data: { submission_id }, 
+        });
         return response.data;
     } catch (error) {
         throw new Error(
