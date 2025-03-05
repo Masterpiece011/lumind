@@ -38,7 +38,7 @@ class SubmissionController {
             const movedFiles = await FileService.moveFilesFromTemp(
                 validInvestments,
                 path.resolve(__dirname, "..", "uploads")
-            )
+            );
 
             // Получение всех команд, к которым относится пользователь
             const userTeams = await Users_Teams.findAll({
@@ -88,10 +88,20 @@ class SubmissionController {
                 await Submissions_investments.bulkCreate(investmentRecords);
             }
 
-            // Возвращение успешного результата
+            // Получаем отправку с вложениями
+            const submissionWithInvestments = await Submissions.findOne({
+                where: { id: submission.id },
+                include: [
+                    {
+                        model: Submissions_investments,
+                        attributes: ["id", "file_url"],
+                    },
+                ],
+            });
+
             return res.json({
                 message: "Отправка успешно создана",
-                submission,
+                submission: submissionWithInvestments,
             });
         } catch (error) {
             next(

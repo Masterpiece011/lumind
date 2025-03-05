@@ -17,11 +17,11 @@ export const getAssignments = createAsyncThunk(
     },
 );
 
-export const getAssignmentById = async (assignmentId, userId) => {
+export const getAssignmentById = async (assignmentId, userId, submissionId) => {
     try {
         const response = await $authHost.get(
             `/api/assignments/${assignmentId}`,
-            { params: { user_id: userId } },
+            { params: { user_id: userId, submission_id: submissionId } },
         );
         return response.data;
     } catch (error) {
