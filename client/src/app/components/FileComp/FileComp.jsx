@@ -50,6 +50,10 @@ const getFileIcon = (fileType) => {
 };
 
 const decodeFileName = (fileName) => {
+    if (!fileName) {
+        return "Файл";
+    }
+
 
     if (!fileName) {
         return "Файл";

@@ -12,6 +12,7 @@ import {
 
 import ApiError from "../error/ApiError.js";
 import FileService from "../multer/fileService.js";
+import deleteEntityFiles from "../multer/fileUtils.js";
 
 class SubmissionController {
     // Метод создания отправки задания
