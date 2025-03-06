@@ -75,23 +75,22 @@ const AssignmentsDetailPage = () => {
 
     const handleSubmissionSuccess = async (updatedFiles) => {
         let isMounted = true;
-
         try {
             console.log("Обновленные файлы:", updatedFiles);
-            dispatch(
-                setAssignment({
-                    ...assignment,
-                    submissions_investments: updatedFiles.map((file) => ({
-                        id: file.id,
-                        file_url: file.file_url,
-                    })),
-                    submission: {
-                        ...assignment.submission,
-                        id: updatedFiles.submission_id,
-                        submitted_date: new Date().toISOString(),
-                    },
-                }),
-            );
+            const updatedAssignment = {
+                ...assignment,
+                submissions_investments: updatedFiles.map((file) => ({
+                    id: file.id,
+                    file_url: file.file_url,
+                })),
+                submission: {
+                    ...assignment.submission,
+                    id: updatedFiles.submission_id,
+                    submitted_date: new Date().toISOString(),
+                },
+            };
+
+            dispatch(setAssignment(updatedAssignment));
             setIsSubmitted(true);
 
             const data = await getAssignmentById(id, user_id);
@@ -102,6 +101,7 @@ const AssignmentsDetailPage = () => {
                         submissions_investments: data.submission
                             ? data.submission.submissions_investments
                             : [],
+                        submission: data.submission ?? {},
                     }),
                 );
             }
@@ -137,12 +137,12 @@ const AssignmentsDetailPage = () => {
             setIsSubmitted(false);
 
             const data = await getAssignmentById(id, user_id);
+
             dispatch(
                 setAssignment({
                     ...data,
-                    submissions_investments: data.submission
-                        ? data.submission.submissions_investments
-                        : [],
+                    submissions_investments: [],
+                    submission: null,
                 }),
             );
         } catch (err) {
@@ -284,13 +284,14 @@ const AssignmentsDetailPage = () => {
                                 ?.length > 0 ? (
                                 <ul className="assignment-detail__attachment-list">
                                     {assignment.assignments.submissions_investments.map(
-                                        (file) => (
-                                            <li key={file.id}>
-                                                <FileItem
-                                                    fileUrl={file.file_url}
-                                                />
-                                            </li>
-                                        ),
+                                        (file) =>
+                                            file.file_url && (
+                                                <li key={file.id}>
+                                                    <FileItem
+                                                        fileUrl={file.file_url}
+                                                    />
+                                                </li>
+                                            ),
                                     )}
                                 </ul>
                             ) : (
