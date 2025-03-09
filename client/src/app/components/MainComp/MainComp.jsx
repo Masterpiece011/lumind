@@ -81,7 +81,12 @@ const MainComp = () => {
                             }
                         />
                     ) : pathname.startsWith("/teams/") && params.id ? (
-                        <TeamDetailPage id={params.id} />
+                        <TeamDetailPage
+                            id={params.id}
+                            onSelectAssignment={(assignmentId) =>
+                                handleNavigation(`/assignments/${assignmentId}`)
+                            }
+                        />
                     ) : pathname.startsWith("/assignments/") && params.id ? (
                         <AssignmentsDetailPage id={params.id} />
                     ) : pathname.startsWith("/teams") ? (

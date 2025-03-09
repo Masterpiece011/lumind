@@ -167,7 +167,9 @@ const AssignmentsDetailPage = () => {
                     </h1>
                     <div className="assignment-detail__meta">
                         Срок сдачи:{" "}
-                        {assignment.assignments.deadline || "Не указан"}
+                        {new Date(
+                            assignment.assignments.due_date,
+                        ).toLocaleDateString()}
                     </div>
                 </div>
                 <div className="assignment-detail__header-right">

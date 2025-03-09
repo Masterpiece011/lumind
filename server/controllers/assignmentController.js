@@ -86,7 +86,7 @@ class AssignmentController {
     // Получение всех заданий пользователя
     async getAll(req, res, next) {
         try {
-            const { user_id } = req.query;
+            const { user_id, filter } = req.query;
 
             if (!user_id) {
                 return next(
@@ -122,10 +122,35 @@ class AssignmentController {
                         model: Assignments_investments,
                         attributes: ["id", "file_url"],
                     },
+                    {
+                        model: Submissions,
+                        attributes: ["id", "created_at"],
+                        as: "submission",
+                    },
                 ],
             });
 
-            return res.json(assignments);
+            // Фильтрация заданий
+            const filteredAssignments = assignments.filter((assignment) => {
+                const now = new Date();
+                const dueDate = new Date(assignment.due_date);
+                const hasSubmission =
+                    assignment.submission !== null &&
+                    assignment.submission !== undefined;
+
+                switch (filter) {
+                    case "current":
+                        return !hasSubmission && dueDate >= now;
+                    case "completed":
+                        return hasSubmission;
+                    case "overdue":
+                        return !hasSubmission && dueDate < now;
+                    default:
+                        return true;
+                }
+            });
+
+            return res.json(filteredAssignments);
         } catch (error) {
             next(
                 ApiError.internal(
