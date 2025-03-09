@@ -1,15 +1,21 @@
-const Router = require('express')
-const router = new Router()
+import { Router } from "express";
 
-const groupController = require('../controllers/groupController')
-const authMiddleware = require('../middleware/authMiddleware')
-const roleMiddleware = require('../middleware/roleMiddleware')
+const groupRouter = Router();
 
-router.post('/', authMiddleware, roleMiddleware(), groupController.create)
-router.get('/:id', groupController.getOne )
-router.get('/', groupController.getAll)
-router.delete('/', authMiddleware, roleMiddleware(), groupController.delete)
+import groupController from "../controllers/groupController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
 
-router.put('/', authMiddleware, roleMiddleware(), groupController.update)
+groupRouter.post("/", authMiddleware, roleMiddleware(), groupController.create);
+groupRouter.get("/:id", groupController.getOne);
+groupRouter.get("/", groupController.getAll);
+groupRouter.delete(
+    "/",
+    authMiddleware,
+    roleMiddleware(),
+    groupController.delete
+);
 
-module.exports = router
+groupRouter.put("/", authMiddleware, roleMiddleware(), groupController.update);
+
+export default groupRouter;

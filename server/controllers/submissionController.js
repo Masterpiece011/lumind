@@ -1,13 +1,17 @@
-require("dotenv").config();
-const path = require("path");
-const {
+import dotenv from "dotenv";
+dotenv.config();
+
+import path from "path";
+
+import {
     Submissions,
     Submissions_investments,
     Assignments_Teams,
     Users_Teams,
-} = require("../models/models");
-const ApiError = require("../error/ApiError");
-const FileService = require("../multer/fileService");
+} from "../models/models.js";
+
+import ApiError from "../error/ApiError.js";
+import FileService from "../multer/fileService.js";
 
 class SubmissionController {
     // Метод создания отправки задания
@@ -38,7 +42,7 @@ class SubmissionController {
             const movedFiles = await FileService.moveFilesFromTemp(
                 validInvestments,
                 path.resolve(__dirname, "..", "uploads")
-            )
+            );
 
             // Получение всех команд, к которым относится пользователь
             const userTeams = await Users_Teams.findAll({
@@ -222,4 +226,4 @@ class SubmissionController {
     }
 }
 
-module.exports = new SubmissionController();
+export default new SubmissionController();

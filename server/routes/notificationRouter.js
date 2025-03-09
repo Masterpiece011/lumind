@@ -1,10 +1,11 @@
-const Router = require('express')
-const router = new Router()
+import { Router } from "express";
 
-router.post('/', )
-router.get('/:id', )
-router.get('/', )
+const notificationRouter = Router();
 
-router.put('/', )
+notificationRouter.post("/");
+notificationRouter.get("/:id");
+notificationRouter.get("/");
 
-module.exports = router
+notificationRouter.put("/");
+
+export default notificationRouter;

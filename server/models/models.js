@@ -1,11 +1,12 @@
-const { now } = require("sequelize/lib/utils");
-const sequelize = require("../db");
+import { now } from "sequelize/lib/utils";
 
-const { DataTypes } = require("sequelize");
+import sequelize from "../db.js";
+
+import DataTypes from "sequelize"
 
 //Пользователь
 
-const Users = sequelize.define(
+export const Users = sequelize.define(
     "user",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -39,7 +40,7 @@ const Users = sequelize.define(
 
 //Роли
 
-const Roles = sequelize.define(
+export const Roles = sequelize.define(
     "roles",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -64,7 +65,7 @@ const Roles = sequelize.define(
 
 //Чат
 
-const Chats = sequelize.define(
+export const Chats = sequelize.define(
     "chats",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -80,7 +81,7 @@ const Chats = sequelize.define(
 
 //Сообщения чата
 
-const Chat_messages = sequelize.define(
+export const Chat_messages = sequelize.define(
     "chat_messages",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -97,7 +98,7 @@ const Chat_messages = sequelize.define(
 
 //Участники чата
 
-const Chat_Members = sequelize.define(
+export const Chat_Members = sequelize.define(
     "chat_members",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -113,7 +114,7 @@ const Chat_Members = sequelize.define(
 
 //Уведомления
 
-const Notifications = sequelize.define(
+export const Notifications = sequelize.define(
     "notifications",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -132,7 +133,7 @@ const Notifications = sequelize.define(
 
 //Группы
 
-const Groups = sequelize.define(
+export const Groups = sequelize.define(
     "groups",
     {
         id: {
@@ -163,7 +164,7 @@ const Groups = sequelize.define(
 
 //Группы c Пользователями
 
-const Users_Groups = sequelize.define(
+export const Users_Groups = sequelize.define(
     "users_groups",
     {
         id: {
@@ -191,7 +192,7 @@ const Users_Groups = sequelize.define(
 );
 
 // Команды
-const Teams = sequelize.define(
+export const Teams = sequelize.define(
     "teams",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -208,7 +209,7 @@ const Teams = sequelize.define(
     }
 );
 //Команды с Пользователями
-const Users_Teams = sequelize.define(
+export const Users_Teams = sequelize.define(
     "users_teams",
     {
         id: {
@@ -235,7 +236,7 @@ const Users_Teams = sequelize.define(
     }
 );
 
-const Groups_Teams = sequelize.define(
+export const Groups_Teams = sequelize.define(
     "groups_teams",
     {
         id: {
@@ -263,7 +264,7 @@ const Groups_Teams = sequelize.define(
 );
 
 //Задания
-const Assignments = sequelize.define(
+export const Assignments = sequelize.define(
     "assignments",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -282,7 +283,7 @@ const Assignments = sequelize.define(
 
 //Вложения задания
 
-const Assignments_investments = sequelize.define(
+export const Assignments_investments = sequelize.define(
     "assignments_investments",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -298,7 +299,7 @@ const Assignments_investments = sequelize.define(
 
 //Задания_Группы
 
-const Assignments_Teams = sequelize.define(
+export const Assignments_Teams = sequelize.define(
     "assignments_teams",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -312,7 +313,7 @@ const Assignments_Teams = sequelize.define(
 
 //Проверка(сдача) задания
 
-const Submissions = sequelize.define(
+export const Submissions = sequelize.define(
     "submissions",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -330,7 +331,7 @@ const Submissions = sequelize.define(
 
 //Вложения для проверка
 
-const Submissions_investments = sequelize.define(
+export const Submissions_investments = sequelize.define(
     "submissions_investments",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -346,7 +347,7 @@ const Submissions_investments = sequelize.define(
 
 //Публикации
 
-const Publications = sequelize.define(
+export const Publications = sequelize.define(
     "publications",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -365,7 +366,7 @@ const Publications = sequelize.define(
 
 //Вложения публикации
 
-const Publication_investments = sequelize.define(
+export const Publication_investments = sequelize.define(
     "publication_investments",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -381,7 +382,7 @@ const Publication_investments = sequelize.define(
 
 //Комментарии к публикации
 
-const Publication_comments = sequelize.define(
+export const Publication_comments = sequelize.define(
     "publication_comments",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -397,7 +398,7 @@ const Publication_comments = sequelize.define(
 
 //Вложения комментария к публикации
 
-const Publication_comments_investments = sequelize.define(
+export const Publication_comments_investments = sequelize.define(
     "publication_comments_investments",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -413,7 +414,7 @@ const Publication_comments_investments = sequelize.define(
 
 //Конференция
 
-const Conferences = sequelize.define(
+export const Conferences = sequelize.define(
     "conferences",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -434,7 +435,7 @@ const Conferences = sequelize.define(
 
 //Участники конференции
 
-const Conference_Members = sequelize.define(
+export const Conference_Members = sequelize.define(
     "conference_members",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -561,26 +562,26 @@ Submissions_investments.belongsTo(Submissions, { foreignKey: "submission_id" });
 Users.hasOne(Submissions, { foreignKey: "user_id" });
 Submissions.belongsTo(Users, { foreignKey: "user_id" });
 
-module.exports = {
-    Users,
-    Roles,
-    Groups,
-    Teams,
-    Users_Groups,
-    Users_Teams,
-    Groups_Teams,
-    Assignments_Teams,
-    Chat_Members,
-    Notifications,
-    Assignments,
-    Assignments_investments,
-    Submissions,
-    Submissions_investments,
-    Chats,
-    Chat_messages,
-    Conferences,
-    Conference_Members,
-    Publications,
-    Publication_comments,
-    Publication_comments_investments,
-};
+// export default {
+//     Users,
+//     Roles,
+//     Groups,
+//     Teams,
+//     Users_Groups,
+//     Users_Teams,
+//     Groups_Teams,
+//     Assignments_Teams,
+//     Chat_Members,
+//     Notifications,
+//     Assignments,
+//     Assignments_investments,
+//     Submissions,
+//     Submissions_investments,
+//     Chats,
+//     Chat_messages,
+//     Conferences,
+//     Conference_Members,
+//     Publications,
+//     Publication_comments,
+//     Publication_comments_investments,
+// };

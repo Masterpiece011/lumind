@@ -1,5 +1,6 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+
+import path from "path";
 
 class FileService {
     static async moveFile(sourcePath, destinationPath) {
@@ -70,4 +71,4 @@ class FileService {
     }
 }
 
-module.exports = FileService;
+export default FileService;

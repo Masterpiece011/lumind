@@ -1,13 +1,16 @@
-require("dotenv").config();
-const {
+import dotenv from "dotenv";
+dotenv.config();
+
+import {
     Assignments,
     Assignments_investments,
     Users_Teams,
     Teams,
     Assignments_Teams,
     Users,
-} = require("../models/models");
-const ApiError = require("../error/ApiError");
+} from "../models/models.js";
+
+import ApiError from "../error/ApiError.js";
 
 class AssignmentController {
     async create(req, res, next) {
@@ -303,4 +306,4 @@ class AssignmentController {
     }
 }
 
-module.exports = new AssignmentController();
+export default new AssignmentController();

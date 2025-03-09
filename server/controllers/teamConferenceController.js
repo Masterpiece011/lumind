@@ -1,12 +1,15 @@
-require("dotenv").config();
-const {
+import dotenv from "dotenv";
+dotenv.config();
+
+import {
     Users,
     Teams,
     Users_Teams,
     Conferences,
     Conference_Members,
-} = require("../models/models");
-const ApiError = require("../error/ApiError");
+} from "../models/models.js";
+
+import ApiError from "../error/ApiError.js";
 
 class teamConferenceController {
     // Создание собрания для команды
@@ -119,13 +122,13 @@ class teamConferenceController {
                 return next(ApiError.badRequest("Конференция не найдена"));
             }
 
-            return res.json({conference: conference});
+            return res.json({ conference: conference });
         } catch (error) {
             console.log("Ошибка получения", error);
-            
+
             next(ApiError.internal(error.message));
         }
     }
 }
 
-module.exports = new teamConferenceController();
+export default new teamConferenceController();

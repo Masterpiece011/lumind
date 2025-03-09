@@ -1,8 +1,10 @@
-const express = require("express");
-const upload = require("../multer/multerConfig");
-const router = express.Router();
+import express from "express";
 
-router.post("/file", (req, res, next) => {
+import upload from "../multer/multerConfig.js";
+
+const uploadRoutes = express.Router();
+
+uploadRoutes.post("/file", (req, res, next) => {
     upload.single("file")(req, res, function (err) {
         if (err) {
             console.error("Multer error:", err);
@@ -15,7 +17,7 @@ router.post("/file", (req, res, next) => {
     });
 });
 
-router.post("/files", upload.array("files", 5), (req, res) => {
+uploadRoutes.post("/files", upload.array("files", 5), (req, res) => {
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: "Файлы не были загружены" });
     }
@@ -25,4 +27,4 @@ router.post("/files", upload.array("files", 5), (req, res) => {
     });
 });
 
-module.exports = router;
+export default uploadRoutes;
