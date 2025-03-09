@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getTeams } from "@/app/api/teamAPI";
 import { MyButton } from "../../uikit";
@@ -10,35 +10,13 @@ import Arrow from "@/app/assets/icons/arrow-icon.svg";
 import "./TeamsComp.scss";
 import * as buttonStyles from "@/app/components/uikit/MyButton/MyButton.module.scss";
 
-const COLORS = [
-    "#FF5733",
-    "#33FF57",
-    "#3357FF",
-    "#F3C623",
-    "#A233FF",
-    "#FF33A8",
-];
-
-const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
-
 const TeamsPage = ({ onSelectTeam }) => {
     const dispatch = useDispatch();
     const { teams = [], loading, error } = useSelector((state) => state.teams);
-    const [teamColors, setTeamColors] = useState({});
 
     useEffect(() => {
         dispatch(getTeams());
     }, [dispatch]);
-
-    useEffect(() => {
-        if (teams.length > 0) {
-            const colors = {};
-            teams.forEach((team) => {
-                colors[team.id] = getRandomColor();
-            });
-            setTeamColors(colors);
-        }
-    }, [teams]);
 
     if (loading) return <div>Загрузка...</div>;
     if (error) return <div>Ошибка: {error}</div>;
@@ -65,8 +43,8 @@ const TeamsPage = ({ onSelectTeam }) => {
                             onClick={() => onSelectTeam(team.id)}
                         >
                             <div
-                                className="teamAvatar"
-                                style={{ backgroundColor: teamColors[team.id] }}
+                                className="avatar"
+                                style={{ backgroundColor: team.avatar_color }}
                             ></div>
                             <div className="teamInfo">
                                 <h3 className="teamName">{team.name}</h3>

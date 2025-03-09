@@ -14,18 +14,21 @@ export const getTeams = createAsyncThunk("teams/getTeams", async (userId) => {
     }
 });
 
-export const getTeamById = async (teamId, userId) => {
-    try {
-        const response = await $authHost.get(`/api/teams/${teamId}`, {
-            params: { user_id: userId },
-        });
-        return response.data;
-    } catch (error) {
-        throw new Error(
-            error.response?.data?.message || "Ошибка загрузки команды",
-        );
-    }
-};
+export const getTeamById = createAsyncThunk(
+    "teams/getTeamById",
+    async ({ teamId, userId }) => {
+        try {
+            const response = await $authHost.get(`/api/teams/${teamId}`, {
+                params: { user_id: userId },
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(
+                error.response?.data?.message || "Ошибка загрузки команды",
+            );
+        }
+    },
+);
 
 export const createTeam = async (teamData) => {
     try {

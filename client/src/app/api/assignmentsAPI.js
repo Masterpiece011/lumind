@@ -3,10 +3,10 @@ import { $authHost } from "./page";
 
 export const getAssignments = createAsyncThunk(
     "assignments/getAssignments",
-    async (userId) => {
+    async ({ userId, filter }) => {
         try {
             const response = await $authHost.get("/api/assignments", {
-                params: { user_id: userId },
+                params: { user_id: userId, filter },
             });
             return response.data;
         } catch (error) {

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getTeamById } from "@/app/api/teamAPI";
-import * as styles from "@/app/teams/team.module.scss";
+import "../TeamDetail.scss";
 import * as buttonStyles from "@/app/components/uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "@/app/components/uikit";
 import { Icon } from "@/app/components/ui/icons";
@@ -15,37 +15,28 @@ import Publication from "@/app/assets/icons/publication-icon.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { getAssignments } from "@/app/api/assignmentsAPI";
 
-const TeamDetailPage = () => {
+const TeamDetailPage = ({ onSelectAssignment }) => {
     const { id } = useParams();
     const router = useRouter();
     const dispatch = useDispatch();
 
-    const [team, setTeam] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState("posts");
+    const { currentTeam, loading, error } = useSelector((state) => state.teams);
+    const user_id = useSelector((state) => state.user.user?.id);
     const { assignments = [] } = useSelector((state) => state.assignments);
 
-    useEffect(() => {
-        if (!id) return;
-        const fetchTeam = async () => {
-            try {
-                const data = await getTeamById(id);
-                setTeam(data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchTeam();
-    }, [id]);
+    const [activeTab, setActiveTab] = useState("posts");
 
     useEffect(() => {
-        if (activeTab === "assignments" && team) {
-            dispatch(getAssignments(team.id));
+        if (id && user_id) {
+            dispatch(getTeamById({ teamId: id, userId: user_id }));
         }
-    }, [activeTab, team, dispatch]);
+    }, [id, user_id, dispatch]);
+
+    useEffect(() => {
+        if (activeTab === "assignments" && currentTeam && user_id) {
+            dispatch(getAssignments({ userId: user_id, filter: "all" }));
+        }
+    }, [activeTab, currentTeam, user_id, dispatch]);
 
     const handleSidebarClick = (path) => {
         router.push(path);
@@ -53,14 +44,14 @@ const TeamDetailPage = () => {
 
     if (loading) return <div>Загрузка...</div>;
     if (error) return <div>Ошибка: {error}</div>;
-    if (!team) return <div>Команда не найдена</div>;
+    if (!currentTeam) return <div>Команда не найдена</div>;
 
     const tabContent = {
         posts: <p>Публикации команды (заглушка)</p>,
         members: (
             <ul>
-                {team.users && team.users.length > 0 ? (
-                    team.users.map((user) => (
+                {currentTeam.users && currentTeam.users.length > 0 ? (
+                    currentTeam.users.map((user) => (
                         <li key={user.id}>
                             {user.first_name} {user.last_name} ({user.email})
                         </li>
@@ -73,30 +64,44 @@ const TeamDetailPage = () => {
         assignments: (
             <div>
                 <h3>Задания</h3>
-                <ul>
-                    {assignments && assignments.length > 0 ? (
+                <div className="assignments__card-wrapper">
+                    {assignments.length > 0 ? (
                         assignments.map((assignment) => (
-                            <li
+                            <div
                                 key={assignment.id}
+                                className="assignments__card"
                                 onClick={() =>
-                                    handleSidebarClick(
-                                        `/assignments/${assignment.id}`,
-                                    )
+                                    onSelectAssignment(assignment.id)
                                 }
                             >
-                                {assignment.title}
-                            </li>
+                                <div className="assignments__header">
+                                    <span className="assignments__date">
+                                        {new Date(
+                                            assignment.created_at,
+                                        ).toLocaleDateString()}
+                                    </span>
+                                </div>
+                                <h2 className="assignments__name">
+                                    {assignment.title}
+                                </h2>
+                                <div className="assignments__deadline">
+                                    Срок:{" "}
+                                    {new Date(
+                                        assignment.due_date,
+                                    ).toLocaleDateString()}
+                                </div>
+                            </div>
                         ))
                     ) : (
-                        <p>Нет заданий</p>
+                        <p className="assignments__empty"></p>
                     )}
-                </ul>
+                </div>
             </div>
         ),
         groups: (
             <ul>
-                {team.groups && team.groups.length > 0 ? (
-                    team.groups.map((group) => (
+                {currentTeam.groups && currentTeam.groups.length > 0 ? (
+                    currentTeam.groups.map((group) => (
                         <li key={group.id}>
                             {group.title} ({group.users.length} участников)
                             <ul>
@@ -117,16 +122,20 @@ const TeamDetailPage = () => {
     };
 
     return (
-        <div className={styles.teamWrapper}>
-            <div className={styles.contentWrapper}>
-                <div className={styles.teamContent}>
+        <div className="team__wrapper">
+            <div className="team__content-wrapper">
+                <div className="team__content">
                     {tabContent[activeTab] || <p>Выберите раздел</p>}
                 </div>
             </div>
-            <aside className={styles.teamSidebar}>
-                <div className={styles.dividerSidebar}></div>
-                <h2>{team.name}</h2>
-                <ul>
+            <aside className="team__sidebar">
+                <div
+                    className="team__avatar"
+                    style={{ backgroundColor: currentTeam.avatar_color }}
+                ></div>
+                <div className="team__divider"></div>
+                <h2>{currentTeam.name}</h2>
+                <ul className="team__sidebar-content">
                     <MyButton
                         className={buttonStyles.teamButton}
                         onClick={() => setActiveTab("members")}
