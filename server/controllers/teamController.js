@@ -12,6 +12,17 @@ import {
 
 import ApiError from "../error/ApiError.js";
 
+const COLORS = [
+    "#FF5733",
+    "#33FF57",
+    "#3357FF",
+    "#F3C623",
+    "#A233FF",
+    "#FF33A8",
+];
+
+const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
 class TeamController {
     // Создание команды с учетом таблицы Groups_Teams
 
@@ -53,12 +64,14 @@ class TeamController {
                 );
             }
 
-            // Создание команды
+            const avatar_color = getRandomColor();
 
+            // Создание команды
             const team = await Teams.create({
-                name: name,
-                description: description,
-                creator_id: creator_id,
+                name,
+                description,
+                creator_id,
+                avatar_color, // Добавляем цвет аватара
             });
 
             // Добавление пользователей в команду

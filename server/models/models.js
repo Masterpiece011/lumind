@@ -198,6 +198,11 @@ export const Teams = sequelize.define(
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         name: { type: DataTypes.STRING, allowNull: false },
         description: { type: DataTypes.STRING, allowNull: true },
+        avatar_color: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: "#FF5733",
+        },
         created_at: { type: DataTypes.DATE, defaultValue: now() },
         updated_at: { type: DataTypes.DATE, defaultValue: now() },
         creator_id: { type: DataTypes.INTEGER, allowNull: true },
