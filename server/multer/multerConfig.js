@@ -1,6 +1,11 @@
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url"; // Импортируем fileURLToPath
+
+// Получаем текущий путь к файлу
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const TEMP_UPLOADS_DIR = path.resolve(__dirname, "..", "temp_uploads");
 
@@ -71,8 +76,8 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
     storage,
-    limits: { fileSize: 10 * 1024 * 1024 },
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
     fileFilter,
 });
 
-module.exports = upload;
+export default upload;

@@ -1,5 +1,6 @@
-const ApiError = require("../error/ApiError");
-const { Publications } = require("../models/models");
+import ApiError from "../error/ApiError.js";
+
+import { Publications } from "../models/models.js";
 
 class PublicationController {
     // Создание публикации
@@ -100,4 +101,4 @@ class PublicationController {
     }
 }
 
-module.exports = new PublicationController();
+export default new PublicationController();

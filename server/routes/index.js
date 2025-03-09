@@ -1,18 +1,19 @@
-const Router = require("express");
-const router = new Router();
+import { Router } from "express";
 
-const userRouter = require("./userRouter");
-const roleRouter = require("./roleRouter");
-const groupRouter = require("./groupRouter");
-const notificationRouter = require("./notificationRouter");
-const assignmentRouter = require("./assignmentRouter");
-const submissionRouter = require("./submissionRouter");
-const publicationRouter = require("./publicationRouter");
-const conferenceRouter = require("./conferenceRouter");
-const teamConferenceRouter = require("./teamConferenceRouter");
-const commentRouter = require("./commentRouter");
-const investmentRouter = require("./investmentRouter");
-const teamRouter = require("./teamRourer");
+const router = Router();
+
+import userRouter from "./userRouter.js";
+import roleRouter from "./roleRouter.js";
+import groupRouter from "./groupRouter.js";
+import notificationRouter from "./notificationRouter.js";
+import assignmentRouter from "./assignmentRouter.js";
+import submissionRouter from "./submissionRouter.js";
+import publicationRouter from "./publicationRouter.js";
+import conferenceRouter from "./conferenceRouter.js";
+import teamConferenceRouter from "./teamConferenceRouter.js";
+import commentRouter from "./commentRouter.js";
+import investmentRouter from "./investmentRouter.js";
+import teamRouter from "./teamRouter.js";
 
 router.use("/users", userRouter);
 router.use("/roles", roleRouter);
@@ -27,4 +28,4 @@ router.use("/comments", commentRouter);
 router.use("/investments", investmentRouter);
 router.use("/teams", teamRouter);
 
-module.exports = router;
+export default router;

@@ -1,11 +1,13 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-const ApiError = require("../error/ApiError");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { Users, Roles, Groups, Users_Groups } = require("../models/models");
-const { Sequelize, model } = require("../db");
-const ROLES = require("../rolesConfing");
+import ApiError from "../error/ApiError.js";
+import * as bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+import { Users, Roles, Groups, Users_Groups } from "../models/models.js";
+
+import * as ROLES from "../rolesConfing.js";
 
 const generateJwt = (id, email, role) => {
     console.log("Generating JWT for Role:", role);
@@ -300,4 +302,4 @@ class UserController {
         }
     }
 }
-module.exports = new UserController();
+export default new UserController();

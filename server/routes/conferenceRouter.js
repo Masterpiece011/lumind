@@ -1,14 +1,20 @@
-const Router = require("express");
-const router = new Router();
+import { Router } from "express";
 
-const conferenceController = require("../controllers/conferenceController");
-const authMiddleware = require("../middleware/authMiddleware");
-const roleMiddleware = require("../middleware/roleMiddleware");
+const conferenceRouter = Router();
 
-router.post("/", authMiddleware, conferenceController.create);
-router.get("/:id", authMiddleware, conferenceController.getOne);
-router.get("/", roleMiddleware(), authMiddleware, conferenceController.getAll);
+import conferenceController from "../controllers/conferenceController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
 
-router.put("/", authMiddleware, conferenceController.update);
+conferenceRouter.post("/", authMiddleware, conferenceController.create);
+conferenceRouter.get("/:id", authMiddleware, conferenceController.getOne);
+conferenceRouter.get(
+    "/",
+    roleMiddleware(),
+    authMiddleware,
+    conferenceController.getAll
+);
 
-module.exports = router;
+conferenceRouter.put("/", authMiddleware, conferenceController.update);
+
+export default conferenceRouter;

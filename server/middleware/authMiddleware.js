@@ -1,9 +1,9 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-// authMiddleware.js
-const jwt = require("jsonwebtoken");
+import * as jwt from "jsonwebtoken";
 
-module.exports = function (req, res, next) {
+export default function (req, res, next) {
     console.log("Auth Middleware Triggered"); // Логирование для отладки
     console.log("Request Headers:", req.headers); // Логирование всех заголовков
 
@@ -27,4 +27,4 @@ module.exports = function (req, res, next) {
     } catch (e) {
         return res.status(401).json({ message: "Не авторизован" });
     }
-};
+}

@@ -1,5 +1,6 @@
-const { json } = require("sequelize");
-const { Groups } = require("../models/models");
+import { json } from "sequelize";
+
+import { Groups } from "../models/models.js";
 
 class UsersGroupsController {
     // Создание связи группы с пользователями
@@ -50,4 +51,4 @@ class UsersGroupsController {
     async getOne(req, res) {}
 }
 
-module.exports = new UsersGroupsController();
+export default new UsersGroupsController();

@@ -1,10 +1,11 @@
-const Router = require('express')
-const router = new Router()
+import { Router } from "express";
 
-router.post('/', )
-router.get('/:id', )
-router.get('/', )
+const commentRouter = new Router();
 
-router.put('/', )
+commentRouter.post("/");
+commentRouter.get("/:id");
+commentRouter.get("/");
 
-module.exports = router
+commentRouter.put("/");
+
+export default commentRouter;

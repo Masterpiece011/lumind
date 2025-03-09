@@ -1,14 +1,17 @@
-require("dotenv").config();
-const path = require("path");
-const {
+import dotenv from "dotenv";
+dotenv.config();
+
+import path from "path";
+
+import {
     Submissions,
     Submissions_investments,
     Assignments_Teams,
     Users_Teams,
-} = require("../models/models");
-const ApiError = require("../error/ApiError");
-const FileService = require("../multer/fileService");
-const { deleteEntityFiles } = require("../multer/fileUtils");
+} from "../models/models.js";
+
+import ApiError from "../error/ApiError.js";
+import FileService from "../multer/fileService.js";
 
 class SubmissionController {
     // Метод создания отправки задания
@@ -254,4 +257,4 @@ class SubmissionController {
     }
 }
 
-module.exports = new SubmissionController();
+export default new SubmissionController();
