@@ -9,6 +9,7 @@ import FileIcon from "@/app/assets/icons/file-icon.svg";
 import "./FileComp.scss";
 
 const getFileType = (fileUrl) => {
+  
     if (!fileUrl) {
         return "file"; // Возвращаем значение по умолчанию, если fileUrl отсутствует
     }
@@ -49,6 +50,7 @@ const getFileIcon = (fileType) => {
 };
 
 const decodeFileName = (fileName) => {
+
     if (!fileName) {
         return "Файл";
     }
