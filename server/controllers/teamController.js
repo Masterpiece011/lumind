@@ -23,6 +23,17 @@ const COLORS = [
 
 const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
 
+const COLORS = [
+    "#FF5733",
+    "#33FF57",
+    "#3357FF",
+    "#F3C623",
+    "#A233FF",
+    "#FF33A8",
+];
+
+const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
 class TeamController {
     // Создание команды с учетом таблицы Groups_Teams
 
