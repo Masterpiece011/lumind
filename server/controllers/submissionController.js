@@ -8,6 +8,7 @@ const {
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const FileService = require("../multer/fileService");
+const { deleteEntityFiles } = require("../multer/fileUtils");
 
 class SubmissionController {
     // Метод создания отправки задания
@@ -38,7 +39,10 @@ class SubmissionController {
             const movedFiles = await FileService.moveFilesFromTemp(
                 validInvestments,
                 path.resolve(__dirname, "..", "uploads")
-            )
+            );
+
+            // Очистка временных файлов
+            await FileService.cleanupTempFiles(validInvestments);
 
             // Получение всех команд, к которым относится пользователь
             const userTeams = await Users_Teams.findAll({
@@ -88,10 +92,20 @@ class SubmissionController {
                 await Submissions_investments.bulkCreate(investmentRecords);
             }
 
-            // Возвращение успешного результата
+            // Получаем отправку с вложениями
+            const submissionWithInvestments = await Submissions.findOne({
+                where: { id: submission.id },
+                include: [
+                    {
+                        model: Submissions_investments,
+                        attributes: ["id", "file_url"],
+                    },
+                ],
+            });
+
             return res.json({
                 message: "Отправка успешно создана",
-                submission,
+                submission: submissionWithInvestments,
             });
         } catch (error) {
             next(
@@ -158,12 +172,30 @@ class SubmissionController {
                 );
             }
 
-            const submission = await Submissions.findByPk(submission_id);
+            // Находим отправку с вложениями
+            const submission = await Submissions.findByPk(submission_id, {
+                include: [
+                    {
+                        model: Submissions_investments,
+                        attributes: ["id", "file_url"],
+                    },
+                ],
+            });
 
             if (!submission) {
                 return next(ApiError.notFound("Отправка не найдена"));
             }
 
+            console.log("Вызов deleteEntityFiles для удаления файлов");
+            // Удаляем связанные файлы из папки uploads
+            await deleteEntityFiles(
+                submission,
+                "submissions_investments",
+                "uploads"
+            );
+            console.log("Функция deleteEntityFiles выполнена");
+
+            // Удаляем записи из базы данных
             await Submissions_investments.destroy({
                 where: { submission_id: submission_id },
             });

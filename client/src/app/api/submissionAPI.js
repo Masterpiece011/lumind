@@ -3,7 +3,7 @@ import { $authHost, $host } from "./page";
 export const getSubmissionById = async (submission_id, userId) => {
     try {
         const response = await $authHost.get(
-           `/api/submissions/${submission_id}`,
+            `/api/submissions/${submission_id}`,
             {
                 params: { user_id: userId },
             },
@@ -41,13 +41,20 @@ export const createSubmission = async ({
     }
 };
 
-export const updateSubmission = async ({ submission_id, comment, investments }) => {
+export const updateSubmission = async ({
+    submission_id,
+    comment,
+    investments,
+}) => {
     if (!submission_id) {
         throw new Error("Необходимо указать ID отправки");
     }
 
     try {
-        const response = await $authHost.put(`/api/submissions/${submission_id}`, { comment, investments });
+        const response = await $authHost.put(
+            `/api/submissions/${submission_id}`,
+            { comment, investments },
+        );
         return response.data;
     } catch (error) {
         throw new Error(
@@ -62,9 +69,9 @@ export const deleteSubmission = async (submission_id) => {
     }
 
     try {
-        const response = await $authHost.delete(
-            `/api/submissions/${submission_id}`,
-        );
+        const response = await $authHost.delete("/api/submissions", {
+            data: { submission_id }, 
+        });
         return response.data;
     } catch (error) {
         throw new Error(

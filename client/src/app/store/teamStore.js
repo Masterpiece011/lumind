@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getTeams } from "../api/teamAPI";
+import { getTeamById, getTeams } from "../api/teamAPI";
 
 const initialState = {
     teams: [],
+    currentTeam: null,
     loading: false,
     error: null,
 };
@@ -34,6 +35,17 @@ const teamSlice = createSlice({
                 state.loading = false;
             })
             .addCase(getTeams.rejected, (state, action) => {
+                state.error = action.error.message;
+                state.loading = false;
+            })
+            .addCase(getTeamById.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(getTeamById.fulfilled, (state, action) => {
+                state.currentTeam = action.payload;
+                state.loading = false;
+            })
+            .addCase(getTeamById.rejected, (state, action) => {
                 state.error = action.error.message;
                 state.loading = false;
             });
