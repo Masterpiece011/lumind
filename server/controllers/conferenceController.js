@@ -1,6 +1,10 @@
-require("dotenv").config();
-const { Users, Conferences, Conference_Members } = require("../models/models");
-const ApiError = require("../error/ApiError");
+import dotenv from "dotenv";
+dotenv.config();
+
+import { Users, Conferences, Conference_Members } from "../models/models.js";
+
+import ApiError from "../error/ApiError.js";
+
 class ConferenceController {
     // Создание звонка
     async create(req, res, next) {
@@ -62,7 +66,7 @@ class ConferenceController {
             conference.session_date = session_date || conference.session_date;
 
             await conference.save();
-            return res.json({conference: conference});
+            return res.json({ conference: conference });
         } catch (error) {
             next(ApiError.internal(error.message));
         }
@@ -111,4 +115,4 @@ class ConferenceController {
     }
 }
 
-module.exports = new ConferenceController();
+export default new ConferenceController();

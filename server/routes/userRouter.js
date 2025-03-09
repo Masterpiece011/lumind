@@ -1,22 +1,23 @@
-const Router = require("express");
-const router = new Router();
+import { Router } from "express";
 
-const userController = require("../controllers/userController");
-const authMiddleware = require("../middleware/authMiddleware");
-const roleMiddleware = require("../middleware/roleMiddleware");
+const userRouter = Router();
 
-router.post(
+import userController from "../controllers/userController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
+
+userRouter.post(
     "/registration",
     authMiddleware,
     roleMiddleware(),
     userController.registration
 );
-router.post("/login", userController.login);
-router.get("/auth", authMiddleware, userController.check);
-router.get("/", authMiddleware, userController.getAll);
-router.get("/:id", authMiddleware, userController.getOne);
-router.delete("/", authMiddleware, roleMiddleware(), userController.delete);
+userRouter.post("/login", userController.login);
+userRouter.get("/auth", authMiddleware, userController.check);
+userRouter.get("/", authMiddleware, userController.getAll);
+userRouter.get("/:id", authMiddleware, userController.getOne);
+userRouter.delete("/", authMiddleware, roleMiddleware(), userController.delete);
 
-router.put("/", authMiddleware, roleMiddleware(), userController.update);
+userRouter.put("/", authMiddleware, roleMiddleware(), userController.update);
 
-module.exports = router;
+export default userRouter;

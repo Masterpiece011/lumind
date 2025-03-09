@@ -1,4 +1,4 @@
-const ROLES = require("../rolesConfing");
+import * as ROLES from "../rolesConfing.js";
 
 const roleRequirements = {
     //Пользователи
@@ -80,7 +80,7 @@ const roleRequirements = {
     "GET /api/teamconferences/": [ROLES.ADMIN, ROLES.MODERATOR],
 };
 
-module.exports = function () {
+export default function () {
     return function (req, res, next) {
         if (req.method === "OPTIONS") {
             return next();
@@ -112,4 +112,4 @@ module.exports = function () {
 
         next();
     };
-};
+}

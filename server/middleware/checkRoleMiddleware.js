@@ -1,10 +1,11 @@
-const jwt = require("jsonwebtoken");
-const ROLES = require("../rolesConfing");
+import * as jwt from "jsonwebtoken";
 
-module.exports = function () {
+import ROLES from "../rolesConfing";
+
+export default function () {
     return function (req, res, next) {
         if (req.method === "OPTIONS") {
-        return next();
+            return next();
         }
 
         try {
@@ -20,15 +21,15 @@ module.exports = function () {
 
             if (userRole !== ROLES.ADMIN && userRole !== ROLES.MODERATOR) {
                 return res
-                .status(403)
-                .json({ message: "Нет доступа, недостаточно прав" });
+                    .status(403)
+                    .json({ message: "Нет доступа, недостаточно прав" });
             }
 
             next();
         } catch (e) {
-        res
-            .status(401)
-            .json({ message: "Ошибка проверки токена, не авторизован" });
+            res.status(401).json({
+                message: "Ошибка проверки токена, не авторизован",
+            });
         }
     };
-};
+}

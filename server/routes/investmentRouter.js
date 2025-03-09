@@ -1,10 +1,11 @@
-const Router = require('express')
-const router = new Router()
+import { Router } from "express";
 
-router.post('/', )
-router.get('/:id', )
-router.get('/', )
+const investmentRouter = new Router();
 
-router.put('/', )
+investmentRouter.post("/");
+investmentRouter.get("/:id");
+investmentRouter.get("/");
 
-module.exports = router
+investmentRouter.put("/");
+
+export default investmentRouter;

@@ -1,20 +1,31 @@
-const Router = require("express");
-const router = new Router();
+import { Router } from "express";
 
-const submissionController = require("../controllers/submissionController");
-const authMiddleware = require("../middleware/authMiddleware");
-const roleMiddleware = require("../middleware/roleMiddleware");
+const submissionRouter = Router();
 
-router.post("/", authMiddleware, roleMiddleware(), submissionController.create);
-router.get("/:id", authMiddleware, submissionController.getOne);
-router.get("/", authMiddleware, submissionController.getAll);
-router.delete(
+import submissionController from "../controllers/submissionController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
+
+submissionRouter.post(
+    "/",
+    authMiddleware,
+    roleMiddleware(),
+    submissionController.create
+);
+submissionRouter.get("/:id", authMiddleware, submissionController.getOne);
+submissionRouter.get("/", authMiddleware, submissionController.getAll);
+submissionRouter.delete(
     "/",
     authMiddleware,
     roleMiddleware(),
     submissionController.delete
 );
 
-router.put("/", authMiddleware, roleMiddleware(), submissionController.update);
+submissionRouter.put(
+    "/",
+    authMiddleware,
+    roleMiddleware(),
+    submissionController.update
+);
 
-module.exports = router;
+export default submissionRouter;

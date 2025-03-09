@@ -1,19 +1,24 @@
-const Router = require("express");
-const router = new Router();
+import { Router } from "express";
 
-const teamConferenceController = require("../controllers/teamConferenceController");
-const authMiddleware = require("../middleware/authMiddleware");
-const roleMiddleware = require("../middleware/roleMiddleware");
+const teamConferenceRouter = Router();
 
-router.post("/", authMiddleware, teamConferenceController.create);
-router.get("/:id", authMiddleware, teamConferenceController.getOne);
-router.get(
+import teamConferenceController from "../controllers/teamConferenceController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import roleMiddleware from "../middleware/roleMiddleware.js";
+
+teamConferenceRouter.post("/", authMiddleware, teamConferenceController.create);
+teamConferenceRouter.get(
+    "/:id",
+    authMiddleware,
+    teamConferenceController.getOne
+);
+teamConferenceRouter.get(
     "/",
     authMiddleware,
     roleMiddleware(),
     teamConferenceController.getAll
 );
 
-router.put("/", authMiddleware, teamConferenceController.update);
+teamConferenceRouter.put("/", authMiddleware, teamConferenceController.update);
 
-module.exports = router;
+export default teamConferenceRouter;

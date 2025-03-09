@@ -1,14 +1,15 @@
-const Router = require("express");
-const router = new Router();
+import { Router } from "express";
 
-const publicationController = require("../controllers/publicationController");
-const authMiddleware = require("../middleware/authMiddleware");
+const publicationRouter = Router();
 
-router.post("/", authMiddleware, publicationController.create);
-router.get("/:id", authMiddleware, publicationController.getOne);
-router.get("/", authMiddleware, publicationController.getAll);
-router.delete("/", authMiddleware, publicationController.delete);
+import publicationController from "../controllers/publicationController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
-router.put("/", authMiddleware, publicationController.update);
+publicationRouter.post("/", authMiddleware, publicationController.create);
+publicationRouter.get("/:id", authMiddleware, publicationController.getOne);
+publicationRouter.get("/", authMiddleware, publicationController.getAll);
+publicationRouter.delete("/", authMiddleware, publicationController.delete);
 
-module.exports = router;
+publicationRouter.put("/", authMiddleware, publicationController.update);
+
+export default publicationRouter;

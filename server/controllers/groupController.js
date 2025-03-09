@@ -1,6 +1,8 @@
-const { json } = require("sequelize");
-const { Groups, Users, Users_Groups } = require("../models/models");
-const ApiError = require("../error/ApiError");
+import { json } from "sequelize";
+
+import { Groups, Users, Users_Groups } from "../models/models.js";
+
+import ApiError from "../error/ApiError.js";
 
 class GroupController {
     // Создание группы
@@ -179,4 +181,4 @@ class GroupController {
     }
 }
 
-module.exports = new GroupController();
+export default new GroupController();

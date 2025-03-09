@@ -1,13 +1,16 @@
-require("dotenv").config();
-const {
+import dotenv from "dotenv";
+dotenv.config();
+
+import {
     Users,
     Groups,
     Users_Groups,
     Teams,
     Users_Teams,
     Groups_Teams,
-} = require("../models/models");
-const ApiError = require("../error/ApiError");
+} from "../models/models.js";
+
+import ApiError from "../error/ApiError.js";
 
 const COLORS = [
     "#FF5733",
@@ -456,4 +459,4 @@ class TeamController {
     }
 }
 
-module.exports = new TeamController();
+export default new TeamController();
