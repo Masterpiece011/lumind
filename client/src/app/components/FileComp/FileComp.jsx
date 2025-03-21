@@ -1,16 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { MyButton } from "../uikit";
 import { Icon } from "../ui/icons";
 import WordIcon from "@/app/assets/icons/word-icon.svg";
 import PDFIcon from "@/app/assets/icons/pdf-icon.svg";
 import ImageIcon from "@/app/assets/icons/image-icon.svg";
 import FileIcon from "@/app/assets/icons/file-icon.svg";
+import EllipsisVertical from "@/app/assets/icons/ellipsis-vertical.svg";
 
 import "./FileComp.scss";
 
 const getFileType = (fileUrl) => {
     if (!fileUrl) {
-        return "file"; // Возвращаем значение по умолчанию, если fileUrl отсутствует
+        return "file";
     }
 
     const extension = fileUrl.split(".").pop().toLowerCase();
@@ -66,6 +67,8 @@ const decodeFileName = (fileName) => {
 };
 
 export const FileItem = ({ fileUrl, onDelete }) => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
     if (!fileUrl) {
         return null;
     }
@@ -75,15 +78,55 @@ export const FileItem = ({ fileUrl, onDelete }) => {
         fileUrl.replace(/\\/g, "/").split("/").pop(),
     );
 
+    const handleDownload = () => {
+    
+        const file = new Blob([fileUrl], { type: "application/octet-stream" });
+
+        const url = URL.createObjectURL(file);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+
+        setIsMenuOpen(false);
+    };
+
     return (
         <div className="file-item">
             <div className="file-icon">{getFileIcon(fileType)}</div>
             <span className="file-name">{fileName}</span>
-            {onDelete && (
-                <MyButton className="file-item-delete" onClick={onDelete}>
-                    Удалить
+            <div className="file-actions">
+                <MyButton
+                    className="file-item-menu"
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                >
+                    <Icon src={EllipsisVertical} alt="elipsis-vertical" />
                 </MyButton>
-            )}
+                {isMenuOpen && (
+                    <div className="file-menu">
+                        <MyButton
+                            className="file-menu-item"
+                            onClick={handleDownload}
+                        >
+                            Скачать
+                        </MyButton>
+                        {onDelete && (
+                            <MyButton
+                                className="file-menu-item"
+                                onClick={onDelete}
+                            >
+                                Удалить
+                            </MyButton>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
