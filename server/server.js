@@ -22,7 +22,7 @@ const { MESSAGES, ACTIONS } = require("./ws/index.js");
 
 app.use(
     cors({
-        origin: "http://localhost:3000", // Клиентский адрес
+        origin: ["http://localhost:3000", "http://localhost:8080"],
         credentials: true, // Если используются куки или токены
         methods: ["GET", "POST", "PUT", "DELETE"], // Разрешённые методы
         allowedHeaders: ["Content-Type", "Authorization"],

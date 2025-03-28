@@ -1,6 +1,7 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const { normalizeFilename, sanitizeFilename } = require("./encodingUtils");
 
 const TEMP_UPLOADS_DIR = path.resolve(__dirname, "..", "temp_uploads");
 
@@ -49,7 +50,18 @@ const storage = multer.diskStorage({
 
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + "-" + file.originalname);
+        let normalizedName;
+
+        try {
+            normalizedName = decodeURIComponent(file.originalname);
+        } catch (e) {
+            normalizedName = file.originalname;
+        }
+
+        normalizedName = normalizeFilename(normalizedName);
+        const safeName = sanitizeFilename(normalizedName);
+
+        cb(null, uniqueSuffix + "-" + safeName);
     },
 });
 

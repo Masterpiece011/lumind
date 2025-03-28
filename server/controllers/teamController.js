@@ -6,6 +6,9 @@ const {
     Teams,
     Users_Teams,
     Groups_Teams,
+    Assignments,
+    Assignments_investments,
+    Assignments_Teams,
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 

@@ -45,3 +45,36 @@ export const uploadMultipleFiles = async (files) => {
         throw error;
     }
 };
+
+export const downloadFile = async (filePath) => {
+    try {
+        const normalizedPath = filePath.replace(/\\/g, "/");
+
+        const response = await $authHost.get("/upload/download", {
+            params: { path: normalizedPath },
+            responseType: "blob",
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        const fileName = normalizedPath.split("/").pop() || "file";
+
+        link.href = url;
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link);
+        link.click();
+
+        setTimeout(() => {
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        }, 100);
+    } catch (error) {
+        console.error("Download error:", error);
+        if (error.response?.data) {
+            // Если сервер вернул ошибку в виде Blob, читаем его
+            const errorText = await error.response.data.text();
+            throw new Error(errorText || "Ошибка при скачивании файла");
+        }
+        throw new Error(error.message || "Ошибка при скачивании файла");
+    }
+};

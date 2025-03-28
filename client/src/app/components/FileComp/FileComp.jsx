@@ -6,8 +6,8 @@ import PDFIcon from "@/app/assets/icons/pdf-icon.svg";
 import ImageIcon from "@/app/assets/icons/image-icon.svg";
 import FileIcon from "@/app/assets/icons/file-icon.svg";
 import EllipsisVertical from "@/app/assets/icons/ellipsis-vertical.svg";
-
 import "./FileComp.scss";
+import { downloadFile } from "@/app/api/uploadFileAPI";
 
 const getFileType = (fileUrl) => {
     if (!fileUrl) {
@@ -55,11 +55,24 @@ const decodeFileName = (fileName) => {
     }
 
     try {
-        const byteArray = new Uint8Array(
-            fileName.split("").map((char) => char.charCodeAt(0)),
-        );
-        const decoder = new TextDecoder("utf-8");
-        return decoder.decode(byteArray);
+        // Пробуем декодировать как URI компонент
+        try {
+            const uriDecoded = decodeURIComponent(fileName);
+            if (!/[�]/.test(uriDecoded)) {
+                return uriDecoded;
+            }
+        } catch (e) {}
+
+        // Пробуем декодировать из UTF-8
+        try {
+            const utf8Decoded = unescape(encodeURIComponent(fileName));
+            if (!/[�]/.test(utf8Decoded)) {
+                return utf8Decoded;
+            }
+        } catch (e) {}
+
+        // Если ничего не помогло, возвращаем оригинальное имя
+        return fileName;
     } catch (error) {
         console.error("Ошибка декодирования названия файла:", error);
         return fileName;
@@ -78,23 +91,21 @@ export const FileItem = ({ fileUrl, onDelete }) => {
         fileUrl.replace(/\\/g, "/").split("/").pop(),
     );
 
-    const handleDownload = () => {
-    
-        const file = new Blob([fileUrl], { type: "application/octet-stream" });
+    const handleDownload = async () => {
+        try {
+            const normalizedPath = fileUrl.replace(/\\/g, "/");
 
-        const url = URL.createObjectURL(file);
+            const downloadPath = normalizedPath.includes("uploads/")
+                ? normalizedPath.split("uploads/")[1]
+                : normalizedPath;
 
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-
-        document.body.removeChild(link);
-
-        URL.revokeObjectURL(url);
-
-        setIsMenuOpen(false);
+            await downloadFile(downloadPath);
+        } catch (error) {
+            console.error("Download failed:", error);
+            alert(`Не удалось скачать файл: ${error.message}`);
+        } finally {
+            setIsMenuOpen(false);
+        }
     };
 
     return (
