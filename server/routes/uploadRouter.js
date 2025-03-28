@@ -4,6 +4,10 @@ import upload from "../multer/multerConfig.js";
 
 const uploadRoutes = express.Router();
 
+import fs from "fs";
+
+import path from "path";
+
 uploadRoutes.post("/file", (req, res, next) => {
     upload.single("file")(req, res, function (err) {
         if (err) {
@@ -25,6 +29,38 @@ uploadRoutes.post("/files", upload.array("files", 5), (req, res) => {
         message: "Файлы успешно загружены",
         files: req.files.map((f) => f.path),
     });
+});
+
+uploadRoutes.get("/download", (req, res) => {
+    try {
+        let filePath = req.query.path.replace(/\\/g, "/");
+
+        if (!filePath.startsWith("uploads/")) {
+            filePath = "uploads/" + filePath;
+        }
+
+        const absolutePath = path.join(__dirname, "..", filePath);
+
+        if (!fs.existsSync(absolutePath)) {
+            return res
+                .status(404)
+                .json({ error: "Файл не найден: " + absolutePath });
+        }
+
+        res.download(absolutePath, path.basename(filePath), (err) => {
+            if (err) {
+                console.error("Download error:", err);
+                if (!res.headersSent) {
+                    res.status(500).json({
+                        error: "Ошибка при скачивании файла",
+                    });
+                }
+            }
+        });
+    } catch (error) {
+        console.error("Server error:", error);
+        res.status(500).json({ error: "Внутренняя ошибка сервера" });
+    }
 });
 
 export default uploadRoutes;
