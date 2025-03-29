@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getTeamById } from "@/app/api/teamAPI";
+import { getTeamById, getTeamFiles } from "@/app/api/teamAPI";
 import "../TeamDetail.scss";
 import * as buttonStyles from "@/app/components/uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "@/app/components/uikit";
@@ -11,7 +11,7 @@ import UserIcon from "@/app/assets/icons/user-icon.png";
 import Assignment from "@/app/assets/icons/assignments-icon.svg";
 import File from "@/app/assets/icons/file-icon.svg";
 import Publication from "@/app/assets/icons/publication-icon.svg";
-
+import { FileItem } from "@/app/components/FileComp";
 import { useDispatch, useSelector } from "react-redux";
 import { getAssignments } from "@/app/api/assignmentsAPI";
 
@@ -37,6 +37,14 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
             dispatch(getAssignments({ userId: user_id, filter: "all" }));
         }
     }, [activeTab, currentTeam, user_id, dispatch]);
+
+    useEffect(() => {
+        if (activeTab === "files" && currentTeam && user_id) {
+            dispatch(getTeamFiles(currentTeam.id));
+        }
+    }, [activeTab, currentTeam, user_id, dispatch]);
+
+    const { teamFiles = [] } = useSelector((state) => state.teams);
 
     const handleSidebarClick = (path) => {
         router.push(path);
@@ -119,6 +127,25 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
                 )}
             </ul>
         ),
+
+        files: (
+            <div className="team-files">
+                <h3>Файлы команды</h3>
+                {teamFiles.length > 0 ? (
+                    <div className="file-list">
+                        {teamFiles.map((file) => (
+                            <FileItem
+                                key={file.id}
+                                fileUrl={file.file_url}
+                                additionalInfo={`${file.assignmentTitle}`}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <p>Нет файлов</p>
+                )}
+            </div>
+        ),
     };
 
     return (
@@ -162,7 +189,7 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
 
                     <MyButton
                         className={buttonStyles.teamButton}
-                        onClick={() => setActiveTab("groups")}
+                        onClick={() => setActiveTab("files")}
                     >
                         <span className={buttonStyles.sidebarIcon}>
                             <Icon src={File} alt="file-icon" />

@@ -2,6 +2,8 @@ import fs from "fs";
 
 import path from "path";
 
+import { normalizeFilename, sanitizeFilename } from ("./encodingUtils");
+
 class FileService {
     static async moveFile(sourcePath, destinationPath) {
         return new Promise((resolve, reject) => {
@@ -36,16 +38,32 @@ class FileService {
                         tempPath
                     );
 
+                    const dirname = path.dirname(relativePath);
+                    let basename = path.basename(relativePath);
+
+                    // Нормализуем имя файла перед перемещением
+                    basename = normalizeFilename(basename);
+                    basename = sanitizeFilename(basename);
+
+                    // Сохраняем расширение файла
+                    const ext = path.extname(basename);
+                    const nameWithoutExt = path.basename(basename, ext);
+
+                    // Создаем новое имя файла
+                    const newBasename = nameWithoutExt + ext;
+                    const newRelativePath = path.join(dirname, newBasename);
                     const destinationPath = path.join(
                         baseUploadsDir,
-                        relativePath
+                        newRelativePath
                     );
 
+                    // Создаем целевую директорию, если ее нет
                     const destinationDir = path.dirname(destinationPath);
                     if (!fs.existsSync(destinationDir)) {
                         fs.mkdirSync(destinationDir, { recursive: true });
                     }
 
+                    // Перемещаем файл
                     await this.moveFile(tempPath, destinationPath);
                     return destinationPath;
                 } catch (err) {

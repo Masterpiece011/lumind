@@ -1,9 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getTeamById, getTeams } from "../api/teamAPI";
+import { getTeamById, getTeamFiles, getTeams } from "../api/teamAPI";
 
 const initialState = {
     teams: [],
     currentTeam: null,
+    teamFiles: [],
     loading: false,
     error: null,
 };

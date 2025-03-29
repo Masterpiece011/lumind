@@ -1,6 +1,5 @@
 "use client";
 
-
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "next/navigation";
@@ -179,7 +178,6 @@ const AssignmentsDetailPage = () => {
                     </div>
                     <MyButton
                         className="assignment-detail__submit-btn"
-
                         onClick={
                             isSubmitted &&
                             assignment.assignments?.submission?.id
@@ -276,7 +274,6 @@ const AssignmentsDetailPage = () => {
                             ref={submissionFormRef}
                             assignment_id={id}
                             submission_id={submission_id}
-
                             onSubmissionSuccess={handleSubmissionSuccess}
                             isSubmitted={isSubmitted}
                         />

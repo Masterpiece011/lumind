@@ -2,10 +2,12 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url"; // Импортируем fileURLToPath
+import { normalizeFilename, sanitizeFilename } from ("./encodingUtils");
 
 // Получаем текущий путь к файлу
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 
 const TEMP_UPLOADS_DIR = path.resolve(__dirname, "..", "temp_uploads");
 
@@ -54,7 +56,18 @@ const storage = multer.diskStorage({
 
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + "-" + file.originalname);
+        let normalizedName;
+
+        try {
+            normalizedName = decodeURIComponent(file.originalname);
+        } catch (e) {
+            normalizedName = file.originalname;
+        }
+
+        normalizedName = normalizeFilename(normalizedName);
+        const safeName = sanitizeFilename(normalizedName);
+
+        cb(null, uniqueSuffix + "-" + safeName);
     },
 });
 

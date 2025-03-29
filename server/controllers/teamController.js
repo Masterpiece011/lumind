@@ -8,6 +8,9 @@ import {
     Teams,
     Users_Teams,
     Groups_Teams,
+    Assignments,
+    Assignments_investments,
+    Assignments_Teams,
 } from "../models/models.js";
 
 import ApiError from "../error/ApiError.js";
@@ -22,6 +25,7 @@ const COLORS = [
 ];
 
 const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
 
 class TeamController {
     // Создание команды с учетом таблицы Groups_Teams
