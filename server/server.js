@@ -7,9 +7,8 @@ import * as models from "./models/models.js";
 import router from "./routes/index.js";
 import ErrorHandlingMiddleware from "./middleware/ErrorHandlingMiddleware.js";
 import cors from "cors";
-import fileUpload from "express-fileupload";
 import path from "path";
-import { fileURLToPath } from "url"; // Импортируем fileURLToPath
+import { fileURLToPath } from "url";
 import expressWs from "express-ws";
 
 // Получаем текущий путь к файлу
@@ -28,17 +27,17 @@ const PORT = process.env.PORT || 8080;
 import { MESSAGES, ACTIONS } from "./ws/index.js";
 
 // Middleware
+
 app.use(
     cors({
-        origin: ["http://localhost:3000", "http://localhost:8080"],
-        credentials: true, // Если используются куки или токены
-        methods: ["GET", "POST", "PUT", "DELETE"], // Разрешённые методы
+        origin: "http://localhost:3000", // URL вашего фронта
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],
     })
 );
 app.use(express.json());
 app.use(cookieParser());
-app.use(fileUpload());
 app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
 
 // Роуты
