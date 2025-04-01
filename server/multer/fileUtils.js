@@ -1,11 +1,11 @@
-const fs = require("fs");
+import fs from "fs";
 
 /**
  * Удаляет файлы, связанные с сущностью (например, заданием или отправкой).
  * @param {Object} entity - Сущность (задание или отправка), содержащая файлы.
  * @param {string} fileField - Название поля, содержащего файлы (например, "Submissions_investments").
  */
-const deleteEntityFiles = async (entity, fileField, baseDir) => {
+export const deleteEntityFiles = async (entity, fileField, baseDir) => {
     if (entity[fileField] && entity[fileField].length > 0) {
         console.log("Найдены файлы для удаления:", entity[fileField]);
         await Promise.all(
@@ -25,8 +25,4 @@ const deleteEntityFiles = async (entity, fileField, baseDir) => {
     } else {
         console.log("Нет файлов для удаления или поле файла пустое.");
     }
-};
-
-module.exports = {
-    deleteEntityFiles,
 };

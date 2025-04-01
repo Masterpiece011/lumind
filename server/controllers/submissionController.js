@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import path from "path";
-
+import { fileURLToPath } from "url";
 import {
     Submissions,
     Submissions_investments,
@@ -12,7 +12,10 @@ import {
 
 import ApiError from "../error/ApiError.js";
 import FileService from "../multer/fileService.js";
-import deleteEntityFiles from "../multer/fileUtils.js";
+import { deleteEntityFiles } from "../multer/fileUtils.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class SubmissionController {
     // Метод создания отправки задания

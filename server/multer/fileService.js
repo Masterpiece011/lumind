@@ -1,8 +1,11 @@
 import fs from "fs";
 
 import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-import { normalizeFilename, sanitizeFilename } from ("./encodingUtils");
+import { normalizeFilename, sanitizeFilename } from "./encodingUtils.js";
 
 class FileService {
     static async moveFile(sourcePath, destinationPath) {

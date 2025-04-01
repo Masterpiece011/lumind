@@ -1,7 +1,6 @@
-const iconv = require("iconv-lite");
-const path = require("path");
+import iconv from "iconv-lite";
 
-exports.normalizeFilename = (filename) => {
+export const normalizeFilename = (filename) => {
     try {
         if (/[а-яА-ЯёЁ]/.test(filename)) {
             return filename;
@@ -31,10 +30,9 @@ exports.normalizeFilename = (filename) => {
     }
 };
 
-// Функция для безопасного создания имени файла
-exports.sanitizeFilename = (filename) => {
+export const sanitizeFilename = (filename) => {
     return filename
-        .replace(/[\/\\|:*?"<>]/g, "_") 
-        .normalize("NFC") 
-        .replace(/[\u0300-\u036f]/g, ""); 
+        .replace(/[\/\\|:*?"<>]/g, "_")
+        .normalize("NFC")
+        .replace(/[\u0300-\u036f]/g, "");
 };

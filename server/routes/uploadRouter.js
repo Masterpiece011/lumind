@@ -1,22 +1,32 @@
 import express from "express";
 
-import upload from "../multer/multerConfig.js";
-
 const uploadRoutes = express.Router();
 
 import fs from "fs";
 
 import path from "path";
+import { fileURLToPath } from "url";
+import upload from "../multer/multerConfig.js";
+
+// Получаем текущий путь к файлу
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 uploadRoutes.post("/file", (req, res, next) => {
+    console.log("Начало загрузки файла");
+
     upload.single("file")(req, res, function (err) {
         if (err) {
             console.error("Multer error:", err);
             return res.status(500).json({ error: "Ошибка загрузки файла" });
         }
+
+        console.log("Файл получен:", req.file);
+
         if (!req.file) {
             return res.status(400).json({ error: "Файл не был загружен" });
         }
+
         res.json({ message: "Файл успешно загружен", filePath: req.file.path });
     });
 });

@@ -54,6 +54,19 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
     if (error) return <div>Ошибка: {error}</div>;
     if (!currentTeam) return <div>Команда не найдена</div>;
 
+    // Получаем все вложения из заданий
+    const assignmentFiles = assignments.flatMap(
+        (assignment) =>
+            assignment.assignments_investments?.map((file) => ({
+                ...file,
+                assignmentTitle: assignment.title,
+                assignmentId: assignment.id,
+            })) || [],
+    );
+
+    // Объединяем файлы команды и файлы заданий
+    const allFiles = [...teamFiles, ...assignmentFiles];
+
     const tabContent = {
         posts: <p>Публикации команды (заглушка)</p>,
         members: (
@@ -131,13 +144,21 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
         files: (
             <div className="team-files">
                 <h3>Файлы команды</h3>
-                {teamFiles.length > 0 ? (
+                {allFiles.length > 0 ? (
                     <div className="file-list">
-                        {teamFiles.map((file) => (
+                        {allFiles.map((file) => (
                             <FileItem
                                 key={file.id}
                                 fileUrl={file.file_url}
-                                additionalInfo={`${file.assignmentTitle}`}
+                                additionalInfo={
+                                    file.assignmentTitle
+                                        ? `Из задания: ${file.assignmentTitle}`
+                                        : "Файл команды"
+                                }
+                                onClick={() =>
+                                    file.assignmentId &&
+                                    onSelectAssignment(file.assignmentId)
+                                }
                             />
                         ))}
                     </div>

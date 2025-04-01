@@ -3,11 +3,10 @@ import { $authHost } from "./page";
 export const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
+    console.log("Отправка файла:", file.name);
 
     try {
-        const response = await $authHost.post("/upload/file", formData, {
-            headers: { "Content-Type": undefined },
-        });
+        const response = await $authHost.post("/upload/file", formData);
 
         if (response.status === 200) {
             const data = response.data;
@@ -30,9 +29,7 @@ export const uploadMultipleFiles = async (files) => {
     });
 
     try {
-        const response = await $authHost.post("/upload/files", formData, {
-            headers: { "Content-Type": undefined },
-        });
+        const response = await $authHost.post("/upload/files", formData, {});
 
         if (response.status === 200) {
             const data = response.data;
