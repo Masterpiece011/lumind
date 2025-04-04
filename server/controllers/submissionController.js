@@ -7,6 +7,7 @@ import {
     Submissions,
     Submissions_investments,
     Assignments_Teams,
+    Assignments,
     Users_Teams,
 } from "../models/models.js";
 
@@ -219,8 +220,40 @@ class SubmissionController {
     }
 
     // Получение всех отправок для задания
+    async getAll(req, res, next) {
+        try {
+            const { user_id } = req.query; 
 
-    async getAll(req, res, next) {}
+            if (!user_id) {
+                return next(
+                    ApiError.badRequest("Необходимо указать ID пользователя")
+                );
+            }
+
+            const submissions = await Submissions.findAll({
+                where: { user_id },
+                include: [
+                    {
+                        model: Submissions_investments,
+                        attributes: ["id", "file_url"],
+                    },
+                    {
+                        model: Assignments,
+                        attributes: ["id", "title"],
+                    },
+                ],
+                order: [["created_at", "DESC"]],
+            });
+
+            return res.json(submissions);
+        } catch (error) {
+            next(
+                ApiError.internal(
+                    `Ошибка при получении отправок: ${error.message}`
+                )
+            );
+        }
+    }
 
     // Получение одной отправки
 
