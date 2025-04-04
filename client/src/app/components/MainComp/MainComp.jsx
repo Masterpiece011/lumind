@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import * as styles from "./MainComp.module.scss";
@@ -22,16 +22,72 @@ const MainComp = () => {
     const router = useRouter();
     const pathname = usePathname();
     const params = useParams();
+    const searchMenuRef = useRef(null);
 
     const [showSearchMenu, setShowSearchMenu] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isMouseOver, setIsMouseOver] = useState(false);
 
-    const onSelectSearch = () => {
-        setShowSearchMenu((prev) => !prev);
+    const handleSearchFocus = (currentQuery) => {
+        setSearchQuery(currentQuery);
+        setShowSearchMenu(true);
+    };
+
+    const handleSearchChange = (query) => {
+        setSearchQuery(query);
+        if (!showSearchMenu) setShowSearchMenu(true);
+    };
+
+    const handleMouseEnter = () => {
+        setIsMouseOver(true);
+    };
+
+    const handleMouseLeave = () => {
+        setIsMouseOver(false);
+        setTimeout(() => {
+            if (!isMouseOver) {
+                setShowSearchMenu(false);
+            }
+        }, 300);
     };
 
     useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                searchMenuRef.current &&
+                !searchMenuRef.current.contains(event.target)
+            ) {
+                const searchInput = document.querySelector(
+                    ".header__search-input",
+                );
+                if (searchInput && !searchInput.contains(event.target)) {
+                    setShowSearchMenu(false);
+                }
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    useEffect(() => {
         setShowSearchMenu(false);
+        setSearchQuery("");
     }, [pathname, params]);
+
+    useEffect(() => {
+        if (showSearchMenu) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [showSearchMenu]);
 
     const handleNavigation = (path) => {
         router.push(path);
@@ -40,7 +96,10 @@ const MainComp = () => {
     return (
         <div className={styles.container}>
             <header>
-                <HeaderComp onSelectSearch={onSelectSearch} />
+                <HeaderComp
+                    onSearchFocus={handleSearchFocus}
+                    onSearchChange={handleSearchChange}
+                />
             </header>
             <div className={styles.mainContent}>
                 <aside className={styles.sidebar}>
@@ -74,36 +133,67 @@ const MainComp = () => {
                 </aside>
 
                 <section className={styles.pageContent}>
-                    {showSearchMenu ? (
-                        <SearchMenu
-                            onSelectTeam={(teamId) =>
-                                handleNavigation(`/teams/${teamId}`)
-                            }
-                        />
-                    ) : pathname.startsWith("/teams/") && params.id ? (
-                        <TeamDetailPage
-                            id={params.id}
-                            onSelectAssignment={(assignmentId) =>
-                                handleNavigation(`/assignments/${assignmentId}`)
-                            }
-                        />
-                    ) : pathname.startsWith("/assignments/") && params.id ? (
-                        <AssignmentsDetailPage id={params.id} />
-                    ) : pathname.startsWith("/teams") ? (
-                        <TeamsPage
-                            onSelectTeam={(teamId) =>
-                                handleNavigation(`/teams/${teamId}`)
-                            }
-                        />
-                    ) : pathname.startsWith("/assignments") ? (
-                        <AssignmentsPage
-                            onSelectAssignment={(assignmentId) =>
-                                handleNavigation(`/assignments/${assignmentId}`)
-                            }
-                        />
-                    ) : pathname.startsWith("/users") ? (
-                        <UsersPage />
-                    ) : null}
+                    <div className={styles.pageContentWrapper}>
+                        {showSearchMenu && (
+                            <div
+                                ref={searchMenuRef}
+                                onMouseEnter={handleMouseEnter}
+                                onMouseLeave={handleMouseLeave}
+                                className={`${styles.searchMenuWrapper} ${
+                                    showSearchMenu ? styles.visible : ""
+                                }`}
+                            >
+                                <SearchMenu
+                                    searchQuery={searchQuery}
+                                    onSelectTeam={(teamId) =>
+                                        handleNavigation(`/teams/${teamId}`)
+                                    }
+                                />
+                            </div>
+                        )}
+
+                        <div
+                            className={`${styles.mainPageContent} ${
+                                showSearchMenu ? styles.blurred : ""
+                            }`}
+                        >
+                            {!showSearchMenu &&
+                            pathname.startsWith("/teams/") &&
+                            params.id ? (
+                                <TeamDetailPage
+                                    id={params.id}
+                                    onSelectAssignment={(assignmentId) =>
+                                        handleNavigation(
+                                            `/assignments/${assignmentId}`,
+                                        )
+                                    }
+                                />
+                            ) : !showSearchMenu &&
+                              pathname.startsWith("/assignments/") &&
+                              params.id ? (
+                                <AssignmentsDetailPage id={params.id} />
+                            ) : !showSearchMenu &&
+                              pathname.startsWith("/teams") ? (
+                                <TeamsPage
+                                    onSelectTeam={(teamId) =>
+                                        handleNavigation(`/teams/${teamId}`)
+                                    }
+                                />
+                            ) : !showSearchMenu &&
+                              pathname.startsWith("/assignments") ? (
+                                <AssignmentsPage
+                                    onSelectAssignment={(assignmentId) =>
+                                        handleNavigation(
+                                            `/assignments/${assignmentId}`,
+                                        )
+                                    }
+                                />
+                            ) : !showSearchMenu &&
+                              pathname.startsWith("/users") ? (
+                                <UsersPage />
+                            ) : null}
+                        </div>
+                    </div>
                 </section>
             </div>
         </div>
