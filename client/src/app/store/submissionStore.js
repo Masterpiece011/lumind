@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getSubmissionById } from "../api/submissionAPI";
+import { getSubmissionById, getUserSubmissions } from "../api/submissionAPI";
 
 export const fetchSubmissionById = createAsyncThunk(
     "submissions/fetchById",
@@ -44,6 +44,18 @@ const submissionSlice = createSlice({
                 state.loading = false;
             })
             .addCase(fetchSubmissionById.rejected, (state, action) => {
+                state.error = action.payload;
+                state.loading = false;
+            })
+
+            .addCase(getUserSubmissions.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(getUserSubmissions.fulfilled, (state, action) => {
+                state.submissions = action.payload;
+                state.loading = false;
+            })
+            .addCase(getUserSubmissions.rejected, (state, action) => {
                 state.error = action.payload;
                 state.loading = false;
             });

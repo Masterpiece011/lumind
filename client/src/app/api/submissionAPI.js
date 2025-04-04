@@ -1,4 +1,5 @@
-import { $authHost, $host } from "./page";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { $authHost } from "./page";
 
 export const getSubmissionById = async (submission_id, userId) => {
     try {
@@ -15,6 +16,23 @@ export const getSubmissionById = async (submission_id, userId) => {
         );
     }
 };
+
+export const getUserSubmissions = createAsyncThunk(
+    "submissions/getUserSubmissions",
+    async (userId) => {
+        try {
+            const response = await $authHost.get("/api/submissions", {
+                params: { user_id: userId },
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(
+                error.response?.data?.message ||
+                    "Ошибка загрузки отправок пользователя",
+            );
+        }
+    },
+);
 
 export const createSubmission = async ({
     user_id,
@@ -70,7 +88,7 @@ export const deleteSubmission = async (submission_id) => {
 
     try {
         const response = await $authHost.delete("/api/submissions", {
-            data: { submission_id }, 
+            data: { submission_id },
         });
         return response.data;
     } catch (error) {
