@@ -14,7 +14,7 @@ import { UserModal } from "../Profile";
 import { FileItem } from "../../FileComp";
 import { getUserSubmissions } from "@/app/api/submissionAPI";
 
-const SearchMenu = ({ onSelectTeam }) => {
+const SearchMenu = ({ onSelectTeam, searchQuery = "", onClose, menuRef }) => {
     const dispatch = useDispatch();
     const { teams = [] } = useSelector((state) => state.teams);
     const usersArray = useSelector((state) => state.users.users) || [];
@@ -25,6 +25,9 @@ const SearchMenu = ({ onSelectTeam }) => {
 
     const [selectedUser, setSelectedUser] = useState(null);
     const [userFiles, setUserFiles] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [filteredTeams, setFilteredTeams] = useState([]);
+    const [filteredFiles, setFilteredFiles] = useState([]);
 
     useEffect(() => {
         if (!teams.length) dispatch(getTeams());
@@ -61,8 +64,36 @@ const SearchMenu = ({ onSelectTeam }) => {
         }
     }, [submissionsData]);
 
+    useEffect(() => {
+        const query = searchQuery.toLowerCase();
+
+        setFilteredUsers(
+            usersArray.filter(
+                (user) =>
+                    user.email.toLowerCase().includes(query) ||
+                    user.name?.toLowerCase().includes(query),
+            ),
+        );
+
+        setFilteredTeams(
+            teams.filter(
+                (team) =>
+                    team.name.toLowerCase().includes(query) ||
+                    team.description?.toLowerCase().includes(query),
+            ),
+        );
+
+        setFilteredFiles(
+            userFiles.filter(
+                (file) =>
+                    file.file_url.toLowerCase().includes(query) ||
+                    file.assignmentTitle?.toLowerCase().includes(query),
+            ),
+        );
+    }, [searchQuery, usersArray, teams, userFiles]);
+
     return (
-        <div className="search-menu">
+        <div className="search-menu" ref={menuRef}>
             <div className="search-menu__card">
                 <h2 className="search-menu__section-title">
                     <span className="search-menu__title-icon">
@@ -72,20 +103,28 @@ const SearchMenu = ({ onSelectTeam }) => {
                 </h2>
 
                 <div className="search-menu__users-content">
-                    {usersArray.map((user) => (
-                        <div
-                            key={user.id}
-                            className="search-menu__user-item"
-                            onClick={() => setSelectedUser(user)}
-                        >
-                            <span className="search-menu__avatar">
-                                <Icon src={nonAvatar} alt="none-avatar" />
-                            </span>
-                            <span className="search-menu__user-name">
-                                {user.email}
-                            </span>
-                        </div>
-                    ))}
+                    {filteredUsers.length > 0 ? (
+                        filteredUsers.map((user) => (
+                            <div
+                                key={user.id}
+                                className="search-menu__user-item"
+                                onClick={() => setSelectedUser(user)}
+                            >
+                                <span className="search-menu__avatar">
+                                    <Icon src={nonAvatar} alt="none-avatar" />
+                                </span>
+                                <span className="search-menu__user-name">
+                                    {user.email}
+                                </span>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="search-menu__empty-message">
+                            {searchQuery
+                                ? "Нет результатов"
+                                : "Нет пользователей"}
+                        </p>
+                    )}
                 </div>
             </div>
 
@@ -97,8 +136,8 @@ const SearchMenu = ({ onSelectTeam }) => {
                     <span className="search-menu__title-text">Файлы</span>
                 </h2>
                 <div className="search-menu__files-list">
-                    {userFiles.length > 0 ? (
-                        userFiles.map((file) => (
+                    {filteredFiles.length > 0 ? (
+                        filteredFiles.map((file) => (
                             <FileItem
                                 key={file.id}
                                 fileUrl={file.file_url}
@@ -107,7 +146,7 @@ const SearchMenu = ({ onSelectTeam }) => {
                         ))
                     ) : (
                         <p className="search-menu__empty-message">
-                            Нет последних файлов
+                            {searchQuery ? "Нет результатов" : "Нет файлов"}
                         </p>
                     )}
                 </div>
@@ -121,22 +160,30 @@ const SearchMenu = ({ onSelectTeam }) => {
                     <span className="search-menu__title-text">Команды</span>
                 </h2>
                 <div className="search-menu__teams-content">
-                    {teams.map((team) => (
-                        <li
-                            className="teams-content__list"
-                            key={team.id}
-                            onClick={() => onSelectTeam(team.id)}
-                        >
-                            <div
-                                className="list__avatar"
-                                style={{ backgroundColor: team.avatar_color }}
-                            ></div>
-                            <div className="list__info">
-                                <div className="info__divider"></div>
-                                <h3 className="info__name">{team.name}</h3>
-                            </div>
-                        </li>
-                    ))}
+                    {filteredTeams.length > 0 ? (
+                        filteredTeams.map((team) => (
+                            <li
+                                className="teams-content__list"
+                                key={team.id}
+                                onClick={() => onSelectTeam(team.id)}
+                            >
+                                <div
+                                    className="list__avatar"
+                                    style={{
+                                        backgroundColor: team.avatar_color,
+                                    }}
+                                ></div>
+                                <div className="list__info">
+                                    <div className="info__divider"></div>
+                                    <h3 className="info__name">{team.name}</h3>
+                                </div>
+                            </li>
+                        ))
+                    ) : (
+                        <p className="search-menu__empty-message">
+                            {searchQuery ? "Нет результатов" : "Нет команд"}
+                        </p>
+                    )}
                 </div>
             </div>
 

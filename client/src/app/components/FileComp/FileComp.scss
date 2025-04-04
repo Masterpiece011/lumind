@@ -83,6 +83,7 @@
                 font-size: 14px;
                 color: #333;
                 gap: 20px;
+                
 
                 & img {
                     width: 34px;
@@ -132,10 +133,14 @@
     background-color: rgba(174, 174, 174, 0.2);
     gap: 5px;
     border: 0;
+    transition: 
+    background 0.2s ease,
+    transform 0.2s ease;
 
     &:hover {
-        background: rgba(174, 174, 174, 0.2);
-    }
+        transform: translateX(3px);
+        background-color: transparent;
+      }
 
     .file-icon img {
         width: 16px;

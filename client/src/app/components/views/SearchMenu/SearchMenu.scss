@@ -1,53 +1,86 @@
 .search-menu {
-    width: 748px;
+  width: 748px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 25px;
+  background: rgba(174, 174, 174, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(174, 174, 174, 0.5);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.2);
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+
+  
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  &__card {
+    width: 336px;
+    height: 200px;
+    flex-shrink: 0;
+    background: rgba(174, 174, 174, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(174, 174, 174, 0.5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: top center;
+
+    &:hover {
+      background: rgba(174, 174, 174, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+
+  &__section-title {
     display: flex;
     align-items: center;
-    flex-direction: row;
-    justify-content: flex-start;
-    background: rgba(174, 174, 174, 0.1);
-    border-radius: 10px;
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 10px;
+    margin-top: 0;
+    transition: all 0.2s ease;
+  }
+
+  &__title-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid rgba(174, 174, 174, 0.5);
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 25px;
+    border-radius: 4px;
+    margin-right: 7px;
+    cursor: pointer;
+    margin-bottom: 5px;
+    transition: all 0.2s ease;
 
-    &__card {
-        width: 336px;
-        height: 200px;
-        flex-shrink: 0;
-        background: rgba(174, 174, 174, 0.1);
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid rgba(174, 174, 174, 0.5);
+    &:hover {
+      background: rgba(174, 174, 174, 0.2);
     }
 
-    &__section-title {
-        display: flex;
-        align-items: center;
-        font-size: 18px;
-        color: #fff;
-        margin-bottom: 10px;
-        margin-top: 0;
+    & img {
+      width: 10px;
+      height: 12px;
+      object-fit: contain;
+      transition: transform 0.2s ease;
     }
+  }
 
-    &__title-icon {
-        width: 18px;
-        height: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid rgba(174, 174, 174, 0.5);
-        border-radius: 4px;
-        margin-right: 7px;
-        cursor: pointer;
-        margin-bottom: 5px;
-
-        & img {
-            width: 10px;
-            height: 12px;
-            object-fit: contain;
-        }
-    }
 
     &__title-text {
         width: 100%;
@@ -56,8 +89,8 @@
 
     &__users-content {
         width: 100%;
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
         row-gap: 5px;
         column-gap: 10px;
     }
@@ -74,10 +107,17 @@
         border-radius: 6px;
         color: #FFFFFF;
         cursor: pointer;
+        transition: 
+        background 0.2s ease,
+        transform 0.2s ease;
+
+        &:hover {
+          transform: translateX(3px);
+        }
     }
 
     &__avatar {
-        margin: 0;
+        margin: 4px 0px 0px 0px;
     }
 
     &__user-name {
@@ -98,13 +138,20 @@
     }
 
     &__card-team {
-        width: 715px;
-        height: 200px;
-        flex-shrink: 0;
-        background: rgba(174, 174, 174, 0.1);
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid rgba(174, 174, 174, 0.5);
+      width: 715px;
+      flex-shrink: 0;
+      background: rgba(174, 174, 174, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(174, 174, 174, 0.5);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: top center;
+
+    &:hover {
+      background: rgba(174, 174, 174, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
     &__teams-content {
         display: grid;
@@ -112,11 +159,15 @@
         gap: 10px;
         padding: 0;
         margin-top: 15px;
+
+        &:hover {
+          transform: translateY(-3px);
+        }
     }
 
     .teams-content__list {
-        width: 80px;
-        height: 66px;
+        width: 160px;
+        height: 80px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -128,16 +179,18 @@
         column-gap: 8px;
         list-style: none;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: 
+      all 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.2s ease; 
 
-        &:hover {
-            background: rgba(174, 174, 174, 0.2);
-        }
+      &:hover {
+        transform: scale(1.02);
+      }
     }
 
     .list__avatar {
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
         border-radius: 4px;
         flex-shrink: 0;
         object-fit: cover;
@@ -151,10 +204,10 @@
 
     .info__name {
         font-weight: 400;
-        font-size: 14px;
+        font-size: 16px;
         line-height: 14px;
         text-align: center;
-        margin: 0;
+        margin: 3px;
     }
 
     .info__divider {
