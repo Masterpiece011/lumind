@@ -1,20 +1,18 @@
-import './scss/global.scss';
-import { Roboto } from "next/font/google";
+import { Inter } from "next/font/google";
+import "./scss/global.scss";
 import ReduxProvider from "./store/ReduxProvider";
 import AppRouter from "./Router/AppRouter";
 
-
-
-const roboto = Roboto({
-    weight: "700",
-    subsets: ["latin", "cyrillic"],
-    display: "swap",
+const inter = Inter({
+    subsets: ["latin"],
+    variable: "--font-inter",
+    weight: ["200", "400", "500", "600", "700", "800"],
 });
 
-export default function RootLayout({ children }) {222
+export default function RootLayout({ children }) {
     return (
-        <html lang="en">
-            <body className={roboto.className}>
+        <html lang="en" className={inter.variable}>
+            <body>
                 <ReduxProvider>
                     <AppRouter>{children}</AppRouter>
                 </ReduxProvider>

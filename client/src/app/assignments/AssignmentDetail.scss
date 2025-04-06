@@ -1,9 +1,9 @@
+@use "../scss/mixins/mixins" as *;
 
 .assignment-detail {
     display: flex;
     flex-direction: column;
     padding: 20px;
-    font-family: sans-serif;
     color: #ffffff;
   
     &__header {
@@ -24,19 +24,19 @@
     }
   
     &__title {
-      font-size: 24px;
+      @include fontOptions(24px, 400, 24px);
       color: #AEAEAE;
     }
   
     &__meta {
       margin-top: 8px;
-      font-size: 14px;
+      @include fontOptions(14px, 400, 14px);
       color: #AEAEAE;
     }
   
     &__score {
       margin-right: 20px;
-      font-size: 16px;
+      @include fontOptions(16px, 400, 16px);
       color: #AEAEAE;
     }
   
@@ -79,12 +79,12 @@
     }
   
     &__submission-title {
-      font-size: 18px;
+      @include fontOptions(18px, 400, 18px);
       color: #AEAEAE;
     }
   
     &__submission-status {
-      font-size: 14px;
+      @include fontOptions(14px, 400, 14px);
       color: #AEAEAE;
     }
   
@@ -93,7 +93,7 @@
       
   
       &-title {
-        font-size: 18px;
+        @include fontOptions(18px, 400, 18px);
         margin-bottom: 8px;
       }
   

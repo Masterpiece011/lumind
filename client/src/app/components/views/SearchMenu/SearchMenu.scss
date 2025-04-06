@@ -1,3 +1,5 @@
+@use "../../../scss/mixins/mixins" as *;
+
 .search-menu {
   width: 748px;
   display: flex;
@@ -13,21 +15,10 @@
     0 8px 24px rgba(0, 0, 0, 0.2);
   max-height: 80vh;
   overflow-y: auto;
-  animation: fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-
-  
-  @keyframes fadeInScale {
-    from {
-      opacity: 0;
-      transform: scale(0.98);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
+  @include grow(0.98, 1);
 
   &__card {
+    min-width: 139px;
     width: 336px;
     height: 200px;
     flex-shrink: 0;
@@ -35,25 +26,22 @@
     padding: 15px;
     border-radius: 8px;
     border: 1px solid rgba(174, 174, 174, 0.5);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-origin: top center;
+    @include lift(-3px);
 
     &:hover {
       background: rgba(174, 174, 174, 0.2);
-      transform: translateY(-3px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
   }
 
-
   &__section-title {
     display: flex;
     align-items: center;
-    font-size: 18px;
+    @include fontOptions(18px, 400, 18px);
     color: #fff;
     margin-bottom: 10px;
     margin-top: 0;
-    transition: all 0.2s ease;
+    @include scale(1.02);
   }
 
   &__title-icon {
@@ -67,7 +55,7 @@
     margin-right: 7px;
     cursor: pointer;
     margin-bottom: 5px;
-    transition: all 0.2s ease;
+    @include scale(1.1);
 
     &:hover {
       background: rgba(174, 174, 174, 0.2);
@@ -77,138 +65,111 @@
       width: 10px;
       height: 12px;
       object-fit: contain;
-      transition: transform 0.2s ease;
+      @include scale(1.1);
     }
   }
 
+  &__title-text {
+    width: 100%;
+    @include fontOptions(18px, 400, 18px);
+  }
 
-    &__title-text {
-        width: 100%;
-        font-size: 18px;
+  &__users-content {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 5px;
+    column-gap: 10px;
+  }
+
+  &__user-item {
+    width: 153px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    column-gap: 5px;
+    padding: 5px 5px;
+    background: #202020;
+    border: 1px solid rgba(174, 174, 174, 0.5);
+    border-radius: 6px;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    @include push(3px);
+
+    &:hover {
+      background: rgba(174, 174, 174, 0.2);
     }
+  }
 
-    &__users-content {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        row-gap: 5px;
-        column-gap: 10px;
-    }
+  &__avatar {
+    margin: 4px 0px 0px 0px;
+    @include scale(1.05);
+  }
 
-    &__user-item {
-        width: 153px;
-        height: 16px;
-        display: flex;
-        align-items: center;
-        column-gap: 5px;
-        padding: 5px 5px;
-        background: #202020;
-        border: 1px solid rgba(174, 174, 174, 0.5);
-        border-radius: 6px;
-        color: #FFFFFF;
-        cursor: pointer;
-        transition: 
-        background 0.2s ease,
-        transform 0.2s ease;
+  &__user-name {
+    @include fontOptions(14px, 400, 14px);
+  }
 
-        &:hover {
-          transform: translateX(3px);
-        }
-    }
+  &__teams-content {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
 
-    &__avatar {
-        margin: 4px 0px 0px 0px;
-    }
-
-    &__user-name {
-        font-size: 14px;
-    }
-
-    &__teams-content {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-    }
-
-    .search-menu__files-list {
+  .search-menu__files-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     column-gap: 10px;
     row-gap: 8px;
-    }
+  }
 
-    &__card-team {
-      width: 715px;
-      flex-shrink: 0;
-      background: rgba(174, 174, 174, 0.1);
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid rgba(174, 174, 174, 0.5);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      transform-origin: top center;
+  &__card-team {
+    width: 715px;
+    flex-shrink: 0;
+    background: rgba(174, 174, 174, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(174, 174, 174, 0.5);
+    @include lift(-3px);
 
     &:hover {
       background: rgba(174, 174, 174, 0.2);
-      transform: translateY(-3px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+  }
 
-    &__teams-content {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-        padding: 0;
-        margin-top: 15px;
+  .teams-content__list {
+    width: 160px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid rgba(174, 174, 174, 0.5);
+    padding: 5px;
+    column-gap: 8px;
+    list-style: none;
+    cursor: pointer;
+    @include scale(1.02);
+  }
 
-        &:hover {
-          transform: translateY(-3px);
-        }
-    }
+  .list__avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    object-fit: cover;
+    @include scale(1.05);
+  }
 
-    .teams-content__list {
-        width: 160px;
-        height: 80px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        border-radius: 8px;
-        background: transparent;
-        border: 1px solid rgba(174, 174, 174, 0.5);
-        padding: 5px;
-        column-gap: 8px;
-        list-style: none;
-        cursor: pointer;
-        transition: 
-      all 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-      transform 0.2s ease; 
-
-      &:hover {
-        transform: scale(1.02);
-      }
-    }
-
-    .list__avatar {
-        width: 50px;
-        height: 50px;
-        border-radius: 4px;
-        flex-shrink: 0;
-        object-fit: cover;
-    }
-
-    .list__info {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .info__name {
-        font-weight: 400;
-        font-size: 16px;
-        line-height: 14px;
-        text-align: center;
-        margin: 3px;
-    }
+  .info__name {
+    @include fontOptions(16px, 400, 14px);
+    text-align: center;
+    margin: 3px;
+  }
 
     .info__divider {
         width: 100%;
@@ -216,5 +177,4 @@
         background-color: rgba(174, 174, 174, 0.5);
         margin: 5px 0;
     }
-    }
-}
+  }

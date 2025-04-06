@@ -1,3 +1,5 @@
+@use "../../../scss/mixins/mixins" as *;
+
 .assignments {
     width: 1100px;
     border-radius: 16px;
@@ -7,9 +9,7 @@
     flex-direction: column;
 
     &__title {
-        font-weight: 400;
-        font-size: 24px;
-        line-height: 22px;
+        @include fontOptions(24px, 400, 22px);
         margin-bottom: 20px;
     }
 
@@ -76,17 +76,17 @@
         display: flex;
         justify-content: space-between;
         margin-bottom: 10px;
-        font-size: 14px;
+        @include fontOptions(14px, 400, 14px);
         color: #555;
     }
 
     &__date {
-        font-weight: bold;
+        @include fontOptions(14px, 600, 14px);
     }
 
     &__team {
         font-style: italic;
-        font-weight: bold;
+        @include fontOptions(14px, 600, 14px);
     }
 
     &__name {
@@ -96,7 +96,7 @@
     }
 
     &__deadline {
-        font-size: 14px;
+        @include fontOptions(14px, 400, 14px);
         color: #777;
     }
 
@@ -104,15 +104,14 @@
         width: 145px;
         padding: 5px 10px;
         border-radius: 4px;
-        font-size: 12px;
-        font-weight: bold;
+        @include fontOptions(12px, 600, 12px);
         color: #ff4d4f;
     }
 
     &__loading,
     &__error,
     &__empty {
-        font-size: 16px;
+        @include fontOptions(16px, 400, 16px);
         color: #333;
         text-align: center;
         margin-top: 20px;

@@ -1,0 +1,56 @@
+
+// Шрифт
+@mixin fontOptions($size, $weight, $line-height) {
+    font-size: $size;
+    font-weight: $weight;
+    line-height: $line-height;
+    font-family: var(--font-inter), sans-serif;
+  }
+
+  // Базовые настройки анимаций
+$ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+
+// Поднятие элемента при hover
+@mixin lift($distance: -3px, $duration: 0.2s) {
+  transition: transform $duration $ease-default;
+  &:hover { transform: translateY($distance); }
+}
+
+// Увеличение масштаба при hover
+@mixin scale($factor: 1.02, $duration: 0.2s) {
+  transition: transform $duration $ease-default;
+  &:hover { transform: scale($factor); }
+}
+
+// Сдвиг в сторону при hover
+@mixin push($distance: 3px, $duration: 0.2s) {
+  transition: transform $duration $ease-default;
+  &:hover { transform: translateX($distance); }
+}
+
+// Анимация появления с масштабированием (без opacity)
+@mixin grow($from: 0.98, $to: 1, $duration: 0.3s) {
+  animation: grow $duration $ease-default forwards;
+  
+  @keyframes grow {
+    from { transform: scale($from); }
+    to { transform: scale($to); }
+  }
+}
+
+// Плавное появление сверху/снизу
+@mixin slideY($from: -20px, $duration: 0.3s) {
+  transform: translateY($from);
+  transition: transform $duration $ease-default;
+  
+  &-active { transform: translateY(0); }
+}
+
+// Плавное появление слева/справа
+@mixin slideX($from: 20px, $duration: 0.3s) {
+  transform: translateX($from);
+  transition: transform $duration $ease-default;
+  
+  &-active { transform: translateX(0); }
+}
+

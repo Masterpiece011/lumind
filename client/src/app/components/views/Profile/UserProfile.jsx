@@ -5,17 +5,18 @@ import Image from "next/image";
 import "./UserProfile.scss";
 import nonAvatar from "@/app/assets/img/non-avatar.png";
 import { UiModal } from "../../uikit/UiModal/UiModal";
+import { MyButton } from "../../uikit";
 
 const UserModal = ({ user, isOpen, onClose }) => {
     return (
         <UiModal isOpen={isOpen} onClose={onClose}>
             <UiModal.Header>
-                <button
+                <MyButton
                     className="user-profile__close-button"
                     onClick={onClose}
                 >
                     ×
-                </button>
+                </MyButton>
             </UiModal.Header>
 
             <UiModal.Body>
