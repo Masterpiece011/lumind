@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import * as styles from "./MainComp.module.scss";
+import "./MainComp.scss";
 import { HeaderComp } from "../HeaderComp";
 import { TeamsPage } from "../views/TeamsComp";
 import { AssignmentsPage } from "../views/Assignments";
@@ -94,16 +94,16 @@ const MainComp = () => {
     };
 
     return (
-        <div className={styles.container}>
+        <div className="main">
             <header>
                 <HeaderComp
                     onSearchFocus={handleSearchFocus}
                     onSearchChange={handleSearchChange}
                 />
             </header>
-            <div className={styles.mainContent}>
-                <aside className={styles.sidebar}>
-                    <ul>
+            <div className="main__content">
+                <aside className="main__sidebar">
+                    <ul className="main__sidebar-list">
                         <Icon
                             src={Home}
                             alt="home"
@@ -132,15 +132,17 @@ const MainComp = () => {
                     </ul>
                 </aside>
 
-                <section className={styles.pageContent}>
-                    <div className={styles.pageContentWrapper}>
+                <section className="main__page-content">
+                    <div className="main__content-wrapper">
                         {showSearchMenu && (
                             <div
                                 ref={searchMenuRef}
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
-                                className={`${styles.searchMenuWrapper} ${
-                                    showSearchMenu ? styles.visible : ""
+                                className={`main__search-wrapper ${
+                                    showSearchMenu
+                                        ? "main__search-wrapper_visible"
+                                        : ""
                                 }`}
                             >
                                 <SearchMenu
@@ -153,8 +155,8 @@ const MainComp = () => {
                         )}
 
                         <div
-                            className={`${styles.mainPageContent} ${
-                                showSearchMenu ? styles.blurred : ""
+                            className={`main__page ${
+                                showSearchMenu ? "main__page_blurred" : ""
                             }`}
                         >
                             {!showSearchMenu &&

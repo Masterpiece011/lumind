@@ -1,3 +1,5 @@
+@use "../../../scss/mixins/mixins" as *;
+
 .submission-form {
   display: flex;
   flex-direction: column;
@@ -10,7 +12,7 @@
 
       label {
           display: block;
-          font-weight: 600;
+          @include fontOptions(24px, 600, 24px); 
           margin-bottom: 6px;
           color: #AEAEAE;
       }
@@ -26,7 +28,7 @@
           cursor: pointer;
           color: #AEAEAE;
           font-family: inherit; 
-          font-size: 14px;
+          @include fontOptions(14px, 400, 14px); 
 
           &:focus {
               outline: none;
@@ -44,7 +46,7 @@
           cursor: pointer;
           color: #AEAEAE;
           font-family: inherit; 
-          font-size: 14px; 
+          @include fontOptions(14px, 400, 14px); 
 
           &:focus {
               outline: none;

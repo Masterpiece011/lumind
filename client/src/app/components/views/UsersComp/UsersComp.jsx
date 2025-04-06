@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getUsers } from "@/app/api/userAPI";
-import * as styles from "./UsersComp.module.scss";
+import "./UsersComp.scss";
+import * as buttonStyles from "@/app/components/uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "../../uikit";
 
 const UsersPage = () => {
@@ -28,30 +29,43 @@ const UsersPage = () => {
     });
 
     return (
-        <div className={styles.usersWrapper}>
-            <div className={styles.filters}>
-                <MyButton onClick={() => setFilter("all")} text="Все" />
+        <div className="users">
+            <div className="users__filters">
+                <MyButton
+                    onClick={() => setFilter("all")}
+                    text="Все"
+                    className={buttonStyles.users__filterBtn}
+                />
 
                 <MyButton
                     onClick={() => setFilter("instructors")}
                     text="Преподаватели"
+                    className={buttonStyles.users__filterBtn}
                 />
 
-                <MyButton onClick={() => setFilter("users")} text="Группа" />
+                <MyButton
+                    onClick={() => setFilter("users")}
+                    text="Группа"
+                    className={buttonStyles.users__filterBtn}
+                />
 
-                <MyButton onClick={() => setFilter("teams")} text="Команды" />
+                <MyButton
+                    onClick={() => setFilter("teams")}
+                    text="Команды"
+                    className={buttonStyles.users__filterBtn}
+                />
             </div>
-            <div className={styles.usersList}>
+            <div className="users__list">
                 {filteredUsers.length > 0 ? (
                     filteredUsers.map((user) => (
-                        <div key={user.id} className={styles.userItem}>
-                            <p>
+                        <div key={user.id} className="users__item">
+                            <p className="users__text">
                                 {user.email} ({user.role.name})
                             </p>
                         </div>
                     ))
                 ) : (
-                    <p>Пользователей не найдено</p>
+                    <p className="users__empty">Пользователей не найдено</p>
                 )}
             </div>
         </div>

@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { setIsAuth, setUser } from "@/app/store/userStore";
 import { MyButton } from "../uikit";
 import { login } from "@/app/api/userAPI";
-import * as styles from "./LoginForm.module.scss";
+import "./LoginForm.scss";
 import * as buttonStyles from "../uikit/MyButton/MyButton.module.scss";
 import { useRouter } from "next/navigation";
 import UserIcon from "@/app/assets/icons/user-icon.png";
@@ -58,23 +58,23 @@ function LoginForm() {
     }
 
     return (
-        <div className={styles.container}>
-            <div className={styles.formWrapper}>
+        <div className="login">
+            <div className="login__wrapper">
                 <form
-                    className={styles.form}
+                    className="login__form"
                     onSubmit={(event) => {
                         event.preventDefault();
                         signIn();
                     }}
                 >
-                    <div className={styles.formContent}>
-                        <div className={styles.fieldsWrapper}>
-                            <h1 className={styles.title}>Авторизация</h1>
-                            <div className={styles.inputWrapper}>
+                    <div className="login__content">
+                        <div className="login__fields">
+                            <h1 className="login__title">Авторизация</h1>
+                            <div className="login__input-wrapper">
                                 <Image
                                     src={UserIcon}
                                     alt="User Icon"
-                                    className={styles.icon}
+                                    className="login__icon"
                                 />
                                 <input
                                     id="email"
@@ -83,14 +83,15 @@ function LoginForm() {
                                     placeholder="Логин"
                                     onChange={handleInputEmail}
                                     value={form.email}
+                                    className="login__input"
                                 />
                             </div>
 
-                            <div className={styles.inputWrapper}>
+                            <div className="login__input-wrapper">
                                 <Image
                                     src={LockIcon}
                                     alt="User Icon"
-                                    className={styles.icon}
+                                    className="login__icon"
                                 />
                                 <input
                                     id="password"
@@ -99,11 +100,12 @@ function LoginForm() {
                                     placeholder="Пароль"
                                     onChange={handleInputPassword}
                                     value={form.password}
+                                    className="login__input"
                                 />
                             </div>
 
-                            <div className={styles.options}>
-                                <div className={styles.checkboxWrapper}>
+                            <div className="login__options">
+                                <div className="login__checkbox-wrapper">
                                     <input
                                         id="showPassword"
                                         type="checkbox"
@@ -111,17 +113,21 @@ function LoginForm() {
                                         onChange={() =>
                                             setShowPassword(!showPassword)
                                         }
+                                        className="login__checkbox"
                                     />
-                                    <label htmlFor="showPassword">
+                                    <label
+                                        htmlFor="showPassword"
+                                        className="login__label"
+                                    >
                                         Показать пароль
                                     </label>
                                 </div>
-                                <a href="#" className={styles.forgotPassword}>
+                                <a href="#" className="login__forgot-password">
                                     Забыли пароль? Восстановить
                                 </a>
                             </div>
                         </div>
-                        <div className={styles.logoWrapper}>
+                        <div className="login__logo-wrapper">
                             <Image src={Logo} alt="Logo" />
                         </div>
                     </div>
