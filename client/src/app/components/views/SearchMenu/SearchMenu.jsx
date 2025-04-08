@@ -10,11 +10,11 @@ import nonAvatar from "@/app/assets/img/non-avatar.png";
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import TeamsIcon from "@/app/assets/icons/teams-icon-search.svg";
 import FilesIcon from "@/app/assets/icons/file-icon.svg";
-import { UserModal } from "../Profile";
 import { FileItem } from "../../FileComp";
 import { getUserSubmissions } from "@/app/api/submissionAPI";
+import { useUserModal } from "@/app/hooks/useUserModal";
 
-const SearchMenu = ({ onSelectTeam, searchQuery = "", onClose, menuRef }) => {
+const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
     const dispatch = useDispatch();
     const { teams = [] } = useSelector((state) => state.teams);
     const usersArray = useSelector((state) => state.users.users) || [];
@@ -23,11 +23,17 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", onClose, menuRef }) => {
     );
     const user_id = useSelector((state) => state.user.user?.id);
 
-    const [selectedUser, setSelectedUser] = useState(null);
     const [userFiles, setUserFiles] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [filteredTeams, setFilteredTeams] = useState([]);
     const [filteredFiles, setFilteredFiles] = useState([]);
+    const { showUserModal } = useUserModal();
+
+    const handleUserClick = (user, e) => {
+        e.stopPropagation();
+        e.nativeEvent.stopImmediatePropagation();
+        showUserModal(user);
+    };
 
     useEffect(() => {
         if (!teams.length) dispatch(getTeams());
@@ -93,7 +99,14 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", onClose, menuRef }) => {
     }, [searchQuery, usersArray, teams, userFiles]);
 
     return (
-        <div className="search-menu" ref={menuRef}>
+        <div
+            className="search-menu"
+            ref={menuRef}
+            onClick={(e) => {
+                e.stopPropagation();
+                e.nativeEvent.stopImmediatePropagation();
+            }}
+        >
             <div className="search-menu__card">
                 <h2 className="search-menu__section-title">
                     <span className="search-menu__title-icon">
@@ -108,7 +121,7 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", onClose, menuRef }) => {
                             <div
                                 key={user.id}
                                 className="search-menu__user-item"
-                                onClick={() => setSelectedUser(user)}
+                                onClick={(e) => handleUserClick(user, e)}
                             >
                                 <span className="search-menu__avatar">
                                     <Icon src={nonAvatar} alt="none-avatar" />
@@ -186,14 +199,6 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", onClose, menuRef }) => {
                     )}
                 </div>
             </div>
-
-            {selectedUser && (
-                <UserModal
-                    user={selectedUser}
-                    isOpen={!!selectedUser}
-                    onClose={() => setSelectedUser(null)}
-                />
-            )}
         </div>
     );
 };

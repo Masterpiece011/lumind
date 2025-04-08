@@ -65,9 +65,59 @@
 
   &__tab-content {
     padding: 20px;
-    
   }
+
+  &__members-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 10px;
+    row-gap: 8px;
 }
+
+&__member {
+    width: 160px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background: transparent;
+    padding: 5px;
+    column-gap: 8px;
+    list-style: none;
+    cursor: pointer;
+    @include scale(1.02);
+
+    &:hover {
+        background: rgba(174, 174, 174, 0.2);
+    }
+}
+
+&__member-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+&__member-name {
+    @include fontOptions(16px, 500, 20px);
+    color: #fff;
+}
+
+&__member-email {
+    @include fontOptions(14px, 400, 18px);
+    color: rgba(174, 174, 174, 0.8);
+}
+
+&__no-members {
+    @include fontOptions(16px, 400, 20px);
+    color: rgba(174, 174, 174, 0.8);
+    text-align: center;
+    padding: 20px;
+}
+}
+
 
 .team-files {
     padding: 20px;

@@ -1,28 +1,34 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
 import { getTeamById, getTeamFiles } from "@/app/api/teamAPI";
 import { getAssignments } from "@/app/api/assignmentsAPI";
 import "../TeamDetail.scss";
-import * as buttonStyles from "@/app/components/uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "@/app/components/uikit";
+import * as buttonStyles from "@/app/components/uikit/MyButton/MyButton.module.scss";
+
 import { Icon } from "@/app/components/ui/icons";
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import Assignment from "@/app/assets/icons/assignments-icon.svg";
 import File from "@/app/assets/icons/file-icon.svg";
 import Publication from "@/app/assets/icons/publication-icon.svg";
 import { FileItem } from "@/app/components/FileComp";
-import { useDispatch, useSelector } from "react-redux";
 
 const TeamDetailPage = ({ onSelectAssignment }) => {
     const { id } = useParams();
     const dispatch = useDispatch();
-
-    const { currentTeam, loading, error } = useSelector((state) => state.teams);
+    const {
+        currentTeam,
+        loading,
+        error,
+        teamFiles = [],
+    } = useSelector((state) => state.teams);
+    const { assignments: assignmentsData = [] } = useSelector(
+        (state) => state.assignments,
+    );
     const user_id = useSelector((state) => state.user.user?.id);
-    const assignmentsData = useSelector((state) => state.assignments);
-    const { teamFiles = [] } = useSelector((state) => state.teams);
 
     const [activeTab, setActiveTab] = useState("posts");
     const [assignmentFilter, setAssignmentFilter] = useState("all");
@@ -30,35 +36,20 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
     useEffect(() => {
         if (id && user_id) {
             dispatch(getTeamById({ teamId: id, userId: user_id }));
+            dispatch(getAssignments({ userId: user_id, filter: "all" }));
+            dispatch(getTeamFiles(id));
         }
     }, [id, user_id, dispatch]);
 
-    useEffect(() => {
-        if (activeTab === "assignments" && currentTeam && user_id) {
-            dispatch(getAssignments({ userId: user_id, filter: "all" }));
-        }
-    }, [activeTab, currentTeam, user_id, dispatch]);
-
-    useEffect(() => {
-        if (activeTab === "files" && currentTeam && user_id) {
-            dispatch(getTeamFiles(currentTeam.id));
-        }
-    }, [activeTab, currentTeam, user_id, dispatch]);
-
     const filteredAssignments = useMemo(() => {
-        if (!Array.isArray(assignmentsData.assignments)) return [];
-
         const now = new Date();
-        return assignmentsData.assignments
+        return assignmentsData
             .filter((assignment) =>
                 assignment.teams?.some((team) => team.id === currentTeam?.id),
             )
             .filter((assignment) => {
                 const dueDate = new Date(assignment.due_date);
-                const hasSubmission =
-                    assignment.submission !== null &&
-                    assignment.submission !== undefined;
-
+                const hasSubmission = assignment.submission != null;
                 switch (assignmentFilter) {
                     case "current":
                         return !hasSubmission && dueDate >= now;
@@ -70,10 +61,10 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
                         return true;
                 }
             });
-    }, [assignmentsData.assignments, currentTeam?.id, assignmentFilter]);
+    }, [assignmentsData, assignmentFilter, currentTeam]);
 
-    const assignmentFiles = useMemo(() => {
-        return filteredAssignments.flatMap(
+    const allFiles = useMemo(() => {
+        const assignmentFiles = filteredAssignments.flatMap(
             (assignment) =>
                 assignment.assignments_investments?.map((file) => ({
                     ...file,
@@ -81,17 +72,21 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
                     assignmentId: assignment.id,
                 })) || [],
         );
-    }, [filteredAssignments]);
+        return [...teamFiles, ...assignmentFiles];
+    }, [teamFiles, filteredAssignments]);
 
-    const allFiles = [...teamFiles, ...assignmentFiles];
+    const handleTabChange = useCallback((tab) => {
+        setActiveTab(tab);
+    }, []);
+
+    const handleFilterChange = useCallback((filter) => {
+        setAssignmentFilter(filter);
+    }, []);
 
     const renderAssignmentCard = (assignment) => {
         const dueDate = new Date(assignment.due_date);
-        const now = new Date();
-        const isOverdue = dueDate < now;
-        const hasSubmission =
-            assignment.submission !== null &&
-            assignment.submission !== undefined;
+        const isOverdue = dueDate < new Date();
+        const hasSubmission = assignment.submission != null;
 
         return (
             <div
@@ -123,54 +118,52 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
     const tabContent = {
         posts: <p>Публикации команды (заглушка)</p>,
         members: (
-            <ul>
-                {currentTeam?.users?.map((user) => (
-                    <li key={user.id}>
-                        {user.first_name} {user.last_name} ({user.email})
-                    </li>
-                )) || <p>Нет участников</p>}
-            </ul>
+            <div className="team__tab-content">
+                <h3 className="team__tab-title">Участники команды</h3>
+                <ul className="team__members-list">
+                    {currentTeam?.users?.map((user) => (
+                        <li className="team__member" key={user.id}>
+                            <div className="team__member-info">
+                                <span className="team__member-name">
+                                    {user.first_name} {user.last_name}
+                                </span>
+                                <span className="team__member-email">
+                                    ({user.email})
+                                </span>
+                            </div>
+                        </li>
+                    )) || <p className="team__no-members">Нет участников</p>}
+                </ul>
+            </div>
         ),
         assignments: (
             <div className="team__tab-content">
                 <h3 className="team__tab-title">Задания команды</h3>
-
                 <div className="assignments__filters">
                     {["all", "current", "completed", "overdue"].map(
-                        (filterType) => {
-                            const labels = {
-                                all: "Все задания",
-                                current: "Текущие",
-                                completed: "Выполненные",
-                                overdue: "Просроченные",
-                            };
-                            return (
-                                <MyButton
-                                    key={filterType}
-                                    className={`assignments__filter-button ${
-                                        assignmentFilter === filterType
-                                            ? "assignments__filter-button--active"
-                                            : ""
-                                    }`}
-                                    onClick={() =>
-                                        setAssignmentFilter(filterType)
-                                    }
-                                >
-                                    {labels[filterType]}
-                                </MyButton>
-                            );
-                        },
+                        (filterType) => (
+                            <MyButton
+                                key={filterType}
+                                className={`assignments__filter-button ${
+                                    assignmentFilter === filterType
+                                        ? "assignments__filter-button--active"
+                                        : ""
+                                }`}
+                                onClick={() => handleFilterChange(filterType)}
+                            >
+                                {filterType === "all"
+                                    ? "Все задания"
+                                    : filterType === "current"
+                                      ? "Текущие"
+                                      : filterType === "completed"
+                                        ? "Выполненные"
+                                        : "Просроченные"}
+                            </MyButton>
+                        ),
                     )}
                 </div>
-
                 <div className="assignments__card-wrapper">
-                    {assignmentsData.loading ? (
-                        <div className="assignments__loading">Загрузка...</div>
-                    ) : assignmentsData.error ? (
-                        <div className="assignments__error">
-                            Ошибка: {assignmentsData.error}
-                        </div>
-                    ) : filteredAssignments.length > 0 ? (
+                    {filteredAssignments.length > 0 ? (
                         filteredAssignments.map(renderAssignmentCard)
                     ) : (
                         <p className="assignments__empty">
@@ -179,23 +172,6 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
                     )}
                 </div>
             </div>
-        ),
-        groups: (
-            <ul>
-                {currentTeam?.groups?.map((group) => (
-                    <li key={group.id}>
-                        {group.title} ({group.users.length} участников)
-                        <ul>
-                            {group.users.map((user) => (
-                                <li key={user.id}>
-                                    {user.first_name} {user.last_name} (
-                                    {user.email})
-                                </li>
-                            ))}
-                        </ul>
-                    </li>
-                )) || <p>Нет групп</p>}
-            </ul>
         ),
         files: (
             <div className="team-files">
@@ -207,9 +183,7 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
                                 key={file.id}
                                 fileUrl={file.file_url}
                                 additionalInfo={
-                                    file.assignmentTitle
-                                        ? `${file.assignmentTitle}`
-                                        : "Файл команды"
+                                    file.assignmentTitle || "Файл команды"
                                 }
                                 onClick={() =>
                                     file.assignmentId &&

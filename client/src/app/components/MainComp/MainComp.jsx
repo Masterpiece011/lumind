@@ -11,12 +11,15 @@ import { UsersPage } from "../views/UsersComp";
 import { SearchMenu } from "../views/SearchMenu";
 import TeamDetailPage from "@/app/teams/[id]/page";
 import AssignmentsDetailPage from "@/app/assignments/[id]/page";
+
 import { Icon } from "../ui/icons";
-import Home from "@/app/assets/icons/home-icon.svg";
-import Chat from "@/app/assets/icons/chat-icon.svg";
-import Teams from "@/app/assets/icons/teams-icon.svg";
-import Assignments from "@/app/assets/icons/assignments-icon.svg";
-import Notifications from "@/app/assets/icons/notification-icon.svg";
+import HomeIcon from "@/app/assets/icons/home-icon.svg";
+import ChatIcon from "@/app/assets/icons/chat-icon.svg";
+import TeamsIcon from "@/app/assets/icons/teams-icon.svg";
+import AssignmentsIcon from "@/app/assets/icons/assignments-icon.svg";
+import NotificationsIcon from "@/app/assets/icons/notification-icon.svg";
+import ScheduleIcon from "@/app/assets/icons/schedule-icon.svg";
+import { useModal } from "../uikit/UiModal/ModalProvider";
 
 const MainComp = () => {
     const router = useRouter();
@@ -27,6 +30,7 @@ const MainComp = () => {
     const [showSearchMenu, setShowSearchMenu] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [isMouseOver, setIsMouseOver] = useState(false);
+    const { isModalOpen, closeModal } = useModal();
 
     const handleSearchFocus = (currentQuery) => {
         setSearchQuery(currentQuery);
@@ -45,7 +49,7 @@ const MainComp = () => {
     const handleMouseLeave = () => {
         setIsMouseOver(false);
         setTimeout(() => {
-            if (!isMouseOver) {
+            if (!isMouseOver && !hasOpenModal) {
                 setShowSearchMenu(false);
             }
         }, 300);
@@ -53,16 +57,18 @@ const MainComp = () => {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
+            if (isModalOpen) return;
+
             if (
                 searchMenuRef.current &&
-                !searchMenuRef.current.contains(event.target)
+                searchMenuRef.current.contains(event.target)
             ) {
-                const searchInput = document.querySelector(
-                    ".header__search-input",
-                );
-                if (searchInput && !searchInput.contains(event.target)) {
-                    setShowSearchMenu(false);
-                }
+                return;
+            }
+
+            const searchInput = document.querySelector(".header__search-input");
+            if (searchInput && !searchInput.contains(event.target)) {
+                setShowSearchMenu(false);
             }
         };
 
@@ -70,27 +76,28 @@ const MainComp = () => {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, []);
+    }, [isModalOpen]);
+
+    useEffect(() => {
+        if (showSearchMenu || isModalOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+    }, [showSearchMenu, isModalOpen]);
 
     useEffect(() => {
         setShowSearchMenu(false);
         setSearchQuery("");
     }, [pathname, params]);
 
-    useEffect(() => {
-        if (showSearchMenu) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "auto";
-        }
-
-        return () => {
-            document.body.style.overflow = "auto";
-        };
-    }, [showSearchMenu]);
-
     const handleNavigation = (path) => {
         router.push(path);
+    };
+
+    const isActive = (path) => {
+        if (path === "/") return pathname === path;
+        return pathname.startsWith(path);
     };
 
     return (
@@ -105,29 +112,64 @@ const MainComp = () => {
                 <aside className="main__sidebar">
                     <ul className="main__sidebar-list">
                         <Icon
-                            src={Home}
-                            alt="home"
+                            src={HomeIcon}
+                            alt="home-icon"
                             onClick={() => handleNavigation("/")}
+                            className={
+                                isActive("/")
+                                    ? "main__sidebar-icon--active"
+                                    : ""
+                            }
                         />
                         <Icon
-                            src={Notifications}
-                            alt="notifications"
+                            src={NotificationsIcon}
+                            alt="notifications-icon"
                             onClick={() => handleNavigation("/notifications")}
+                            className={
+                                isActive("/notifications")
+                                    ? "main__sidebar-icon--active"
+                                    : ""
+                            }
                         />
                         <Icon
-                            src={Teams}
-                            alt="teams"
+                            src={TeamsIcon}
+                            alt="teams-icon"
                             onClick={() => handleNavigation("/teams")}
+                            className={
+                                isActive("/teams")
+                                    ? "main__sidebar-icon--active"
+                                    : ""
+                            }
                         />
                         <Icon
-                            src={Chat}
-                            alt="chat"
+                            src={ChatIcon}
+                            alt="chat-icon"
                             onClick={() => handleNavigation("/chat")}
+                            className={
+                                isActive("/chat")
+                                    ? "main__sidebar-icon--active"
+                                    : ""
+                            }
                         />
                         <Icon
-                            src={Assignments}
-                            alt="assignments"
+                            src={AssignmentsIcon}
+                            alt="assignments-icon"
                             onClick={() => handleNavigation("/assignments")}
+                            className={
+                                isActive("/assignments")
+                                    ? "main__sidebar-icon--active"
+                                    : ""
+                            }
+                        />
+                        <Icon
+                            src={ScheduleIcon}
+                            alt="schedule-icon"
+                            onClick={() => handleNavigation("/schedule")}
+                            className={
+                                isActive("/schedule")
+                                    ? "main__sidebar-icon--active"
+                                    : ""
+                            }
                         />
                     </ul>
                 </aside>
@@ -155,11 +197,10 @@ const MainComp = () => {
                         )}
 
                         <div
-                            className={`main__page ${
-                                showSearchMenu ? "main__page_blurred" : ""
-                            }`}
+                            className={`main__page ${showSearchMenu || isModalOpen ? "main__page_blurred" : ""}`}
                         >
                             {!showSearchMenu &&
+                            !isModalOpen &&
                             pathname.startsWith("/teams/") &&
                             params.id ? (
                                 <TeamDetailPage
@@ -171,10 +212,12 @@ const MainComp = () => {
                                     }
                                 />
                             ) : !showSearchMenu &&
+                              !isModalOpen &&
                               pathname.startsWith("/assignments/") &&
                               params.id ? (
                                 <AssignmentsDetailPage id={params.id} />
                             ) : !showSearchMenu &&
+                              !isModalOpen &&
                               pathname.startsWith("/teams") ? (
                                 <TeamsPage
                                     onSelectTeam={(teamId) =>
@@ -182,6 +225,7 @@ const MainComp = () => {
                                     }
                                 />
                             ) : !showSearchMenu &&
+                              !isModalOpen &&
                               pathname.startsWith("/assignments") ? (
                                 <AssignmentsPage
                                     onSelectAssignment={(assignmentId) =>
@@ -191,6 +235,7 @@ const MainComp = () => {
                                     }
                                 />
                             ) : !showSearchMenu &&
+                              !isModalOpen &&
                               pathname.startsWith("/users") ? (
                                 <UsersPage />
                             ) : null}
