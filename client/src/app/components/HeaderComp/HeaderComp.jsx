@@ -4,8 +4,11 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
+
 import Settings from "@/app/assets/icons/settings.svg";
 import SearchIcon from "@/app/assets/icons/search-icon.svg";
+import ThemeIcon from "@/app/assets/icons/theme-icon.svg";
+
 import "./HeaderComp.scss";
 import * as buttonStyles from "../uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "../uikit";
@@ -75,9 +78,14 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
                 )}
                 <div className="header__content">
                     <div className="header__content-wrapper">
-                        <div className="header__settings">
+                        <MyButton className={buttonStyles.headerButton}>
+                            <Image src={ThemeIcon} alt="theme-icon" />
+                        </MyButton>
+
+                        <MyButton className={buttonStyles.headerButton}>
                             <Image src={Settings} alt="settings-icon" />
-                        </div>
+                        </MyButton>
+                        
                         {isAuth ? (
                             <MyButton
                                 className={buttonStyles.headerButton}

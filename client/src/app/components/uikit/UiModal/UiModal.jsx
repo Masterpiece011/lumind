@@ -4,8 +4,18 @@ import * as styles from "./UiModal.module.scss";
 const UiModal = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;
 
+    const handleOverlayClick = (e) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
     return (
-        <div className={styles.modalOverlay} onClick={onClose}>
+        <div
+            className={styles.modalOverlay}
+            onClick={handleOverlayClick}
+            style={{ pointerEvents: isOpen ? "auto" : "none" }}
+        >
             <div
                 className={styles.modalContent}
                 onClick={(e) => e.stopPropagation()}

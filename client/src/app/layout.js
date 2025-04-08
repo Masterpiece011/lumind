@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./scss/global.scss";
 import ReduxProvider from "./store/ReduxProvider";
 import AppRouter from "./Router/AppRouter";
+import { ModalProvider } from "./components/uikit/UiModal/ModalProvider";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -14,7 +15,9 @@ export default function RootLayout({ children }) {
         <html lang="en" className={inter.variable}>
             <body>
                 <ReduxProvider>
-                    <AppRouter>{children}</AppRouter>
+                    <ModalProvider>
+                        <AppRouter>{children}</AppRouter>
+                    </ModalProvider>
                 </ReduxProvider>
             </body>
         </html>

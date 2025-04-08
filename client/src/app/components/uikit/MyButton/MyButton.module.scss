@@ -33,6 +33,7 @@
 .headerButton {
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 34px;
     height: 34px;
     border-radius: 8px;
@@ -121,4 +122,37 @@
     &:hover {
         background-color: #5a1dc0;
     }
+}
+
+.userProfileButton {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    
+    &:hover {
+        transform: scale(1.1);
+        
+        .icon {
+            filter: brightness(1.2);
+        }
+    }
+    
+    &:active {
+        transform: scale(0.95);
+    }
+}
+
+.userProfileIcon {
+    width: 24px;
+    height: 24px;
+    color: var(--primary-color, #4914A5);
+    transition: filter 0.2s ease;
 }

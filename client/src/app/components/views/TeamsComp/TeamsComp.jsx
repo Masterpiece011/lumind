@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getTeams } from "@/app/api/teamAPI";
 import { MyButton } from "../../uikit";
@@ -10,9 +10,19 @@ import Arrow from "@/app/assets/icons/arrow-icon.svg";
 import "./TeamsComp.scss";
 import * as buttonStyles from "@/app/components/uikit/MyButton/MyButton.module.scss";
 
-const TeamsPage = ({ onSelectTeam }) => {
+const TeamsPage = memo(({ onSelectTeam }) => {
     const dispatch = useDispatch();
-    const { teams = [], loading, error } = useSelector((state) => state.teams);
+    const {
+        teams = [],
+        loading,
+        error,
+    } = useSelector(
+        (state) => state.teams,
+        (prev, next) =>
+            prev.teams === next.teams &&
+            prev.loading === next.loading &&
+            prev.error === next.error,
+    );
 
     useEffect(() => {
         dispatch(getTeams());
@@ -74,6 +84,6 @@ const TeamsPage = ({ onSelectTeam }) => {
             </ul>
         </div>
     );
-};
+});
 
 export { TeamsPage };
