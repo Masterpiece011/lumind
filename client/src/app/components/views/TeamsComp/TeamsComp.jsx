@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, memo } from "react";
+import React, { useEffect, memo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getTeams } from "@/app/api/teamAPI";
 import { MyButton } from "../../uikit";
@@ -12,6 +12,7 @@ import * as buttonStyles from "@/app/components/uikit/MyButton/MyButton.module.s
 
 const TeamsPage = memo(({ onSelectTeam }) => {
     const dispatch = useDispatch();
+    const [isExpanded, setIsExpanded] = useState(true);
     const {
         teams = [],
         loading,
@@ -28,60 +29,81 @@ const TeamsPage = memo(({ onSelectTeam }) => {
         dispatch(getTeams());
     }, [dispatch]);
 
-    if (loading) return <div>Загрузка...</div>;
-    if (error) return <div>Ошибка: {error}</div>;
+    const toggleAccordion = () => {
+        setIsExpanded(!isExpanded);
+    };
+
+    if (loading) return <div className="teams__loading">Загрузка...</div>;
+    if (error) return <div className="teams__error">Ошибка: {error}</div>;
     if (!Array.isArray(teams))
-        return <div>Ошибка: данные о командах некорректны.</div>;
+        return (
+            <div className="teams__error">
+                Ошибка: данные о командах некорректны.
+            </div>
+        );
 
     return (
-        <div className="teamsWrapper">
-            <div className="teamsDetails">
-                <MyButton className={buttonStyles.teamsButton}>
+        <div className="teams">
+            <div className="teams__header">
+                <MyButton
+                    className={`${buttonStyles.teamsButton} ${isExpanded ? "teams__button--active" : ""}`}
+                    onClick={toggleAccordion}
+                >
                     <div className={buttonStyles.tittleInfo}>
                         <p className={buttonStyles.teamTittle}>Захлушка</p>
-                        <Icon src={Arrow} alt="arrow" />
+                        <Icon
+                            src={Arrow}
+                            alt="arrow"
+                            className={`teams__arrow ${isExpanded ? "teams__arrow--expanded" : ""}`}
+                        />
                     </div>
                 </MyButton>
             </div>
-            <div className="teamDivider"></div>
-            <ul className="teamList">
-                {teams.length > 0 ? (
-                    teams.map((team) => (
-                        <li
-                            className="teamCard"
-                            key={team.id}
-                            onClick={() => onSelectTeam(team.id)}
-                        >
-                            <div
-                                className="avatar"
-                                style={{ backgroundColor: team.avatar_color }}
-                            ></div>
-                            <div className="teamInfo">
-                                <h3 className="teamName">{team.name}</h3>
-                                <div className="infoDivider"></div>
-                                {team.groups && team.groups.length > 0 ? (
-                                    <ul className="groupList">
-                                        {team.groups.map((group) => (
-                                            <li
-                                                key={group.id}
-                                                className="groupItem"
-                                            >
-                                                {group.title}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="noGroups">
-                                        Список групп Пуст
-                                    </p>
-                                )}
-                            </div>
-                        </li>
-                    ))
-                ) : (
-                    <p>Нет доступных команд</p>
-                )}
-            </ul>
+            <div className="teams__divider"></div>
+            <div
+                className={`teams__content ${isExpanded ? "teams__content--expanded" : "teams__content--collapsed"}`}
+            >
+                <ul className="teams__list">
+                    {teams.length > 0 ? (
+                        teams.map((team) => (
+                            <li
+                                className="teams__item"
+                                key={team.id}
+                                onClick={() => onSelectTeam(team.id)}
+                            >
+                                <div
+                                    className="teams__avatar"
+                                    style={{
+                                        backgroundColor: team.avatar_color,
+                                    }}
+                                ></div>
+                                <div className="teams__info">
+                                    <h3 className="teams__name">{team.name}</h3>
+                                    <div className="teams__info-divider"></div>
+                                    {team.groups && team.groups.length > 0 ? (
+                                        <ul className="teams__groups">
+                                            {team.groups.map((group) => (
+                                                <li
+                                                    key={group.id}
+                                                    className="teams__group"
+                                                >
+                                                    {group.title}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="teams__empty">
+                                            Список групп Пуст
+                                        </p>
+                                    )}
+                                </div>
+                            </li>
+                        ))
+                    ) : (
+                        <p className="teams__empty">Нет доступных команд</p>
+                    )}
+                </ul>
+            </div>
         </div>
     );
 });
