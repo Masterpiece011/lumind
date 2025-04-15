@@ -1,0 +1,132 @@
+@use "../../../../shared/styles/mixins/mixins" as *;
+
+.assignment-detail {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    color: #ffffff;
+  
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+  
+    &__header-left {
+      display: flex;
+      flex-direction: column;
+    }
+  
+    &__header-right {
+      display: flex;
+      align-items: center;
+    }
+  
+    &__title {
+      @include fontOptions(24px, 400, 24px);
+      color: #AEAEAE;
+    }
+  
+    &__meta {
+      margin-top: 8px;
+      @include fontOptions(14px, 400, 14px);
+      color: #AEAEAE;
+    }
+  
+    &__score {
+      margin-right: 20px;
+      @include fontOptions(16px, 400, 16px);
+      color: #AEAEAE;
+    }
+  
+    &__submit-btn {
+      background-color: #AEAEAE80;
+      color: whitesmoke;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+  
+      &:hover {
+        background-color: #444;
+      }
+    }
+  
+    &__body { 
+      display: flex;
+      gap: 30px;
+    }
+  
+    &__info {
+      flex: 3; 
+    }
+  
+    &__submission {
+      width: 500px;
+      flex: 2;
+      background: transparent;
+      border: 2px solid #9F70FD;
+      border-radius: 6px;
+      padding: 20px;
+    }
+
+    &__submission-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+  
+    &__submission-title {
+      @include fontOptions(18px, 400, 18px);
+      color: #AEAEAE;
+    }
+  
+    &__submission-status {
+      @include fontOptions(14px, 400, 14px);
+      color: #AEAEAE;
+    }
+  
+    &__section {
+      margin-bottom: 20px;
+      
+  
+      &-title {
+        @include fontOptions(18px, 400, 18px);
+        margin-bottom: 8px;
+      }
+  
+      &-text {
+        margin: 0 0 8px 0;
+        line-height: 1.4;
+      
+      }
+    }
+
+
+    &__submission-files {
+      color: black;
+    }
+
+  
+    &__attachment-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      color: black;
+  
+      li {
+        margin-bottom: 8px;
+  
+        a {
+          color: #0078d4;
+          text-decoration: none;
+  
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
