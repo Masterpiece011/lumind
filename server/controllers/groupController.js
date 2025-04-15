@@ -1,6 +1,8 @@
 import { json } from "sequelize";
 
-import { Groups, Users, Users_Groups } from "../models/models.js";
+import { Op } from "sequelize";
+
+import { Groups, Users } from "../models/models.js";
 
 import ApiError from "../error/ApiError.js";
 
@@ -9,16 +11,20 @@ class GroupController {
 
     async create(req, res) {
         try {
-            const { title, creator_id } = req.body;
+            const { title, description, creator_id } = req.body;
 
             if (!title || !creator_id) {
                 return res.status(400).json({
                     message: "Нельзя создать группу без названия или создателя",
                 });
             }
+
+            console.log(title, description, creator_id);
+
             const group = await Groups.create({
-                title: title,
-                creator_id: creator_id,
+                title,
+                description: description || "",
+                creator_id,
             });
 
             return res.json(group);
@@ -31,25 +37,58 @@ class GroupController {
 
     async getAll(req, res) {
         try {
+            const {
+                page = 1,
+                quantity = 10,
+                order = "ASC",
+                search_text = "",
+            } = req.body;
+
+            // Рассчитываем смещение (offset)
+            const offset = (page - 1) * quantity;
+
+            const where = {};
+            if (search_text) {
+                where[Op.or] = [{ title: { [Op.iLike]: `%${search_text}%` } }];
+            }
+
+            // Нормализация параметра сортировки
+            const normalizeOrder = (orderParam) => {
+                if (
+                    orderParam.toUpperCase() === "ASC" ||
+                    orderParam.toUpperCase() === "DESC"
+                ) {
+                    return [["title", orderParam]];
+                }
+
+                if (typeof orderParam === "string") {
+                    const [field, direction] = orderParam.split(":");
+                    return [[field || "title", direction || "ASC"]];
+                }
+
+                if (Array.isArray(orderParam) && orderParam.length === 2) {
+                    return [orderParam];
+                }
+
+                return [["title", "ASC"]];
+            };
+
+            const totalGroups = await Groups.count({ where });
+
+            const sequelizeOrder = normalizeOrder(order);
+
             const groups = await Groups.findAll({
-                include: [
-                    {
-                        model: Users,
-                        attributes: [
-                            "id",
-                            "first_name",
-                            "middle_name",
-                            "last_name",
-                        ],
-                        through: {
-                            attributes: [],
-                        },
-                    },
-                ],
+                limit: quantity,
+                offset: offset,
+                where: where,
+                order: sequelizeOrder,
+                attributes: { exclude: ["created_at", "updated_at"] },
             });
-            return res.json({ groups: groups });
+
+            return res.json({ groups: groups, total: totalGroups });
         } catch (error) {
             console.log("Error fetchgin groups ", error);
+
             return res.status(500).json({
                 message: "Ошибка при получении групп",
             });
@@ -60,24 +99,24 @@ class GroupController {
 
     async getOne(req, res) {
         try {
-            const { group_id } = req.params;
+            const { id } = req.params;
 
             const group = await Groups.findOne({
-                where: { id: group_id },
+                where: { id },
                 include: [
                     {
                         model: Users,
+                        as: "users",
                         attributes: [
                             "id",
                             "first_name",
                             "middle_name",
                             "last_name",
+                            "display_name",
                         ],
-                        through: {
-                            attributes: [],
-                        },
                     },
                 ],
+                attributes: { exclude: ["created_at", "updated_at"] },
             });
 
             if (!group) {
@@ -98,45 +137,42 @@ class GroupController {
     // Обновление группы
 
     async update(req, res) {
-        const { group_id, title, users } = req.body;
+        const { group_id, title, description, creator_id } = req.body;
         try {
+            if (!group_id) {
+                return ApiError.badRequest("Необходимо ввести id группы");
+            }
+
             const group = await Groups.findOne({
                 where: { id: group_id },
-                include: Users,
+                include: [
+                    {
+                        model: Users,
+                        as: "users",
+                        attributes: [
+                            "id",
+                            "first_name",
+                            "middle_name",
+                            "last_name",
+                            "display_name",
+                        ],
+                    },
+                ],
+                attributes: { exclude: ["created_at", "updated_at"] },
             });
 
             if (group) {
-                await group.update({ title: title });
+                await group.update({
+                    title: title || group.title,
+                    description: description || group.description,
+                    creator_id: creator_id || group.creator_id,
+                });
 
-                if (users) {
-                    const usersArray = Array.isArray(users) ? users : [users];
-
-                    await group.addUsers(usersArray);
-
-                    const updatedUsers = await group.getUsers();
-
-                    const userDetails = updatedUsers.map((user) => ({
-                        id: user.id,
-                        first_name: user.first_name,
-                        middle_name: user.middle_name,
-                        last_name: user.last_name,
-                    }));
-
-                    return res.json({
-                        group: {
-                            id: group.id,
-                            title: group.title,
-                            users: userDetails,
-                        },
-                    });
-                }
-
-                return res.json({
-                    group: {
-                        id: group.id,
-                        title: group.title,
-                        users: [],
-                    },
+                // Формируем ответ
+                return res.status(200).json({
+                    success: true,
+                    data: group,
+                    message: `Группа с id = ${group_id} успешно обновлена`,
                 });
             } else {
                 return ApiError.badRequest("Группа не найдена");
@@ -150,30 +186,24 @@ class GroupController {
     // Удаление группы
 
     async delete(req, res) {
-        const { group_id } = req.body;
-
         try {
-            const group_with_users = await Users_Groups.findAll({
-                where: {
-                    group_id: group_id,
-                },
-            });
+            const { id } = req.params;
 
-            if (group_with_users) {
-                await Users_Groups.destroy({
-                    where: {
-                        group_id: group_id,
-                    },
-                });
+            if (!id) return;
+
+            const group = await Groups.findByPk(id);
+
+            if (!group) {
+                return ApiError.badRequest("Группа не найдена");
             }
-            await Groups.destroy({
-                where: {
-                    id: group_id,
-                },
-            });
 
-            return res.json({
-                message: `Группа по id ${group_id} была удалена`,
+            const groupTitle = group.title;
+
+            await group.destroy();
+
+            return res.status(200).json({
+                success: true,
+                message: `Группа "${groupTitle}" (id: ${id}) успешно удалена`,
             });
         } catch (e) {
             return ApiError.badRequest("Невозможно удалить группу");

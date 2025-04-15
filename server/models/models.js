@@ -2,12 +2,12 @@ import { now } from "sequelize/lib/utils";
 
 import sequelize from "../db.js";
 
-import DataTypes from "sequelize"
+import DataTypes from "sequelize";
 
 //Пользователь
 
 export const Users = sequelize.define(
-    "user",
+    "users",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         img: {
@@ -17,9 +17,42 @@ export const Users = sequelize.define(
         },
         email: { type: DataTypes.STRING, unique: true },
         password: { type: DataTypes.STRING, allowNull: false },
-        first_name: { type: DataTypes.STRING },
-        middle_name: { type: DataTypes.STRING },
-        last_name: { type: DataTypes.STRING },
+        first_name: { type: DataTypes.STRING, defaultValue: "" },
+        middle_name: { type: DataTypes.STRING, defaultValue: "" },
+        last_name: { type: DataTypes.STRING, defaultValue: "" },
+        display_name: { type: DataTypes.STRING, defaultValue: "" },
+        created_at: {
+            type: DataTypes.DATE,
+            defaultValue: now(),
+            allowNull: true,
+        },
+        updated_at: {
+            type: DataTypes.DATE,
+            defaultValue: now(),
+            allowNull: true,
+        },
+    },
+    {
+        timestamps: true,
+        createdAt: "created_at",
+        updatedAt: "updated_at",
+    }
+);
+
+//Организации
+
+export const Organizations = sequelize.define(
+    "organizations",
+    {
+        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        img: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: "non-avatar-organization.png",
+        },
+        title: { type: DataTypes.STRING, unique: true, allowNull: false },
+        description: { type: DataTypes.STRING, allowNull: true },
+        creator_id: { type: DataTypes.INTEGER, allowNull: true },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: now(),
@@ -69,8 +102,8 @@ export const Chats = sequelize.define(
     "chats",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        created_at: { type: DataTypes.DATE, defaultValue: now() },
         chat_members: { type: DataTypes.JSON },
+        created_at: { type: DataTypes.DATE, defaultValue: now() },
     },
     {
         timestamps: true,
@@ -81,18 +114,19 @@ export const Chats = sequelize.define(
 
 //Сообщения чата
 
-export const Chat_messages = sequelize.define(
+export const Chat_Messages = sequelize.define(
     "chat_messages",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         message: { type: DataTypes.STRING },
-        from_user: { type: DataTypes.STRING, allowNull: false },
+        chat_id: { type: DataTypes.INTEGER, allowNull: false },
+        user_id: { type: DataTypes.INTEGER, allowNull: false },
         created_at: { type: DataTypes.DATE, defaultValue: now() },
     },
     {
         timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
+        createdAt: "created_at",
+        updatedAt: "updated_at",
     }
 );
 
@@ -107,8 +141,8 @@ export const Chat_Members = sequelize.define(
     },
     {
         timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
+        createdAt: "created_at",
+        updatedAt: "updated_at",
     }
 );
 
@@ -118,16 +152,16 @@ export const Notifications = sequelize.define(
     "notifications",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        title: { type: DataTypes.STRING },
+        title: { type: DataTypes.STRING, allowNull: false },
         message: { type: DataTypes.STRING, allowNull: true },
-        is_read: { type: DataTypes.BOOLEAN },
+        is_viewed: { type: DataTypes.BOOLEAN },
         user_id: { type: DataTypes.INTEGER },
         notificator_id: { type: DataTypes.INTEGER, allowNull: true },
     },
     {
         timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
+        createdAt: "created_at",
+        updatedAt: "updated_at",
     }
 );
 
@@ -142,37 +176,9 @@ export const Groups = sequelize.define(
             unique: true,
             autoIncrement: true,
         },
-        title: { type: DataTypes.STRING },
-        created_at: {
-            type: DataTypes.DATE,
-            defaultValue: now(),
-            allowNull: true,
-        },
-        updated_at: {
-            type: DataTypes.DATE,
-            defaultValue: now(),
-            allowNull: true,
-        },
+        title: { type: DataTypes.STRING, allowNull: false },
+        description: { type: DataTypes.STRING, allowNull: true },
         creator_id: { type: DataTypes.INTEGER, allowNull: true },
-    },
-    {
-        timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
-    }
-);
-
-//Группы c Пользователями
-
-export const Users_Groups = sequelize.define(
-    "users_groups",
-    {
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            unique: true,
-            autoIncrement: true,
-        },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: now(),
@@ -192,6 +198,7 @@ export const Users_Groups = sequelize.define(
 );
 
 // Команды
+
 export const Teams = sequelize.define(
     "teams",
     {
@@ -213,7 +220,9 @@ export const Teams = sequelize.define(
         updatedAt: "updated_at",
     }
 );
+
 //Команды с Пользователями
+
 export const Users_Teams = sequelize.define(
     "users_teams",
     {
@@ -241,41 +250,14 @@ export const Users_Teams = sequelize.define(
     }
 );
 
-export const Groups_Teams = sequelize.define(
-    "groups_teams",
-    {
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            unique: true,
-            autoIncrement: true,
-        },
-        created_at: {
-            type: DataTypes.DATE,
-            defaultValue: now(),
-            allowNull: true,
-        },
-        updated_at: {
-            type: DataTypes.DATE,
-            defaultValue: now(),
-            allowNull: true,
-        },
-    },
-    {
-        timestamps: true,
-        createdAt: "created_at",
-        updatedAt: "updated_at",
-    }
-);
+// Задания
 
-//Задания
-export const Assignments = sequelize.define(
-    "assignments",
+export const Tasks = sequelize.define(
+    "tasks",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         title: { type: DataTypes.STRING, allowNull: false },
         description: { type: DataTypes.STRING, allowNull: true },
-        due_date: { type: DataTypes.DATE, allowNull: false },
         comment: { type: DataTypes.STRING, allowNull: true },
         creator_id: { type: DataTypes.INTEGER, allowNull: true },
     },
@@ -286,67 +268,43 @@ export const Assignments = sequelize.define(
     }
 );
 
-//Вложения задания
+// Команды и задания
 
-export const Assignments_investments = sequelize.define(
-    "assignments_investments",
-    {
-        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        assignment_id: { type: DataTypes.INTEGER },
-        file_url: { type: DataTypes.STRING, allowNull: true },
-    },
-    {
-        timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
-    }
-);
-
-//Задания_Группы
-
-export const Assignments_Teams = sequelize.define(
-    "assignments_teams",
+export const Teams_Tasks = sequelize.define(
+    "teams_tasks",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     },
     {
         timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
+        createdAt: "created_at",
+        updatedAt: "updated_at",
     }
 );
 
-//Проверка(сдача) задания
+// Назначения
 
-export const Submissions = sequelize.define(
-    "submissions",
+export const Assignments = sequelize.define(
+    "assignments",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        user_id: { type: DataTypes.INTEGER },
-        assignment_id: { type: DataTypes.INTEGER },
-        submitted_date: { type: DataTypes.DATE, allowNull: false },
+        title: { type: DataTypes.STRING, allowNull: false },
+        description: { type: DataTypes.STRING, allowNull: true },
         comment: { type: DataTypes.STRING, allowNull: true },
+        user_id: { type: DataTypes.INTEGER, allowNull: false },
+        creator_id: { type: DataTypes.INTEGER, allowNull: false },
+        assessment: { type: DataTypes.INTEGER, allowNull: true },
+        status: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: "assigned",
+        },
+        plan_date: { type: DataTypes.DATE, allowNull: true },
     },
     {
         timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
-    }
-);
-
-//Вложения для проверка
-
-export const Submissions_investments = sequelize.define(
-    "submissions_investments",
-    {
-        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        submission_id: { type: DataTypes.INTEGER },
-        file_url: { type: DataTypes.STRING },
-    },
-    {
-        timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
+        createdAt: "created_at",
+        updatedAt: "updated_at",
     }
 );
 
@@ -364,24 +322,8 @@ export const Publications = sequelize.define(
     },
     {
         timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
-    }
-);
-
-//Вложения публикации
-
-export const Publication_investments = sequelize.define(
-    "publication_investments",
-    {
-        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        publication_id: { type: DataTypes.INTEGER },
-        file_url: { type: DataTypes.STRING, allowNull: true },
-    },
-    {
-        timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
+        createdAt: "created_at",
+        updatedAt: "updated_at",
     }
 );
 
@@ -396,28 +338,12 @@ export const Publication_comments = sequelize.define(
     },
     {
         timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
+        createdAt: "created_at",
+        updatedAt: "updated_at",
     }
 );
 
-//Вложения комментария к публикации
-
-export const Publication_comments_investments = sequelize.define(
-    "publication_comments_investments",
-    {
-        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        publication_comment_id: { type: DataTypes.INTEGER },
-        file_url: { type: DataTypes.STRING, allowNull: false },
-    },
-    {
-        timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
-    }
-);
-
-//Конференция
+// Конференции
 
 export const Conferences = sequelize.define(
     "conferences",
@@ -433,160 +359,269 @@ export const Conferences = sequelize.define(
     },
     {
         timestamps: true,
-        createdAt: "created_at", // необязательно, если названия совпадают
-        updatedAt: "updated_at", // необязательно, если названия совпадают
+        createdAt: "created_at",
+        updatedAt: "updated_at",
     }
 );
 
-//Участники конференции
+// Участники конференции
 
 export const Conference_Members = sequelize.define(
     "conference_members",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        user_id: { type: DataTypes.INTEGER },
+    },
+    {
+        timestamps: true,
+        createdAt: "created_at",
+        updatedAt: "updated_at",
+    }
+);
+
+// Файлы
+
+export const Files = sequelize.define(
+    "files",
+    {
+        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        file_url: { type: DataTypes.STRING, allowNull: false },
+        entity_type: { type: DataTypes.STRING, allowNull: false },
+        entity_id: { type: DataTypes.INTEGER, allowNull: false },
     },
     {
         timestamps: true,
         createdAt: "created_at", // необязательно, если названия совпадают
         updatedAt: "updated_at", // необязательно, если названия совпадают
+    },
+    {
+        indexes: [],
     }
 );
 
+//Связка Организации с Пользователем
+
+Organizations.hasMany(Users, {
+    foreignKey: "organization_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
+
+Users.belongsTo(Organizations, {
+    foreignKey: "organization_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
+
 //Связка Пользователя с Уведомлениями
 
-Users.hasMany(Notifications, { foreignKey: "user_id" });
-Notifications.belongsTo(Users, { foreignKey: "user_id" });
+Users.hasMany(Notifications, {
+    foreignKey: "user_id",
+    onDelete: "CASCADE", // Удалить уведомления если удалён пользователь
+    onUpdate: "CASCADE", // Обновить user_id если изменился id пользователя
+});
+
+Notifications.belongsTo(Users, {
+    foreignKey: "user_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
 
 //Связка Пользователя с Ролью
 
-Roles.hasMany(Users, { foreignKey: "role_id" });
-Users.belongsTo(Roles, { foreignKey: "role_id" });
+Roles.hasMany(Users, {
+    foreignKey: "role_id",
+    onDelete: "RESTRICT", // или 'SET NULL' если allowNull: true
+    onUpdate: "CASCADE",
+});
+Users.belongsTo(Roles, {
+    foreignKey: "role_id",
+    onDelete: "RESTRICT", // или 'SET NULL' если allowNull: true
+    onUpdate: "CASCADE",
+});
 
-//Связка Пользователя с Чатом
+//Связка между Командами и Пользователями
 
-Chats.belongsToMany(Users, { through: Chat_Members, foreignKey: "chat_id" });
-Users.belongsToMany(Chats, { through: Chat_Members, foreignKey: "user_id" });
-
-//Связка между Команд и Пользователей
 Users.belongsToMany(Teams, { through: Users_Teams, foreignKey: "user_id" });
 Teams.belongsToMany(Users, { through: Users_Teams, foreignKey: "team_id" });
 
-//Связка между Командой и Группой
-Groups.belongsToMany(Teams, { through: Groups_Teams, foreignKey: "group_id" });
-Teams.belongsToMany(Groups, { through: Groups_Teams, foreignKey: "team_id" });
+//Связка Пользователя с Чатом через Chat_Members
+
+Chats.belongsToMany(Users, {
+    through: Chat_Members,
+    foreignKey: "chat_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
+
+Users.belongsToMany(Chats, {
+    through: Chat_Members,
+    foreignKey: "user_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
 
 //Связка Чата с Сообщениями чата
 
-Chats.hasMany(Chat_messages, { foreignKey: "chat_id" });
-Chat_messages.belongsTo(Chats, { foreignKey: "chat_id" });
-
-//Связка Конференции с Пользователем
-
-Conferences.belongsToMany(Users, {
-    through: Conference_Members,
-    foreignKey: "conference_id",
+Chats.hasMany(Chat_Messages, {
+    foreignKey: "chat_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
 });
-Users.belongsToMany(Conferences, {
-    through: Conference_Members,
-    foreignKey: "user_id",
+
+Chat_Messages.belongsTo(Chats, {
+    foreignKey: "chat_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
 });
 
 //Связка Публикации с Конференцией
 
-Publications.hasOne(Conferences, { foreignKey: "publication_id" });
-Conferences.belongsTo(Publications, { foreignKey: "publication_id" });
-
-//Связка Публикации с Группой
-
-Groups.hasMany(Publications, { foreignKey: "group_id" });
-Publications.belongsTo(Groups, { foreignKey: "group_id" });
-
-//Связка Вложений публикации с Публикацией
-
-Publications.hasMany(Publication_investments, { foreignKey: "publication_id" });
-Publication_investments.belongsTo(Publications, {
+Publications.hasOne(Conferences, {
     foreignKey: "publication_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
+
+Conferences.belongsTo(Publications, {
+    foreignKey: "publication_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
+
+//Связка Публикации с Командой
+
+Teams.hasMany(Publications, {
+    foreignKey: "team_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
+
+Publications.belongsTo(Teams, {
+    foreignKey: "team_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
 });
 
 //Связка Комментов публикации с Публикацией
 
-Publications.hasMany(Publication_comments, { foreignKey: "publication_id" });
-Publication_comments.belongsTo(Publications, { foreignKey: "publication_id" });
+Publications.hasMany(Publication_comments, {
+    foreignKey: "publication_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
+
+Publication_comments.belongsTo(Publications, {
+    foreignKey: "publication_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
 
 //Связка Комментов публикации с Пользователем (Создатель коммента)
 
 Users.hasOne(Publication_comments, { foreignKey: "user_id" });
 Publication_comments.belongsTo(Users, { foreignKey: "user_id" });
 
-//Связка Вложений комментов публикации с Комментами публикации
-
-Publication_comments.hasMany(Publication_comments_investments, {
-    foreignKey: "publication_comment_id",
-});
-Publication_comments_investments.belongsTo(Publication_comments, {
-    foreignKey: "publication_comment_id",
-});
-
 //Связка Пользоватей с Группами
 
-Groups.belongsToMany(Users, { through: Users_Groups, foreignKey: "group_id" });
-Users.belongsToMany(Groups, { through: Users_Groups, foreignKey: "user_id" });
+Users.belongsTo(Groups, {
+    foreignKey: "group_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
 
-//Связка Пользователя с Заданием
-Users.hasMany(Assignments, { foreignKey: "creator_id", as: "assignments" });
-Assignments.belongsTo(Users, { foreignKey: "creator_id", as: "creator" });
+Groups.hasMany(Users, {
+    foreignKey: "group_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
 
 //Связка Заданий с Командой
 
-Assignments.belongsToMany(Teams, {
-    through: Assignments_Teams,
-    foreignKey: "assignment_id",
+Tasks.belongsToMany(Teams, {
+    through: Teams_Tasks,
+    foreignKey: "task_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
 });
-Teams.belongsToMany(Assignments, {
-    through: Assignments_Teams,
+
+Teams.belongsToMany(Tasks, {
+    through: Teams_Tasks,
     foreignKey: "team_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
 });
 
-//Связка Вложений заданий с Заданием
+//Связка Заданий с назначением
 
-Assignments.hasMany(Assignments_investments, { foreignKey: "assignment_id" });
-Assignments_investments.belongsTo(Assignments, { foreignKey: "assignment_id" });
+Tasks.hasMany(Assignments, {
+    foreignKey: "task_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
 
-//Связка Проверки с Заданием
+Assignments.belongsTo(Tasks, {
+    foreignKey: "task_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
 
-Assignments.hasOne(Submissions, { foreignKey: "assignment_id" });
-Submissions.belongsTo(Assignments, { foreignKey: "assignment_id" });
+//Связка Публикаций с Файлами
 
-//Связка Вложений проверки с Проверкой
+Publications.hasMany(Files, {
+    foreignKey: "entity_id",
+    constraints: false,
+    scope: {
+        entity_type: "publication",
+    },
+});
 
-Submissions.hasMany(Submissions_investments, { foreignKey: "submission_id" });
-Submissions_investments.belongsTo(Submissions, { foreignKey: "submission_id" });
+Files.belongsTo(Publications, {
+    foreignKey: "entity_id",
+    constraints: false,
+});
 
-//Связка Проверки с Пользователем
+//Связка Комментариев публикации с Файлами
 
-Users.hasOne(Submissions, { foreignKey: "user_id" });
-Submissions.belongsTo(Users, { foreignKey: "user_id" });
+Publication_comments.hasMany(Files, {
+    foreignKey: "entity_id",
+    constraints: false,
+    scope: {
+        entity_type: "publication_comment",
+    },
+});
 
-// export default {
-//     Users,
-//     Roles,
-//     Groups,
-//     Teams,
-//     Users_Groups,
-//     Users_Teams,
-//     Groups_Teams,
-//     Assignments_Teams,
-//     Chat_Members,
-//     Notifications,
-//     Assignments,
-//     Assignments_investments,
-//     Submissions,
-//     Submissions_investments,
-//     Chats,
-//     Chat_messages,
-//     Conferences,
-//     Conference_Members,
-//     Publications,
-//     Publication_comments,
-//     Publication_comments_investments,
-// };
+Files.belongsTo(Publication_comments, {
+    foreignKey: "entity_id",
+    constraints: false,
+});
+
+//Связка Заданий с Файлами
+
+Tasks.hasMany(Files, {
+    foreignKey: "entity_id",
+    constraints: false,
+    scope: {
+        entity_type: "task",
+    },
+});
+
+Files.belongsTo(Tasks, {
+    foreignKey: "entity_id",
+    constraints: false,
+});
+
+//Связка Назначений с Файлами
+
+Assignments.hasMany(Files, {
+    foreignKey: "entity_id",
+    constraints: false,
+    scope: {
+        entity_type: "assignment",
+    },
+});
+
+Files.belongsTo(Assignments, {
+    foreignKey: "entity_id",
+    constraints: false,
+});

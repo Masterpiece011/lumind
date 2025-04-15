@@ -3,13 +3,7 @@ dotenv.config();
 
 import path from "path";
 import { fileURLToPath } from "url";
-import {
-    Submissions,
-    Submissions_investments,
-    Assignments_Teams,
-    Assignments,
-    Users_Teams,
-} from "../models/models.js";
+import { Teams_Tasks, Assignments, Users_Teams } from "../models/models.js";
 
 import ApiError from "../error/ApiError.js";
 import FileService from "../multer/fileService.js";
@@ -68,7 +62,7 @@ class SubmissionController {
             const teamIds = userTeams.map((team) => team.team_id);
 
             // Проверка связи задания с командами пользователя через Assignments_Teams
-            const assignmentTeamLink = await Assignments_Teams.findOne({
+            const assignmentTeamLink = await Teams_Tasks.findOne({
                 where: {
                     assignment_id: assignment_id,
                     team_id: teamIds,
@@ -222,7 +216,7 @@ class SubmissionController {
     // Получение всех отправок для задания
     async getAll(req, res, next) {
         try {
-            const { user_id } = req.query; 
+            const { user_id } = req.query;
 
             if (!user_id) {
                 return next(
