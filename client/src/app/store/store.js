@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userReducer from "../store/userStore";
-import usersReducer from "../store/usersStore";
+import userReducer from "../../entities/user/model/userStore";
+import usersReducer from "../../entities/user/model/usersStore";
 import groupReducer from "../store/groupStore";
-import teamReducer from "../store/teamStore";
-import assignmentReducer from "../store/assignmentStore";
-import submissionReducer from "../store/submissionStore";
+import teamReducer from "../../entities/team/model/teamStore";
+import assignmentReducer from "../../entities/assignment/model/assignmentStore";
+import submissionReducer from "../../features/submissions/model/submissionStore";
 
 export const store = configureStore({
     reducer: {

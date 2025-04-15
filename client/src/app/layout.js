@@ -1,8 +1,8 @@
 import { Inter } from "next/font/google";
-import "./scss/global.scss";
-import ReduxProvider from "./store/ReduxProvider";
-import AppRouter from "./Router/AppRouter";
-import { ModalProvider } from "./components/uikit/UiModal/ModalProvider";
+import "../shared/styles/global.scss";
+import ReduxProvider from "./providers/Redux/ReduxProvider";
+import AppRouter from "./providers/AppRouter/AppRouter";
+import { ModalProvider } from "@/shared/uikit/UiModal/ModalProvider";
 
 const inter = Inter({
     subsets: ["latin"],

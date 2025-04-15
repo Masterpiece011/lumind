@@ -1,0 +1,1 @@
+export { HomeComp } from "./HomeComp";

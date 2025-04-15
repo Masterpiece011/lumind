@@ -1,5 +1,5 @@
-import AdminPage from "./components/AdminComp/AdminComp";
-import { MainComp } from "./components/MainComp";
+import AdminPage from "../features/admin/ui/AdminComp/AdminComp";
+import { MainComp } from "./layouts/MainLayout";
 
 export const URLS = {
     TEST_URL: "http://localhost:3000/test",
