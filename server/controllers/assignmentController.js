@@ -3,31 +3,33 @@ dotenv.config();
 
 import {
     Assignments,
-    Assignments_investments,
-    Submissions_investments,
-    Submissions,
+    Files,
     Users_Teams,
     Teams,
-    Assignments_Teams,
+    Teams_Tasks,
     Users,
+    Tasks,
 } from "../models/models.js";
 
 import ApiError from "../error/ApiError.js";
 
 class AssignmentController {
+    // Создание назаначения
     async create(req, res, next) {
         try {
             const {
                 title,
                 description,
-                due_date,
                 comment,
                 creator_id,
-                team_id,
+                user_id,
+                task_id,
                 investments = [],
+                status,
+                plan_date,
             } = req.body;
 
-            if (!title || !due_date || !creator_id || !team_id) {
+            if (!title || !plan_date || !creator_id) {
                 return next(
                     ApiError.badRequest(
                         "Необходимо указать обязательные данные"
@@ -35,58 +37,55 @@ class AssignmentController {
                 );
             }
 
-            // Проверка, состоит ли пользователь в команде
-            const userInTeam = await Users_Teams.findOne({
-                where: { user_id: creator_id, team_id: team_id },
-            });
+            const task = await Tasks.findByPk(task_id);
 
-            if (!userInTeam) {
-                return next(
-                    ApiError.forbidden(
-                        "Пользователь не состоит в указанной команде"
-                    )
-                );
+            if (!task) {
+                return next(ApiError.badRequest("Задания не существует"));
             }
 
-            // Создание задания
+            // Создание назначения
             const assignment = await Assignments.create({
                 title,
                 description,
-                due_date,
+                plan_date,
                 comment,
                 creator_id,
+                user_id,
+                task_id,
+                status: status || "assigned",
             });
 
-            // Привязка задания к команде через Assignments_Teams
-            await Assignments_Teams.create({
-                assignment_id: assignment.id,
-                team_id: team_id,
-                team_id: team_id,
-            });
+            let assignmentInvestments = [];
 
             // Добавление вложений
             if (investments.length > 0) {
                 const investmentRecords = investments.map((fileUrl) => ({
-                    assignment_id: assignment.id,
+                    entity_id: assignment.id,
+                    entity_type: "assignment",
                     file_url: fileUrl,
                 }));
-                await Assignments_investments.bulkCreate(investmentRecords);
+                assignmentInvestments = await Files.bulkCreate(
+                    investmentRecords
+                );
             }
 
             return res.json({
-                message: "Задание успешно создано",
-                assignment,
+                message: "Назначение успешно создано",
+                assignment: {
+                    assignment,
+                    investments: assignmentInvestments,
+                },
             });
         } catch (error) {
             next(
                 ApiError.internal(
-                    `Ошибка при создании задания: ${error.message}`
+                    `Ошибка при создании назначения: ${error.message}`
                 )
             );
         }
     }
 
-    // Получение всех заданий пользователя
+    // Получение всех назначений пользователя
     async getAll(req, res, next) {
         try {
             const { user_id, filter } = req.query;
@@ -122,7 +121,7 @@ class AssignmentController {
                         where: { id: teamIds },
                     },
                     {
-                        model: Assignments_investments,
+                        model: Files,
                         attributes: ["id", "file_url"],
                     },
                     {
@@ -167,62 +166,39 @@ class AssignmentController {
     async getOne(req, res, next) {
         try {
             const { id } = req.params;
-            const { user_id } = req.query;
 
-            if (!id || !user_id) {
+            if (!id) {
                 return next(
-                    ApiError.badRequest(
-                        "Необходимо указать ID задания и ID пользователя"
-                    )
+                    ApiError.badRequest("Необходимо указать ID назначения")
                 );
             }
 
             // Проверяем, в каких командах состоит пользователь
-            const userTeams = await Users_Teams.findAll({
-                where: { user_id: user_id },
-                attributes: ["team_id"],
-            });
+            // const userTeams = await Users_Teams.findAll({
+            //     where: { user_id: user_id },
+            //     attributes: ["team_id"],
+            // });
 
-            const teamIds = userTeams.map((team) => team.team_id);
+            // const teamIds = userTeams.map((team) => team.team_id);
 
-            if (teamIds.length === 0) {
-                return next(
-                    ApiError.forbidden(
-                        "Пользователь не состоит в командах, связанных с этим заданием"
-                    )
-                );
-            }
+            // if (teamIds.length === 0) {
+            //     return next(
+            //         ApiError.forbidden(
+            //             "Пользователь не состоит в командах, связанных с этим заданием"
+            //         )
+            //     );
+            // }
 
             const assignment = await Assignments.findOne({
                 where: { id },
                 include: [
                     {
-                        model: Users,
-                        as: "creator",
+                        model: Files,
                         attributes: [
                             "id",
-                            "first_name",
-                            "middle_name",
-                            "last_name",
-                            "email",
-                        ],
-                    },
-                    {
-                        model: Teams,
-                        attributes: ["id", "name"],
-                        through: { attributes: [] },
-                    },
-                    {
-                        model: Assignments_investments,
-                        attributes: ["id", "file_url"],
-                    },
-                    {
-                        model: Submissions,
-                        include: [
-                            {
-                                model: Submissions_investments,
-                                attributes: ["id", "file_url"],
-                            },
+                            "entity_id",
+                            "entity_type",
+                            "file_url",
                         ],
                     },
                 ],
@@ -236,7 +212,7 @@ class AssignmentController {
                 );
             }
 
-            return res.json(assignment);
+            return res.json({ assignment });
         } catch (error) {
             next(
                 ApiError.internal(
@@ -246,64 +222,71 @@ class AssignmentController {
         }
     }
 
-    // Обновление задания
+    // Обновление назначения
     async update(req, res, next) {
         try {
             const {
-                task_id,
+                assignment_id,
                 title,
                 description,
-                due_date,
+                plan_date,
                 comment,
                 investments = [],
             } = req.body;
 
-            if (!task_id) {
+            if (!assignment_id) {
                 return next(
-                    ApiError.badRequest("Необходимо указать ID задания")
+                    ApiError.badRequest("Необходимо указать ID назначения")
                 );
             }
 
-            const assignment = await Assignments.findByPk(task_id);
+            const assignment = await Assignments.findByPk(assignment_id);
 
             if (!assignment) {
-                return next(ApiError.notFound("Задание не найдено"));
+                return next(ApiError.notFound("Назначение не найдено"));
             }
 
-            // Обновление задания
+            // Обновление назначения
             await assignment.update({
                 title: title || assignment.title,
                 description: description || assignment.description,
-                due_date: due_date || assignment.due_date,
                 comment: comment || assignment.comment,
+                plan_date: plan_date || assignment.plan_date,
             });
+
+            let assignmentInvestments = [];
 
             // Обновление вложений (удаляем старые и добавляем новые)
             if (investments.length > 0) {
-                await Assignments_investments.update({
-                    where: { assignment_id: task_id },
+                await Files.update({
+                    where: { assignment_id: assignment_id },
                 });
                 const investmentRecords = investments.map((fileUrl) => ({
-                    assignment_id: task_id,
+                    assignment_id: assignment_id,
                     file_url: fileUrl,
                 }));
-                await Assignments_investments.bulkCreate(investmentRecords);
+                assignmentInvestments = await Files.bulkCreate(
+                    investmentRecords
+                );
             }
 
             return res.json({
-                message: "Задание успешно обновлено",
-                assignment,
+                message: "Назначение успешно обновлено",
+                assignment: {
+                    assignment,
+                    investments: assignmentInvestments,
+                },
             });
         } catch (error) {
             next(
                 ApiError.internal(
-                    `Ошибка при обновлении задания: ${error.message}`
+                    `Ошибка при обновлении назначения: ${error.message}`
                 )
             );
         }
     }
 
-    // Удаление задания
+    // Удаление назначения
     async delete(req, res, next) {
         try {
             const { task_id } = req.body;
@@ -321,12 +304,12 @@ class AssignmentController {
             }
 
             // Удаление связей в Assignments_Teams
-            await Assignments_Teams.destroy({
+            await Teams_Tasks.destroy({
                 where: { assignment_id: task_id },
             });
 
             // Удаление задания и связанных вложений
-            await Assignments_investments.destroy({
+            await Files.destroy({
                 where: { assignment_id: task_id },
             });
             await assignment.destroy();

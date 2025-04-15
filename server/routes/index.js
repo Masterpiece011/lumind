@@ -14,6 +14,9 @@ import teamConferenceRouter from "./teamConferenceRouter.js";
 import commentRouter from "./commentRouter.js";
 import investmentRouter from "./investmentRouter.js";
 import teamRouter from "./teamRouter.js";
+import usersTeamsRouter from "./usersTeamsRouter.js";
+import teamsTasksRouter from "./teamsTasksRouter.js";
+import taskRouter from "./taskRouter.js";
 
 router.use("/users", userRouter);
 router.use("/roles", roleRouter);
@@ -27,5 +30,8 @@ router.use("/publications", publicationRouter);
 router.use("/comments", commentRouter);
 router.use("/investments", investmentRouter);
 router.use("/teams", teamRouter);
+router.use("/users-teams", usersTeamsRouter);
+router.use("/teams-tasks", teamsTasksRouter);
+router.use("/tasks", taskRouter);
 
 export default router;

@@ -14,9 +14,9 @@ userRouter.post(
 );
 userRouter.post("/login", userController.login);
 userRouter.get("/auth", authMiddleware, userController.check);
-userRouter.get("/", authMiddleware, userController.getAll);
+userRouter.post("/", authMiddleware, userController.getAll);
 userRouter.get("/:id", authMiddleware, userController.getOne);
-userRouter.delete("/", authMiddleware, roleMiddleware(), userController.delete);
+userRouter.delete("/:id", authMiddleware, roleMiddleware(), userController.delete);
 
 userRouter.put("/", authMiddleware, roleMiddleware(), userController.update);
 
