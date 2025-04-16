@@ -6,6 +6,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { check } from "@/shared/api/userAPI";
 import { setUser, setIsAuth } from "@/entities/user/model/userStore";
 import { MainComp } from "@/app/layouts/MainLayout";
+import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 
 const AppRouter = ({ children }) => {
     const dispatch = useDispatch();
@@ -55,7 +56,7 @@ const AppRouter = ({ children }) => {
     }, [router]);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <ClockLoader loading={loading} />;
     }
 
     if (shouldRenderMainComp) {
