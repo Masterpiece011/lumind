@@ -9,6 +9,7 @@ import Arrow from "@/app/assets/icons/arrow-icon.svg";
 import "./style.scss";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 import { getTeams } from "@/shared/api/teamAPI";
+import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 
 const TeamsPage = memo(({ onSelectTeam }) => {
     const dispatch = useDispatch();
@@ -33,7 +34,7 @@ const TeamsPage = memo(({ onSelectTeam }) => {
         setIsExpanded(!isExpanded);
     };
 
-    if (loading) return <div className="teams__loading">Загрузка...</div>;
+    if (loading) return <ClockLoader loading={loading} />;
     if (error) return <div className="teams__error">Ошибка: {error}</div>;
     if (!Array.isArray(teams))
         return (
