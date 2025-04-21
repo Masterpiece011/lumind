@@ -11,9 +11,9 @@ const ClockLoader = ({ loading }) => {
         if (!loading) return;
 
         const interval = setInterval(() => {
-            setMinuteDeg((prev) => (prev + 15) % 360);
-            setHourDeg((prev) => (prev + 5) % 360);
-        }, 50);
+            setMinuteDeg((prev) => (prev + 6) % 360);
+            setHourDeg((prev) => (prev + 0.5) % 360);
+        }, 100);
 
         return () => clearInterval(interval);
     }, [loading]);
@@ -25,11 +25,15 @@ const ClockLoader = ({ loading }) => {
             <div className="clock-loader__face">
                 <div
                     className="clock-loader__hour-hand"
-                    style={{ transform: `rotate(${hourDeg}deg)` }}
+                    style={{
+                        transform: `translate(-50%, -100%) rotate(${hourDeg}deg)`,
+                    }}
                 />
                 <div
                     className="clock-loader__minute-hand"
-                    style={{ transform: `rotate(${minuteDeg}deg)` }}
+                    style={{
+                        transform: `translate(-50%, -100%) rotate(${minuteDeg}deg)`,
+                    }}
                 />
                 <div className="clock-loader__center-dot" />
             </div>
