@@ -4,17 +4,24 @@ import Cookies from "js-cookie";
 import { $authHost, $host } from "./page";
 
 export const login = async (email, password) => {
-    const { data } = await $host.post("api/users/login", { email, password });
+    try {
+        const { data } = await $host.post("api/users/login", {
+            email,
+            password,
+        });
 
-    if (!data.token) {
-        throw new Error("Токен отсутствует в ответе сервера.");
+        if (!data.token) {
+            throw new Error("Токен отсутствует в ответе сервера.");
+        }
+
+        const decodedToken = jwtDecode(data.token);
+
+        Cookies.set("token", data.token, { expires: 1, secure: true });
+
+        return { user: decodedToken, token: data.token };
+    } catch (error) {
+        console.log("Ошибка аутентификации");
     }
-
-    const decodedToken = jwtDecode(data.token);
-
-    Cookies.set("token", data.token, { expires: 1, secure: true });
-
-    return { user: decodedToken, token: data.token };
 };
 
 export const check = async () => {
@@ -27,22 +34,20 @@ export const check = async () => {
 
 export const getUsers = createAsyncThunk("users/getUsers", async () => {
     try {
-        const response = await $authHost.get("/api/users");
-        return response.data;
+        const { data } = await $authHost.post("/api/users");
+        return v;
     } catch (error) {
         throw new Error(
-            error.response?.data?.message || "Ошибка получения пользователей",
+            error.data?.message || "Ошибка получения пользователей",
         );
     }
 });
 
 export const getUserById = async (userId) => {
     try {
-        const response = await $authHost.get(`/api/users/${userId}`);
-        return response.data;
+        const { data } = await $authHost.get(`/api/users/${userId}`);
+        return data;
     } catch (error) {
-        throw new Error(
-            error.response?.data?.message || "Ошибка получения пользователя",
-        );
+        throw new Error(error.data?.message || "Ошибка получения пользователя");
     }
 };

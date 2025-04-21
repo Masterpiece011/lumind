@@ -13,7 +13,12 @@ assignmentRouter.post(
     assignmentController.create
 );
 assignmentRouter.get("/:id", authMiddleware, assignmentController.getOne);
-assignmentRouter.post("/", authMiddleware, assignmentController.getAll);
+assignmentRouter.post(
+    "/",
+    authMiddleware,
+    roleMiddleware(),
+    assignmentController.getAll
+);
 assignmentRouter.put(
     "/",
     authMiddleware,

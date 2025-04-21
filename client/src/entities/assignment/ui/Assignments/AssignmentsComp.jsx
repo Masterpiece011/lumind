@@ -6,72 +6,76 @@ import { getAssignments } from "@/shared/api/assignmentsAPI";
 import "./style.scss";
 import { MyButton } from "@/shared/uikit/MyButton";
 
-const AssignmentsPage = memo(({ onSelectAssignment }) => {
+const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const dispatch = useDispatch();
-    const assignmentsData = useSelector((state) => state.assignments);
-    const user_id = useSelector((state) => state.user.user?.id);
+    const { assignments, assignmentsTotal, loading, error } = useSelector(
+        (state) => state.assignments,
+        (prev, next) =>
+            prev.assignments === next.assignments &&
+            prev.assignmentsTotal === next.assignmentsTotal &&
+            prev.loading === next.loading &&
+            prev.error === next.error,
+    );
 
     useEffect(() => {
-        if (user_id) {
-            dispatch(getAssignments({ userId: user_id, filter: "all" }));
+        if (!userId) {
+            return;
         }
-    }, [dispatch, user_id]);
+        dispatch(getAssignments({ userId }));
+    }, [dispatch, userId]);
 
-    const [filter, setFilter] = useState("all");
+    // const [filter, setFilter] = useState("all");
 
-    const filteredAssignments = useMemo(() => {
-        if (!Array.isArray(assignmentsData.assignments)) return [];
+    // const filteredAssignments = useMemo(() => {
+    //     if (!Array.isArray(assignments)) return [];
 
-        const now = new Date();
-        return assignmentsData.assignments.filter((assignment) => {
-            const dueDate = new Date(assignment.due_date);
-            const hasSubmission =
-                assignment.submission !== null &&
-                assignment.submission !== undefined;
+    //     const now = new Date();
+    //     return assignments.filter((assignment) => {
+    //         const planDate = new Date(assignment.plan_date);
+    //         const hasSubmission =
+    //             assignment.submission !== null &&
+    //             assignment.submission !== undefined;
 
-            switch (filter) {
-                case "current":
-                    return !hasSubmission && dueDate >= now;
-                case "completed":
-                    return hasSubmission;
-                case "overdue":
-                    return !hasSubmission && dueDate < now;
-                default:
-                    return true;
-            }
-        });
-    }, [assignmentsData.assignments, filter]);
+    //         switch (filter) {
+    //             case "current":
+    //                 return !hasSubmission && planDate >= now;
+    //             case "completed":
+    //                 return hasSubmission;
+    //             case "overdue":
+    //                 return !hasSubmission && planDate < now;
+    //             default:
+    //                 return true;
+    //         }
+    //     });
+    // }, [assignments, filter]);
 
-    if (assignmentsData.loading)
-        return <div className="assignments__loading">Загрузка...</div>;
-    if (assignmentsData.error)
-        return (
-            <div className="assignments__error">
-                Ошибка: {assignmentsData.error}
-            </div>
-        );
-    if (!Array.isArray(assignmentsData.assignments)) {
-        return (
-            <div className="assignments__error">
-                Ошибка: данные о заданиях некорректны.
-            </div>
-        );
-    }
+    if (loading) return <div className="assignments__loading">Загрузка...</div>;
+    if (error) return <div className="assignments__error">Ошибка: {error}</div>;
+    // if (!Array.isArray(assignments)) {
+    //     console.log("assignments", assignments);
+
+    //     return (
+    //         <div className="assignments__error">
+    //             Ошибка: данные о заданиях некорректны.
+    //         </div>
+    //     );
+    // }
 
     return (
         <div className="assignments">
             <h1 className="assignments__title">Задания</h1>
 
             {/* Фильтры с сохранением ссылок на функции */}
-            <Filters currentFilter={filter} onFilterChange={setFilter} />
+            {/* <Filters currentFilter={filter} onFilterChange={setFilter} /> */}
 
             <div className="assignments__divider"></div>
 
             {/* Список заданий */}
             <AssignmentsList
-                assignments={filteredAssignments}
+                assignments={assignments}
+                assignmentsTotal={assignmentsTotal}
                 onSelect={onSelectAssignment}
-                isLoading={assignmentsData.loading}
+                isLoading={loading}
             />
         </div>
     );
@@ -110,24 +114,6 @@ const FilterButton = memo(({ type, isActive, onClick }) => {
     );
 });
 
-const AssignmentsList = memo(({ assignments, onSelect, isLoading }) => (
-    <div
-        className={`assignments__card-wrapper ${isLoading ? "assignments__card-wrapper--loading" : ""}`}
-    >
-        {assignments.length > 0 ? (
-            assignments.map((assignment) => (
-                <AssignmentCard
-                    key={assignment.id}
-                    assignment={assignment}
-                    onSelect={onSelect}
-                />
-            ))
-        ) : (
-            <p className="assignments__empty"></p>
-        )}
-    </div>
-));
-
 const AssignmentCard = memo(({ assignment, onSelect }) => {
     const dueDate = new Date(assignment.due_date);
     const now = new Date();
@@ -160,5 +146,25 @@ const AssignmentCard = memo(({ assignment, onSelect }) => {
         </div>
     );
 });
+
+const AssignmentsList = memo(
+    ({ assignments, assignmentsTotal, onSelect, isLoading }) => (
+        <div
+            className={`assignments__card-wrapper ${isLoading ? "assignments__card-wrapper--loading" : ""}`}
+        >
+            {assignmentsTotal > 0 ? (
+                assignments.map((assignment) => (
+                    <AssignmentCard
+                        key={assignment.id}
+                        assignment={assignment}
+                        onSelect={onSelect}
+                    />
+                ))
+            ) : (
+                <p className="assignments__empty"></p>
+            )}
+        </div>
+    ),
+);
 
 export { AssignmentsPage };

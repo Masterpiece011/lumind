@@ -88,7 +88,7 @@ class AssignmentController {
     // Получение всех назначений пользователя
     async getAll(req, res, next) {
         try {
-            const { user_id, filter } = req.query;
+            const { user_id, filter } = req.body;
 
             if (!user_id) {
                 return next(
@@ -112,47 +112,34 @@ class AssignmentController {
             }
 
             // Получаем задания, связанные с командами пользователя
-            const assignments = await Assignments.findAll({
-                include: [
-                    {
-                        model: Teams,
-                        attributes: ["id", "name"],
-                        through: { attributes: [] },
-                        where: { id: teamIds },
+            const { count, rows: assignments } =
+                await Assignments.findAndCountAll({
+                    where: {
+                        user_id: user_id,
                     },
-                    {
-                        model: Files,
-                        attributes: ["id", "file_url"],
-                    },
-                    {
-                        model: Submissions,
-                        attributes: ["id", "created_at"],
-                        as: "submission",
-                    },
-                ],
-            });
+                });
 
             // Фильтрация заданий
-            const filteredAssignments = assignments.filter((assignment) => {
-                const now = new Date();
-                const dueDate = new Date(assignment.due_date);
-                const hasSubmission =
-                    assignment.submission !== null &&
-                    assignment.submission !== undefined;
+            // const filteredAssignments = assignments.filter((assignment) => {
+            //     const now = new Date();
+            //     const dueDate = new Date(assignment.due_date);
+            //     const hasSubmission =
+            //         assignment.submission !== null &&
+            //         assignment.submission !== undefined;
 
-                switch (filter) {
-                    case "current":
-                        return !hasSubmission && dueDate >= now;
-                    case "completed":
-                        return hasSubmission;
-                    case "overdue":
-                        return !hasSubmission && dueDate < now;
-                    default:
-                        return true;
-                }
-            });
+            //     switch (filter) {
+            //         case "current":
+            //             return !hasSubmission && dueDate >= now;
+            //         case "completed":
+            //             return hasSubmission;
+            //         case "overdue":
+            //             return !hasSubmission && dueDate < now;
+            //         default:
+            //             return true;
+            //     }
+            // });
 
-            return res.json(filteredAssignments);
+            return res.json({ assignments: assignments, total: count });
         } catch (error) {
             next(
                 ApiError.internal(

@@ -3,12 +3,18 @@ import { $authHost } from "./page";
 
 export const getAssignments = createAsyncThunk(
     "assignments/getAssignments",
-    async ({ userId, filter }) => {
+    async ({ userId, searchQuery }) => {
         try {
-            const response = await $authHost.get("/api/assignments", {
-                params: { user_id: userId, filter },
+            console.log("ass", userId);
+
+            const { data } = await $authHost.post("/api/assignments", {
+                user_id: userId,
+                search_text: searchQuery,
             });
-            return response.data;
+
+            console.log(data);
+
+            return data;
         } catch (error) {
             throw new Error(
                 error.response?.data?.message || "Ошибка получения заданий",
@@ -17,17 +23,15 @@ export const getAssignments = createAsyncThunk(
     },
 );
 
-export const getAssignmentById = async (assignmentId, userId, submissionId) => {
+export const getAssignmentById = async (assignmentId, userId, taskId) => {
     try {
-        const response = await $authHost.get(
+        const { data } = await $authHost.get(
             `/api/assignments/${assignmentId}`,
-            { params: { user_id: userId, submission_id: submissionId } },
+            { params: { user_id: userId, task_id: taskId } },
         );
-        return response.data;
+        return data;
     } catch (error) {
-        throw new Error(
-            error.response?.data?.message || "Ошибка загрузки задания",
-        );
+        throw new Error(error.data?.message || "Ошибка загрузки задания");
     }
 };
 
