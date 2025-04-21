@@ -1,6 +1,8 @@
 // src/app/scss/global.scss
 @use "mixins/mixins" as *;
 
+@import "reset.scss";
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

@@ -12,6 +12,7 @@ import {
 } from "../models/models.js";
 
 import ApiError from "../error/ApiError.js";
+import { where } from "sequelize";
 
 class AssignmentController {
     // Создание назаначения
@@ -88,7 +89,7 @@ class AssignmentController {
     // Получение всех назначений пользователя
     async getAll(req, res, next) {
         try {
-            const { user_id, filter } = req.body;
+            const { user_id, status } = req.body;
 
             if (!user_id) {
                 return next(
@@ -111,33 +112,16 @@ class AssignmentController {
                 });
             }
 
-            // Получаем задания, связанные с командами пользователя
+            const whereCondition = { user_id };
+            if (status && status !== "all") {
+                whereCondition.status = status;
+            }
+
+            // Получаем назначения пользователя
             const { count, rows: assignments } =
                 await Assignments.findAndCountAll({
-                    where: {
-                        user_id: user_id,
-                    },
+                    where: whereCondition,
                 });
-
-            // Фильтрация заданий
-            // const filteredAssignments = assignments.filter((assignment) => {
-            //     const now = new Date();
-            //     const dueDate = new Date(assignment.due_date);
-            //     const hasSubmission =
-            //         assignment.submission !== null &&
-            //         assignment.submission !== undefined;
-
-            //     switch (filter) {
-            //         case "current":
-            //             return !hasSubmission && dueDate >= now;
-            //         case "completed":
-            //             return hasSubmission;
-            //         case "overdue":
-            //             return !hasSubmission && dueDate < now;
-            //         default:
-            //             return true;
-            //     }
-            // });
 
             return res.json({ assignments: assignments, total: count });
         } catch (error) {
@@ -192,14 +176,41 @@ class AssignmentController {
             });
 
             if (!assignment) {
-                return next(
-                    ApiError.badRequest(
-                        "Задание не найдено или не привязано к командам пользователя"
-                    )
-                );
+                return next(ApiError.badRequest("Назначение не найдено"));
             }
 
-            return res.json({ assignment });
+            const assignmentInvestments = await Files.findAll({
+                where: { entity_id: assignment.id, entity_type: "assignment" },
+            });
+
+            const task = await Tasks.findByPk(assignment.task_id);
+
+            const taskInvestments = await Files.findAll({
+                where: { entity_id: assignment.task_id, entity_type: "task" },
+            });
+
+            const creator = await Users.findByPk(assignment.creator_id, {
+                attributes: {
+                    exclude: ["password", "created_at", "updated_at"],
+                },
+            });
+
+            const response = {
+                id: assignment.id,
+                title: assignment.title,
+                description: assignment.description,
+                comment: assignment.comment,
+                creator: creator || undefined,
+                task: task || undefined,
+                task_files: taskInvestments || [],
+                status: assignment.status,
+                user_id: assignment.user_id,
+                plan_date: assignment.plan_date,
+                created_at: assignment.created_at,
+                assignment_files: assignmentInvestments || [],
+            };
+
+            return res.json({ assignment: response });
         } catch (error) {
             next(
                 ApiError.internal(
@@ -219,6 +230,8 @@ class AssignmentController {
                 plan_date,
                 comment,
                 investments = [],
+                assessment,
+                status,
             } = req.body;
 
             if (!assignment_id) {
@@ -238,6 +251,8 @@ class AssignmentController {
                 title: title || assignment.title,
                 description: description || assignment.description,
                 comment: comment || assignment.comment,
+                assessment: assessment || assignment.assessment,
+                status: status || assignment.status,
                 plan_date: plan_date || assignment.plan_date,
             });
 
@@ -246,10 +261,14 @@ class AssignmentController {
             // Обновление вложений (удаляем старые и добавляем новые)
             if (investments.length > 0) {
                 await Files.update({
-                    where: { assignment_id: assignment_id },
+                    where: {
+                        entity_id: assignment_id,
+                        entity_type: "assignment",
+                    },
                 });
                 const investmentRecords = investments.map((fileUrl) => ({
-                    assignment_id: assignment_id,
+                    entity_id: assignment_id,
+                    entity_type: "assignment",
                     file_url: fileUrl,
                 }));
                 assignmentInvestments = await Files.bulkCreate(

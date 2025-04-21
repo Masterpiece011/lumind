@@ -1,7 +1,8 @@
-@use "../../shared/styles/mixins/mixins" as *;
+@use "@/shared/styles/mixins/mixins" as *;
 
 .search-menu {
   width: 748px;
+  overflow: hidden;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;

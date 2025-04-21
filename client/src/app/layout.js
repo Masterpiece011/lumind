@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import "../shared/styles/global.scss";
+import "@/shared/styles/global.scss";
 import ReduxProvider from "./providers/Redux/ReduxProvider";
 import AppRouter from "./providers/AppRouter/AppRouter";
 import { ModalProvider } from "@/shared/uikit/UiModal/ModalProvider";

@@ -24,49 +24,28 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
         dispatch(getAssignments({ userId }));
     }, [dispatch, userId]);
 
-    // const [filter, setFilter] = useState("all");
-
-    // const filteredAssignments = useMemo(() => {
-    //     if (!Array.isArray(assignments)) return [];
-
-    //     const now = new Date();
-    //     return assignments.filter((assignment) => {
-    //         const planDate = new Date(assignment.plan_date);
-    //         const hasSubmission =
-    //             assignment.submission !== null &&
-    //             assignment.submission !== undefined;
-
-    //         switch (filter) {
-    //             case "current":
-    //                 return !hasSubmission && planDate >= now;
-    //             case "completed":
-    //                 return hasSubmission;
-    //             case "overdue":
-    //                 return !hasSubmission && planDate < now;
-    //             default:
-    //                 return true;
-    //         }
-    //     });
-    // }, [assignments, filter]);
+    const [filter, setFilter] = useState("all");
 
     if (loading) return <div className="assignments__loading">Загрузка...</div>;
     if (error) return <div className="assignments__error">Ошибка: {error}</div>;
-    // if (!Array.isArray(assignments)) {
-    //     console.log("assignments", assignments);
 
-    //     return (
-    //         <div className="assignments__error">
-    //             Ошибка: данные о заданиях некорректны.
-    //         </div>
-    //     );
-    // }
+    const handleSetNewFilter = (newFilter) => {
+        if (newFilter !== filter) {
+            setFilter(newFilter);
+
+            dispatch(getAssignments({ userId, status: newFilter }));
+        }
+    };
 
     return (
         <div className="assignments">
             <h1 className="assignments__title">Задания</h1>
 
             {/* Фильтры с сохранением ссылок на функции */}
-            {/* <Filters currentFilter={filter} onFilterChange={setFilter} /> */}
+            <Filters
+                currentFilter={filter}
+                onFilterChange={handleSetNewFilter}
+            />
 
             <div className="assignments__divider"></div>
 
@@ -83,7 +62,7 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
 
 const Filters = memo(({ currentFilter, onFilterChange }) => (
     <div className="assignments__filters">
-        {["all", "current", "completed", "overdue"].map((filterType) => (
+        {["all", "assigned", "completed", "failed"].map((filterType) => (
             <FilterButton
                 key={filterType}
                 type={filterType}
@@ -97,9 +76,9 @@ const Filters = memo(({ currentFilter, onFilterChange }) => (
 const FilterButton = memo(({ type, isActive, onClick }) => {
     const labels = {
         all: "Все задания",
-        current: "Текущие",
+        assigned: "Назначенные",
         completed: "Выполненные",
-        overdue: "Просроченные",
+        failed: "Проваленные",
     };
 
     return (
@@ -114,48 +93,44 @@ const FilterButton = memo(({ type, isActive, onClick }) => {
     );
 });
 
-const AssignmentCard = memo(({ assignment, onSelect }) => {
-    const dueDate = new Date(assignment.due_date);
-    const now = new Date();
-    const isOverdue = dueDate < now;
-    const hasSubmission =
-        assignment.submission !== null && assignment.submission !== undefined;
+const AssignmentCard = memo(({ assignment, status, onSelect }) => {
+    const labels = {
+        assigned: "Назначено",
+        completed: "Выполнено",
+        failed: "Провалено",
+    };
 
     return (
-        <div
+        <li
             className="assignments__card"
             onClick={() => onSelect(assignment.id)}
         >
             <div className="assignments__header">
-                <span className="assignments__date">
-                    {new Date(assignment.created_at).toLocaleDateString()}
-                </span>
-                {hasSubmission && isOverdue && (
-                    <div className="assignments__status assignments__status--overdue">
-                        Сдано с опозданием
-                    </div>
-                )}
-                <span className="assignments__team">
+                <span className="assignments__status">{labels[status]}</span>
+                {/* <span className="assignments__team">
                     {assignment.teams?.[0]?.name || "Неизвестно"}
-                </span>
+                </span> */}
             </div>
             <h2 className="assignments__name">{assignment.title}</h2>
             <div className="assignments__deadline">
-                Срок: {new Date(assignment.due_date).toLocaleDateString()}
+                <p>
+                    Срок: {new Date(assignment.plan_date).toLocaleDateString()}
+                </p>
             </div>
-        </div>
+        </li>
     );
 });
 
 const AssignmentsList = memo(
     ({ assignments, assignmentsTotal, onSelect, isLoading }) => (
-        <div
-            className={`assignments__card-wrapper ${isLoading ? "assignments__card-wrapper--loading" : ""}`}
+        <ul
+            className={`assignments__cards-list ${isLoading ? "assignments__cards-list--loading" : ""}`}
         >
             {assignmentsTotal > 0 ? (
                 assignments.map((assignment) => (
                     <AssignmentCard
                         key={assignment.id}
+                        status={assignment.status}
                         assignment={assignment}
                         onSelect={onSelect}
                     />
@@ -163,7 +138,7 @@ const AssignmentsList = memo(
             ) : (
                 <p className="assignments__empty"></p>
             )}
-        </div>
+        </ul>
     ),
 );
 

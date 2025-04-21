@@ -125,7 +125,7 @@ const MainComp = () => {
                             className={
                                 isActive("/")
                                     ? "main__sidebar-icon--active"
-                                    : ""
+                                    : "main__sidebar-icon"
                             }
                         />
                         <Icon
@@ -135,7 +135,7 @@ const MainComp = () => {
                             className={
                                 isActive("/notifications")
                                     ? "main__sidebar-icon--active"
-                                    : ""
+                                    : "main__sidebar-icon"
                             }
                         />
                         <Icon
@@ -145,7 +145,7 @@ const MainComp = () => {
                             className={
                                 isActive("/teams")
                                     ? "main__sidebar-icon--active"
-                                    : ""
+                                    : "main__sidebar-icon"
                             }
                         />
                         <Icon
@@ -155,7 +155,7 @@ const MainComp = () => {
                             className={
                                 isActive("/chat")
                                     ? "main__sidebar-icon--active"
-                                    : ""
+                                    : "main__sidebar-icon"
                             }
                         />
                         <Icon
@@ -165,7 +165,7 @@ const MainComp = () => {
                             className={
                                 isActive("/assignments")
                                     ? "main__sidebar-icon--active"
-                                    : ""
+                                    : "main__sidebar-icon"
                             }
                         />
                         <Icon
@@ -175,7 +175,7 @@ const MainComp = () => {
                             className={
                                 isActive("/schedule")
                                     ? "main__sidebar-icon--active"
-                                    : ""
+                                    : "main__sidebar-icon"
                             }
                         />
                     </ul>
