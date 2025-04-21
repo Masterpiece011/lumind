@@ -1,132 +1,163 @@
-@use "../../../../shared/styles/mixins/mixins" as *;
+@use "@/shared/styles/mixins/mixins" as *;
 
 .assignment-detail {
     display: flex;
     flex-direction: column;
+    gap: 20px;
     padding: 20px;
     color: #ffffff;
-  
+    overflow: hidden;
+
     &__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-  
-    &__header-left {
-      display: flex;
-      flex-direction: column;
-    }
-  
-    &__header-right {
-      display: flex;
-      align-items: center;
-    }
-  
-    &__title {
-      @include fontOptions(24px, 400, 24px);
-      color: #AEAEAE;
-    }
-  
-    &__meta {
-      margin-top: 8px;
-      @include fontOptions(14px, 400, 14px);
-      color: #AEAEAE;
-    }
-  
-    &__score {
-      margin-right: 20px;
-      @include fontOptions(16px, 400, 16px);
-      color: #AEAEAE;
-    }
-  
-    &__submit-btn {
-      background-color: #AEAEAE80;
-      color: whitesmoke;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-  
-      &:hover {
-        background-color: #444;
-      }
-    }
-  
-    &__body { 
-      display: flex;
-      gap: 30px;
-    }
-  
-    &__info {
-      flex: 3; 
-    }
-  
-    &__submission {
-      width: 500px;
-      flex: 2;
-      background: transparent;
-      border: 2px solid #9F70FD;
-      border-radius: 6px;
-      padding: 20px;
-    }
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
 
-    &__submission-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-  
-    &__submission-title {
-      @include fontOptions(18px, 400, 18px);
-      color: #AEAEAE;
-    }
-  
-    &__submission-status {
-      @include fontOptions(14px, 400, 14px);
-      color: #AEAEAE;
-    }
-  
-    &__section {
-      margin-bottom: 20px;
-      
-  
-      &-title {
-        @include fontOptions(18px, 400, 18px);
-        margin-bottom: 8px;
-      }
-  
-      &-text {
-        margin: 0 0 8px 0;
-        line-height: 1.4;
-      
-      }
-    }
+        &-left {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
 
+            &-title {
+                text-transform: uppercase;
+            }
 
-    &__submission-files {
-      color: black;
-    }
-
-  
-    &__attachment-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      color: black;
-  
-      li {
-        margin-bottom: 8px;
-  
-        a {
-          color: #0078d4;
-          text-decoration: none;
-  
-          &:hover {
-            text-decoration: underline;
-          }
+            &-term {
+                margin-right: 12px;
+            }
         }
-      }
+
+        &-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
     }
-  }
+
+    &__title {
+        @include fontOptions(24px, 400, 1.2);
+        color: #aeaeae;
+        margin: 0;
+    }
+
+    &__meta {
+        @include fontOptions(14px, 400, 1.4);
+        color: #aeaeae;
+        display: flex;
+        gap: 15px;
+    }
+
+    &__score {
+        @include fontOptions(16px, 400, 1.4);
+        color: #aeaeae;
+
+        .comment {
+            font-size: 14px;
+            color: #9f70fd;
+            margin-top: 4px;
+        }
+    }
+
+    &__submit-btn {
+        background-color: rgba(#aeaeae, 0.5);
+        color: whitesmoke;
+        padding: 8px 16px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: #444;
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+
+    &__body {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+    }
+
+    &__info {
+        flex: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+
+        &-caption {
+            margin-bottom: 8px;
+        }
+    }
+
+    &__section {
+        &-title {
+            @include fontOptions(18px, 400, 1.4);
+            color: #aeaeae;
+            margin: 0 0 8px 0;
+        }
+
+        &-text {
+            @include fontOptions(16px, 400, 1.6);
+            margin: 0;
+            color: #dedede;
+        }
+    }
+
+    &__work {
+        flex: 2;
+        background: transparent;
+        border: 2px solid #9f70fd;
+        border-radius: 6px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+
+        &-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        &-title {
+            @include fontOptions(18px, 400, 1.4);
+            color: #aeaeae;
+            margin: 0;
+        }
+    }
+
+    &__files-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__status-notice {
+        @include fontOptions(14px, 400, 1.4);
+        color: #9f70fd;
+        padding: 8px;
+        background-color: rgba(#9f70fd, 0.1);
+        border-radius: 4px;
+        text-align: center;
+    }
+
+    &__my-work-btn {
+        background-color: #9f70fd;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 0.9;
+        }
+    }
+}

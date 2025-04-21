@@ -135,7 +135,7 @@ class TaskController {
 
             const taskData = {
                 task: task,
-                task_investments: taskInvestments,
+                task_files: taskInvestments,
             };
 
             return res.json({ task: taskData });
@@ -150,13 +150,25 @@ class TaskController {
 
     async update(req, res) {
         try {
-            const { task_id, title, description, comment } = req.body;
+            const { task_id, title, description, comment, files } = req.body;
 
             // Находим задание
             const task = await Tasks.findByPk(task_id);
 
             if (!task) {
                 return ApiError.badRequest("Задание не найдено");
+            }
+
+            let taskFiles = [];
+
+            // Добавление вложений
+            if (files.length > 0) {
+                const investmentRecords = files.map((fileUrl) => ({
+                    entity_id: task_id.id,
+                    entity_type: "task",
+                    file_url: fileUrl,
+                }));
+                taskFiles = await Files.bulkCreate(investmentRecords);
             }
 
             // Обновляем данные задания
@@ -169,7 +181,7 @@ class TaskController {
             // Формируем ответ
             return res.status(200).json({
                 success: true,
-                data: task,
+                data: { task: { task, files: taskFiles } },
                 message: "Задание успешно обновлено",
             });
         } catch (error) {

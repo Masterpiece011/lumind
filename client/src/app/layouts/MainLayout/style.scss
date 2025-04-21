@@ -18,36 +18,38 @@
             display: flex;
             flex-direction: column;
             list-style: none;
-            margin-top: 40px;
+            gap: 12px;
+            padding: 40px 0 0 40px;
 
             img {
-                margin: 0 0 15px 0;
                 cursor: pointer;
-                border: 1px solid #AEAEAE80;
+                border: 1px solid #aeaeae80;
                 box-shadow: 0px 4px 4px 0px #00000040;
                 border-radius: 8px;
                 padding: 10px;
+                width: 60px;
+                height: 60px;
+                transition: all 0.3s;
 
                 &:hover,
                 &--active {
-                    background: #4914A5;
-                    border: 1px solid #4914A5;
+                    background: #4914a5;
+                    border: 1px solid #4914a5;
                     box-shadow: 0px 4px 4px 0px #00000040;
                 }
 
                 &:active {
-                    background: #000000A6;
+                    background: #000000a6;
                 }
             }
         }
 
-         &-icon--active {
-            background: #4914A5;
-            border: 1px solid #4914A5;
+        &-icon--active {
+            background: #4914a5;
+            border: 1px solid #4914a5;
             box-shadow: 0px 4px 4px 0px #00000040;
         }
     }
-
 
     &__page-content {
         display: flex;
@@ -66,12 +68,12 @@
     &__search-wrapper {
         opacity: 0;
         transform: translateY(-20px);
-        transition: 
+        transition:
             opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
             transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events: none;
         will-change: transform, opacity;
-        
+
         &_visible {
             opacity: 1;
             transform: translateY(0);
@@ -80,10 +82,10 @@
     }
 
     &__page {
-        transition: 
+        transition:
             filter 0.3s ease,
             opacity 0.3s ease;
-        
+
         &_blurred {
             filter: blur(2px);
             opacity: 0.7;

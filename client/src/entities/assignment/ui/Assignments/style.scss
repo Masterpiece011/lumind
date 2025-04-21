@@ -13,41 +13,45 @@
     }
 
     &__filters {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 700px;
         gap: 10px;
         margin-bottom: 20px;
-    }
 
-    &__filter-button {
-        padding: 8px 16px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background-color: #f9f9f9;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
+        .assignments__filter-button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: rgba(174, 174, 174, 0.1019607843);
+            cursor: pointer;
+            transition: all 0.3s;
 
-        &:hover {
-            background-color: #f1f1f1;
-        }
+            &:hover {
+                background-color: #7e57c2;
+            }
 
-        &--active {
-            background: #7e57c2;
-            color: white;
+            &--active {
+                background: #7e57c2;
+                border-color: #7e57c2;
+                color: white;
+            }
         }
     }
 
     &__divider {
         width: 100%;
         height: 2px;
+        border-radius: 50%;
         background: #aeaeae80;
         margin-bottom: 20px;
     }
 
-    &__card-wrapper {
-        max-width: 700px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    &__cards-list {
+        display: grid;
+        grid-template-rows: repeat(2, auto);
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
         opacity: 1;
         transition: opacity 0.3s ease;
 
@@ -58,16 +62,24 @@
 
     &__card {
         width: 100%;
-        background-color: #f9f9f9;
+        color: #f9f9f9;
+        background-color: rgba(174, 174, 174, 0.1019607843);
         border: 1px solid #ddd;
         border-radius: 8px;
         padding: 15px;
         margin-bottom: 15px;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: all 0.3s;
 
         &:hover {
-            background-color: #c3a2f5;
+            background-color: rgba(174, 174, 174, 0.306);
+            border-color: transparent;
+        }
+
+        p,
+        span,
+        h2 {
+            color: #f9f9f9;
         }
     }
 
@@ -79,7 +91,7 @@
         color: #555;
     }
 
-    &__date {
+    &__status {
         @include fontOptions(14px, 600, 14px);
     }
 
@@ -97,14 +109,6 @@
     &__deadline {
         @include fontOptions(14px, 400, 14px);
         color: #777;
-    }
-
-    &__status {
-        width: 145px;
-        padding: 5px 10px;
-        border-radius: 4px;
-        @include fontOptions(12px, 600, 12px);
-        color: #ff4d4f;
     }
 
     &__loading,
