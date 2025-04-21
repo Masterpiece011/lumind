@@ -5,7 +5,7 @@ const initialState = {
     user: null,
 };
 
-const userStore = createSlice({
+export const userStore = createSlice({
     name: "user",
     initialState,
     reducers: {

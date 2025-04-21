@@ -3,7 +3,7 @@
 import React, { useEffect, memo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MyButton } from "@/shared/uikit/MyButton";
-import { Icon } from "../../../../shared/uikit/icons";
+import { Icon } from "@/shared/uikit/icons";
 import Arrow from "@/app/assets/icons/arrow-icon.svg";
 
 import "./style.scss";
@@ -11,24 +11,32 @@ import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 import { getTeams } from "@/shared/api/teamAPI";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 
-const TeamsPage = memo(({ onSelectTeam }) => {
+const TeamsPage = memo(({ userId, onSelectTeam }) => {
     const dispatch = useDispatch();
     const [isExpanded, setIsExpanded] = useState(true);
+
+    console.log(userId);
+
+    // Получаем данные из Redux
     const {
         teams = [],
+        teamsTotal = 0,
         loading,
         error,
     } = useSelector(
         (state) => state.teams,
         (prev, next) =>
             prev.teams === next.teams &&
+            prev.teamsTotal === next.teamsTotal &&
             prev.loading === next.loading &&
             prev.error === next.error,
     );
 
     useEffect(() => {
-        dispatch(getTeams());
-    }, [dispatch]);
+        if (userId) {
+            dispatch(getTeams({ userId }));
+        }
+    }, [dispatch, userId]);
 
     const toggleAccordion = () => {
         setIsExpanded(!isExpanded);
@@ -36,12 +44,13 @@ const TeamsPage = memo(({ onSelectTeam }) => {
 
     if (loading) return <ClockLoader loading={loading} />;
     if (error) return <div className="teams__error">Ошибка: {error}</div>;
-    if (!Array.isArray(teams))
+    if (!Array.isArray(teams)) {
         return (
             <div className="teams__error">
                 Ошибка: данные о командах некорректны.
             </div>
         );
+    }
 
     return (
         <div className="teams">
@@ -51,7 +60,7 @@ const TeamsPage = memo(({ onSelectTeam }) => {
                     onClick={toggleAccordion}
                 >
                     <div className={buttonStyles.accordionInfo}>
-                        <p className={buttonStyles.accordionTittle}>Захлушка</p>
+                        <p className={buttonStyles.accordionTittle}>Команды</p>
                         <Icon
                             src={Arrow}
                             alt="arrow"
@@ -65,7 +74,7 @@ const TeamsPage = memo(({ onSelectTeam }) => {
                 className={`teams__content ${isExpanded ? "teams__content--expanded" : "teams__content--collapsed"}`}
             >
                 <ul className="teams__list">
-                    {teams.length > 0 ? (
+                    {teamsTotal > 0 ? (
                         teams.map((team) => (
                             <li
                                 className="teams__item"
@@ -75,26 +84,16 @@ const TeamsPage = memo(({ onSelectTeam }) => {
                                 <div
                                     className="teams__avatar"
                                     style={{
-                                        backgroundColor: team.avatar_color,
+                                        backgroundColor:
+                                            team.avatar_color || "#ccc",
                                     }}
                                 ></div>
                                 <div className="teams__info">
                                     <h3 className="teams__name">{team.name}</h3>
                                     <div className="teams__info-divider"></div>
-                                    {team.groups && team.groups.length > 0 ? (
-                                        <ul className="teams__groups">
-                                            {team.groups.map((group) => (
-                                                <li
-                                                    key={group.id}
-                                                    className="teams__group"
-                                                >
-                                                    {group.title}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <p className="teams__empty">
-                                            Список групп Пуст
+                                    {team.description && (
+                                        <p className="teams__info-description">
+                                            {team.description}
                                         </p>
                                     )}
                                 </div>

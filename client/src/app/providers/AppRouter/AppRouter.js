@@ -25,6 +25,11 @@ const AppRouter = ({ children }) => {
         const verifyAuth = async () => {
             try {
                 const { user: authUser } = await check();
+                if (!authUser) {
+                    router.push("/login");
+
+                    return;
+                }
                 dispatch(setUser(authUser));
                 dispatch(setIsAuth(true));
             } catch {

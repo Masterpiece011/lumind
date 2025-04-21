@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import "./style.scss";
@@ -32,6 +33,11 @@ const MainComp = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [isMouseOver, setIsMouseOver] = useState(false);
     const { isModalOpen } = useModal();
+
+    const userId = useSelector(
+        (state) => state.user?.user?.id || null,
+        (prev, next) => prev === next,
+    );
 
     const handleSearchFocus = (currentQuery) => {
         setSearchQuery(currentQuery);
@@ -225,6 +231,7 @@ const MainComp = () => {
                               !isModalOpen &&
                               pathname.startsWith("/teams") ? (
                                 <TeamsPage
+                                    userId={userId}
                                     onSelectTeam={(teamId) =>
                                         handleNavigation(`/teams/${teamId}`)
                                     }
@@ -233,6 +240,7 @@ const MainComp = () => {
                               !isModalOpen &&
                               pathname.startsWith("/assignments") ? (
                                 <AssignmentsPage
+                                    userId={userId}
                                     onSelectAssignment={(assignmentId) =>
                                         handleNavigation(
                                             `/assignments/${assignmentId}`,

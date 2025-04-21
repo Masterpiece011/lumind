@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getAssignments } from "../../../shared/api/assignmentsAPI";
+import { getAssignments } from "@/shared/api/assignmentsAPI";
 
 const initialState = {
     assignments: [],
+    assignmentsTotal: 0,
     loading: false,
     error: null,
 };
@@ -14,12 +15,13 @@ const assignmentSlice = createSlice({
         setLoading: (state) => {
             state.loading = true;
         },
-        setAssignment: (state, action) => {
-            state.assignments = action.payload;
+        setAssignment: (state, { payload }) => {
+            state.assignments = payload.assignments;
+            state.assignmentsTotal = payload.total || payload.length || 0;
             state.loading = false;
         },
-        setError: (state, action) => {
-            state.error = action.payload;
+        setError: (state, { payload }) => {
+            state.error = payload;
             state.loading = false;
         },
     },
@@ -29,12 +31,20 @@ const assignmentSlice = createSlice({
             .addCase(getAssignments.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(getAssignments.fulfilled, (state, action) => {
-                state.assignments = action.payload;
+            .addCase(getAssignments.fulfilled, (state, { payload, meta }) => {
+                console.log("Assignments loaded for userId:", meta.arg?.userId);
+
+                state.assignments = payload.assignments;
+                state.assignmentsTotal = payload.total || payload.length || 0;
                 state.loading = false;
             })
-            .addCase(getAssignments.rejected, (state, action) => {
-                state.error = action.error.message;
+            .addCase(getAssignments.rejected, (state, { error, meta }) => {
+                console.error(
+                    "Error loading teams for userId:",
+                    meta.arg?.userId,
+                    error,
+                );
+                state.error = error.message;
                 state.loading = false;
             });
     },

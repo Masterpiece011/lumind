@@ -1,18 +1,24 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { $authHost, $host } from "./page";
 
-export const getTeams = createAsyncThunk("teams/getTeams", async (userId) => {
-    try {
-        const response = await $authHost.get("/api/teams", {
-            params: { user_id: userId },
-        });
-        return response.data;
-    } catch (error) {
-        throw new Error(
-            error.response?.data?.message || "Ошибка получения команд",
-        );
-    }
-});
+export const getTeams = createAsyncThunk(
+    "teams/getTeams",
+    async ({ userId, pageNumber = 1, searchQuery = "" }) => {
+        try {
+            const response = await $authHost.post("/api/teams", {
+                user_id: userId,
+                page: pageNumber,
+                search_text: searchQuery,
+            });
+
+            return response.data;
+        } catch (error) {
+            throw new Error(
+                error.response?.data?.message || "Ошибка получения команд",
+            );
+        }
+    },
+);
 
 export const getTeamFiles = createAsyncThunk(
     "teams/getTeamFiles",
