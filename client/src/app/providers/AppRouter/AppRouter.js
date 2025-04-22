@@ -19,18 +19,12 @@ const AppRouter = ({ children }) => {
     const needsMainComp =
         pathname.startsWith("/teams") ||
         pathname.startsWith("/assignments") ||
+        pathname.startsWith("/chats") ||
         pathname.startsWith("/users");
 
     useEffect(() => {
         const verifyAuth = async () => {
             try {
-                // const cookieToken = Cookies.get("token");
-                // console.log("cookieToken", cookieToken);
-
-                // if (!cookieToken) {
-                //     router.push("/login");
-                //     return;
-                // }
                 const { user: authUser } = await check();
                 console.log("authUser", authUser);
 

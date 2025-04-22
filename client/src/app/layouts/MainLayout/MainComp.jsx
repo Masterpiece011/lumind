@@ -14,7 +14,7 @@ import AssignmentsDetailPage from "@/entities/assignment/ui/AssignmentDetail";
 import { HomeComp } from "@/widgets/StartComp";
 import { Icon } from "@/shared/uikit/icons";
 import { useSearch } from "@/shared/lib/hooks/useSearch";
-
+import { ChatPage } from "@/features/chat/ui/ChatComp";
 import HomeIcon from "@/app/assets/icons/home-icon.svg";
 import ChatIcon from "@/app/assets/icons/chat-icon.svg";
 import TeamsIcon from "@/app/assets/icons/teams-icon.svg";
@@ -104,9 +104,9 @@ const MainComp = () => {
                         <Icon
                             src={ChatIcon}
                             alt="chat-icon"
-                            onClick={() => handleNavigation("/chat")}
+                            onClick={() => handleNavigation("/chats")}
                             className={
-                                isActive("/chat")
+                                isActive("/chats")
                                     ? "main__sidebar-icon--active"
                                     : "main__sidebar-icon"
                             }
@@ -163,6 +163,12 @@ const MainComp = () => {
                             !isModalOpen &&
                             pathname === "/" ? (
                                 <HomeComp />
+                            ) : !showSearchMenu &&
+                              !isModalOpen &&
+                              pathname.startsWith("/chats") ? (
+                                <div className="chat-page-wrapper">
+                                    <ChatPage userId={userId} />
+                                </div>
                             ) : !showSearchMenu &&
                               !isModalOpen &&
                               pathname.startsWith("/teams/") &&
