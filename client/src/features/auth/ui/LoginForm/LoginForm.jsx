@@ -22,25 +22,28 @@ function LoginForm() {
         password: "",
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
 
     const signIn = async () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+
         const { email, password } = form;
-        console.log("Отправляемые данные:", { email, password });
 
         try {
             const { user, token } = await login(email, password);
-            console.log("Ответ с сервера:", user);
 
             dispatch(setIsAuth(true));
             dispatch(setUser(user));
             Cookies.set("token", token, { expires: 1, path: "/" });
-            router.push("/");
+
+            // Явный редирект после успешного входа
+            router.replace("/");
         } catch (error) {
-            console.error(
-                "Ошибка авторизации:",
-                error.response?.data || error.message,
-            );
+            console.error("Ошибка авторизации:", error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 

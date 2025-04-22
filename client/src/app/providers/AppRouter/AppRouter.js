@@ -13,10 +13,10 @@ const AppRouter = ({ children }) => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const { isAuth } = useSelector((state) => state.user);
+    const { user, isAuth } = useSelector((state) => state.user);
     const [loading, setLoading] = useState(true);
 
-    const shouldRenderMainComp =
+    const needsMainComp =
         pathname.startsWith("/teams") ||
         pathname.startsWith("/assignments") ||
         pathname.startsWith("/users");
@@ -24,10 +24,18 @@ const AppRouter = ({ children }) => {
     useEffect(() => {
         const verifyAuth = async () => {
             try {
+                // const cookieToken = Cookies.get("token");
+                // console.log("cookieToken", cookieToken);
+
+                // if (!cookieToken) {
+                //     router.push("/login");
+                //     return;
+                // }
                 const { user: authUser } = await check();
+                console.log("authUser", authUser);
+
                 if (!authUser) {
                     router.push("/login");
-
                     return;
                 }
                 dispatch(setUser(authUser));
@@ -50,21 +58,31 @@ const AppRouter = ({ children }) => {
     }, [pathname, loading]);
 
     useEffect(() => {
+        if (!isAuth && pathname !== "/login") {
+            window.history.replaceState(null, "", "/login");
+            router.replace("/login");
+        }
+    }, [isAuth, pathname, router]);
+
+    useEffect(() => {
         const handlePopState = (event) => {
-            if (event.state?.path) {
+            if (!isAuth) {
+                window.history.pushState(null, "", "/login");
+                router.replace("/login");
+            } else if (event.state?.path) {
                 router.replace(event.state.path);
             }
         };
 
         window.addEventListener("popstate", handlePopState);
         return () => window.removeEventListener("popstate", handlePopState);
-    }, [router]);
+    }, [router, isAuth]);
 
     if (loading) {
         return <ClockLoader loading={loading} />;
     }
 
-    if (shouldRenderMainComp) {
+    if (needsMainComp) {
         return <MainComp>{children}</MainComp>;
     }
 

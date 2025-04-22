@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import "./style.scss";
 import { HeaderComp } from "@/widgets/HeaderComp";
 import { TeamsPage } from "@/entities/team/ui/Teams";
 import { AssignmentsPage } from "@/entities/assignment/ui/Assignments";
@@ -13,15 +12,17 @@ import { SearchMenu } from "@/widgets/SearchMenu";
 import { TeamDetailPage } from "@/entities/team/ui/TeamDetail";
 import AssignmentsDetailPage from "@/entities/assignment/ui/AssignmentDetail";
 import { HomeComp } from "@/widgets/StartComp";
-
 import { Icon } from "@/shared/uikit/icons";
+import { useSearch } from "@/shared/lib/hooks/useSearch";
+
 import HomeIcon from "@/app/assets/icons/home-icon.svg";
 import ChatIcon from "@/app/assets/icons/chat-icon.svg";
 import TeamsIcon from "@/app/assets/icons/teams-icon.svg";
 import AssignmentsIcon from "@/app/assets/icons/assignments-icon.svg";
 import NotificationsIcon from "@/app/assets/icons/notification-icon.svg";
 import ScheduleIcon from "@/app/assets/icons/schedule-icon.svg";
-import { useModal } from "@/shared/uikit/UiModal/ModalProvider";
+
+import "./style.scss";
 
 const MainComp = () => {
     const router = useRouter();
@@ -29,74 +30,25 @@ const MainComp = () => {
     const params = useParams();
     const searchMenuRef = useRef(null);
 
-    const [showSearchMenu, setShowSearchMenu] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [isMouseOver, setIsMouseOver] = useState(false);
-    const { isModalOpen } = useModal();
+    const {
+        showSearchMenu,
+        searchQuery,
+        isModalOpen,
+        handleSearchFocus,
+        handleSearchChange,
+        handleMouseEnter,
+        handleMouseLeave,
+        setShowSearchMenu,
+    } = useSearch();
 
     const userId = useSelector(
         (state) => state.user?.user?.id || null,
         (prev, next) => prev === next,
     );
 
-    const handleSearchFocus = (currentQuery) => {
-        setSearchQuery(currentQuery);
-        setShowSearchMenu(true);
-    };
-
-    const handleSearchChange = (query) => {
-        setSearchQuery(query);
-        if (!showSearchMenu) setShowSearchMenu(true);
-    };
-
-    const handleMouseEnter = () => {
-        setIsMouseOver(true);
-    };
-
-    const handleMouseLeave = () => {
-        setIsMouseOver(false);
-        setTimeout(() => {
-            if (!isMouseOver && !hasOpenModal) {
-                setShowSearchMenu(false);
-            }
-        }, 300);
-    };
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (isModalOpen) return;
-
-            if (
-                searchMenuRef.current &&
-                searchMenuRef.current.contains(event.target)
-            ) {
-                return;
-            }
-
-            const searchInput = document.querySelector(".header__search-input");
-            if (searchInput && !searchInput.contains(event.target)) {
-                setShowSearchMenu(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isModalOpen]);
-
-    useEffect(() => {
-        if (showSearchMenu || isModalOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "auto";
-        }
-    }, [showSearchMenu, isModalOpen]);
-
     useEffect(() => {
         setShowSearchMenu(false);
-        setSearchQuery("");
-    }, [pathname, params]);
+    }, [pathname, params, setShowSearchMenu]);
 
     const handleNavigation = (path) => {
         router.push(path);
@@ -115,6 +67,7 @@ const MainComp = () => {
                     onSearchChange={handleSearchChange}
                 />
             </header>
+
             <div className="main__content">
                 <aside className="main__sidebar">
                     <ul className="main__sidebar-list">
@@ -229,7 +182,8 @@ const MainComp = () => {
                                 <AssignmentsDetailPage id={params.id} />
                             ) : !showSearchMenu &&
                               !isModalOpen &&
-                              pathname.startsWith("/teams") ? (
+                              pathname.startsWith("/teams") &&
+                              userId ? (
                                 <TeamsPage
                                     userId={userId}
                                     onSelectTeam={(teamId) =>
