@@ -37,7 +37,9 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
 
     const handleLogoutClick = () => {
         dispatch(logout());
-        router.push("/");
+        // Очищаем историю и перенаправляем на login
+        window.history.replaceState(null, "", "/login");
+        router.replace("/login");
     };
 
     const handleSearchChange = (e) => {

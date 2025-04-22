@@ -3,51 +3,59 @@ import { getTeamById, getTeams } from "@/shared/api/teamAPI";
 
 const initialState = {
     teams: [],
-    teamsTotal: 0, // Изменил null на 0 для более безопасной работы
+    teamsTotal: 0,
     currentTeam: {},
     teamFiles: [],
     loading: false,
+    initialized: false,
     error: null,
+    lastUserId: null, 
 };
 
 const teamSlice = createSlice({
     name: "teams",
     initialState,
     reducers: {
-        setLoading: (state) => {
-            state.loading = true;
-        },
-        setTeams: (state, { payload }) => {
-            state.teams = payload.teams || payload;
-            state.teamsTotal = payload.total || payload.length || 0;
-            state.loading = false;
-        },
-        setError: (state, { payload }) => {
-            state.error = payload;
-            state.loading = false;
+        resetTeams: (state) => {
+            state.teams = [];
+            state.teamsTotal = 0;
+            state.initialized = false;
+            state.lastUserId = null;
         },
     },
     extraReducers: (builder) => {
         builder
-            .addCase(getTeams.pending, (state) => {
+            .addCase(getTeams.pending, (state, { meta }) => {
+                const { userId } = meta.arg || {};
+
+                if (!userId || userId === state.lastUserId) {
+                    return state;
+                }
+
                 state.loading = true;
                 state.error = null;
+                state.lastUserId = userId;
             })
             .addCase(getTeams.fulfilled, (state, { payload, meta }) => {
-                // Добавил meta.arg для доступа к параметрам запроса
-                console.log("Teams loaded for userId:", meta.arg?.userId);
+                const { userId } = meta.arg || {};
+
+                if (!userId || userId !== state.lastUserId) {
+                    return state;
+                }
 
                 state.teams = payload.teams || payload;
                 state.teamsTotal = payload.total || payload.length || 0;
                 state.loading = false;
+                state.initialized = true;
             })
             .addCase(getTeams.rejected, (state, { error, meta }) => {
-                console.error(
-                    "Error loading teams for userId:",
-                    meta.arg?.userId,
-                    error,
-                );
-                state.error = error.message;
+                const { userId } = meta.arg || {};
+
+                if (!userId || userId !== state.lastUserId) {
+                    return state;
+                }
+
+                state.error = error.payload || error.message;
                 state.loading = false;
             })
             .addCase(getTeamById.pending, (state) => {
@@ -65,6 +73,5 @@ const teamSlice = createSlice({
     },
 });
 
-export const { setLoading, setTeams, setError } = teamSlice.actions;
-
+export const { setLoading, setTeams, setError, resetTeams } = teamSlice.actions;
 export default teamSlice.reducer;
