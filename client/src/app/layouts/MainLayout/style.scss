@@ -66,6 +66,8 @@
     }
 
     &__search-wrapper {
+        display: flex;
+        justify-content: center;
         opacity: 0;
         transform: translateY(-20px);
         transition:
