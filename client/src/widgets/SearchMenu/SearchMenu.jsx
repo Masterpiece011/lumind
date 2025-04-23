@@ -18,6 +18,7 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
     const dispatch = useDispatch();
     const { teams = [] } = useSelector((state) => state.teams);
     const usersArray = useSelector((state) => state.users.users) || [];
+    const usersLoading = useSelector((state) => state.users.loading);
     const { submissions: submissionsData = [] } = useSelector(
         (state) => state.submissions,
     );
@@ -30,14 +31,16 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
     const { showUserModal } = useUserModal();
 
     const handleUserClick = (user, e) => {
+        e.preventDefault();
         e.stopPropagation();
-        e.nativeEvent.stopImmediatePropagation();
         showUserModal(user);
     };
 
     useEffect(() => {
+        console.log("Triggered users fetching effect");
+
         if (!teams.length) dispatch(getTeams());
-        if (!usersArray.length) dispatch(getUsers());
+        if (!usersArray.length) dispatch(getUsers({ page: 1, quantity: 100 }));
         if (user_id) dispatch(getUserSubmissions(user_id));
     }, [dispatch, teams.length, usersArray.length, user_id]);
 
@@ -98,6 +101,18 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
         );
     }, [searchQuery, usersArray, teams, userFiles]);
 
+    const formatUserName = (user) => {
+        const lastName = user.last_name || "";
+        const firstName = user.first_name
+            ? `${user.first_name.charAt(0)}.`
+            : "";
+        const middleName = user.middle_name
+            ? `${user.middle_name.charAt(0)}.`
+            : "";
+
+        return `${lastName} ${firstName} ${middleName}`.trim();
+    };
+
     return (
         <div
             className="search-menu"
@@ -122,12 +137,13 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
                                 key={user.id}
                                 className="search-menu__user-item"
                                 onClick={(e) => handleUserClick(user, e)}
+                                onMouseDown={(e) => e.preventDefault()}
                             >
                                 <span className="search-menu__avatar">
                                     <Icon src={nonAvatar} alt="none-avatar" />
                                 </span>
                                 <span className="search-menu__user-name">
-                                    {user.email}
+                                    {formatUserName(user)}
                                 </span>
                             </div>
                         ))
