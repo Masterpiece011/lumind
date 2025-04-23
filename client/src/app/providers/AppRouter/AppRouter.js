@@ -20,6 +20,7 @@ const AppRouter = ({ children }) => {
         pathname.startsWith("/teams") ||
         pathname.startsWith("/assignments") ||
         pathname.startsWith("/chats") ||
+        pathname.startsWith("/schedule") ||
         pathname.startsWith("/users");
 
     useEffect(() => {

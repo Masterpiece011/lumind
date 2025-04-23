@@ -23,5 +23,6 @@ export const UserDetailPage = ({ userId, onClose }) => {
     }, [userId, router]);
 
     if (!user) return null;
+
     return <UserModal user={user} onClose={onClose} />;
 };

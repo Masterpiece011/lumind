@@ -36,6 +36,9 @@ export const useSearch = () => {
         const handleClickOutside = (event) => {
             if (isModalOpen) return;
 
+            const userItem = event.target.closest(".search-menu__user-item");
+            if (userItem) return;
+
             const searchInput = document.querySelector(".header__search-input");
             if (searchInput && searchInput.contains(event.target)) {
                 return;
