@@ -12,7 +12,6 @@ import { UsersPage } from "@/entities/user/ui/Users";
 import { SearchMenu } from "@/widgets/SearchMenu";
 import { TeamDetailPage } from "@/entities/team/ui/TeamDetail";
 import { Sidebar } from "@/widgets/Sidebar/Sidebar";
-
 import { AssignmentDetailPage } from "@/entities/assignment/ui/AssignmentDetail/AssignmentDetail";
 
 import { HomeComp } from "@/widgets/StartComp";
@@ -86,17 +85,17 @@ const MainComp = () => {
                             onMouseLeave={handleMouseLeave}
                             className="main__search-overlay"
                         >
-                          <SearchMenu
-                              searchQuery={searchQuery}
-                              onSelectTeam={(teamId) =>
-                                  handleNavigation(`/teams/${teamId}`)
-                              }
-                              menuRef={searchMenuRef}
-                              onTeamsCardClick={handleTeamsCardClick}
-                              onUsersCardClick={handleUsersCardClick}
-                              isTeamsPageActive={pathname === "/teams"}
-                              isUsersPageActive={pathname === "/users"}
-                          />
+                            <SearchMenu
+                                searchQuery={searchQuery}
+                                onSelectTeam={(teamId) =>
+                                    handleNavigation(`/teams/${teamId}`)
+                                }
+                                menuRef={searchMenuRef}
+                                onTeamsCardClick={handleTeamsCardClick}
+                                onUsersCardClick={handleUsersCardClick}
+                                isTeamsPageActive={pathname === "/teams"}
+                                isUsersPageActive={pathname === "/users"}
+                            />
                         </div>
                     )}
 

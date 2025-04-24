@@ -3,6 +3,7 @@ import "@/shared/styles/global.scss";
 import ReduxProvider from "./providers/Redux/ReduxProvider";
 import AppRouter from "./providers/AppRouter/AppRouter";
 import { ModalProvider } from "@/shared/uikit/UiModal/ModalProvider";
+import { ThemeProvider } from "./providers/ThemeProvider/ThemeProvider";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -15,9 +16,11 @@ export default function RootLayout({ children }) {
         <html lang="en" className={inter.variable}>
             <body>
                 <ReduxProvider>
-                    <ModalProvider>
-                        <AppRouter>{children}</AppRouter>
-                    </ModalProvider>
+                    <ThemeProvider>
+                        <ModalProvider>
+                            <AppRouter>{children}</AppRouter>
+                        </ModalProvider>
+                    </ThemeProvider>
                 </ReduxProvider>
             </body>
         </html>

@@ -1,9 +1,10 @@
+@use "../../../../shared/styles/variables/variables" as *;
 @use "../../../../shared/styles/mixins/mixins" as *;
 
 .schedule {
-    background-color: #aeaeae1a;
+    background-color: var(--card-bg);
     border-radius: 16px;
-    box-shadow: 0px 0px 10px 10px #0000000d;
+    box-shadow: 0px 0px 10px 10px var(--shadow-color);
     padding: 20px;
     height: 100%;
     overflow-y: auto;
@@ -25,8 +26,8 @@
     }
 
     &__week-button {
-        background-color: rgba(174, 174, 174, 0.1);
-        color: rgba(174, 174, 174, 0.9);
+        background-color: var(--card-bg);
+        color: var(--text-muted);
         border: none;
         border-radius: 8px;
         padding: 8px 16px;
@@ -35,7 +36,7 @@
         transition: all 0.3s;
 
         &--active {
-            background-color: #7e57c2;
+            background-color: var(--active-color);
             color: white;
         }
     }
@@ -53,20 +54,20 @@
 
     &__filter-label {
         @include fontOptions(16px, 400, 24px);
-        color: rgba(174, 174, 174, 0.9);
+        color: var(--text-muted);
         margin-bottom: 5px;
     }
 
     &__filter-input {
-        background-color: rgba(174, 174, 174, 0.1);
-        border: 1px solid rgba(174, 174, 174, 0.3);
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border);
         border-radius: 8px;
         padding: 8px 12px;
-        color: #f9f9f9;
+        color: var(--text-color);
         outline: none;
 
         &:focus {
-            border-color: #7e57c2;
+            border-color: var(--active-color);
         }
     }
 
@@ -79,7 +80,7 @@
     &__table-header {
         display: grid;
         grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1fr;
-        background-color: rgba(126, 87, 194, 0.2);
+        background-color: rgba(var(--active-color), 0.2);
         border-radius: 8px;
         padding: 12px 0;
         margin-bottom: 5px;
@@ -87,13 +88,13 @@
 
     &__table-cell {
         @include fontOptions(14px, 600, 16px);
-        color: #7e57c2;
+        color: var(--active-color);
         padding: 0 15px;
         position: relative;
     }
 
     &__divider {
-        border-left: 2px solid #AEAEAE80
+        border-left: 2px solid var(--divider-color);
     }
 
     &__day-container {
@@ -110,18 +111,18 @@
 
     &__day-name {
         @include fontOptions(18px, 600, 24px);
-        color: #f9f9f9;
+        color: var(--text-color);
     }
 
     &__day-date {
         @include fontOptions(16px, 400, 24px);
-        color: rgba(174, 174, 174, 0.7);
+        color: var(--text-muted);
     }
 
     &__table-row {
         display: grid;
         grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1fr;
-        background-color: rgba(174, 174, 174, 0.05);
+        background-color: var(--card-bg);
         border-radius: 8px;
         padding: 12px 0;
         margin-bottom: 5px;
@@ -129,7 +130,7 @@
     }
 
     &__no-entries {
-        color: rgba(174, 174, 174, 0.7);
+        color: var(--text-muted);
         @include fontOptions(14px, 400, 16px);
         grid-template-columns: 1fr;
         padding-left: 15px;
@@ -137,6 +138,7 @@
 
     &__time {
         @include fontOptions(16px, 600, 24px);
+        color: var(--text-color);
     }
 
     &__title,
@@ -144,6 +146,6 @@
     &__type,
     &__location {
         @include fontOptions(16px, 400, 16px);
-        color: rgba(174, 174, 174, 0.9);
+        color: var(--text-muted);
     }
 }
