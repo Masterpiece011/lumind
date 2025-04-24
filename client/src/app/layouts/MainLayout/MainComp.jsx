@@ -4,26 +4,21 @@ import React, { useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { HeaderComp } from "@/widgets/HeaderComp";
 
+import { HeaderComp } from "@/widgets/HeaderComp";
 import { TeamsPage } from "@/entities/team/ui/Teams";
 import { AssignmentsPage } from "@/entities/assignment/ui/Assignments";
 import { UsersPage } from "@/entities/user/ui/Users";
 import { SearchMenu } from "@/widgets/SearchMenu";
 import { TeamDetailPage } from "@/entities/team/ui/TeamDetail";
-import AssignmentsDetailPage from "@/entities/assignment/ui/AssignmentDetail";
+import { Sidebar } from "@/widgets/Sidebar/Sidebar";
+
+import { AssignmentDetailPage } from "@/entities/assignment/ui/AssignmentDetail/AssignmentDetail";
+
 import { HomeComp } from "@/widgets/StartComp";
 import { useSearch } from "@/shared/lib/hooks/useSearch";
 import { ChatPage } from "@/features/chat/ui/ChatComp";
 import { SchedulePage } from "@/features/schedule/ui/SheduleComp";
-
-import { Icon } from "@/shared/uikit/icons";
-import HomeIcon from "@/app/assets/icons/home-icon.svg";
-import ChatIcon from "@/app/assets/icons/chat-icon.svg";
-import TeamsIcon from "@/app/assets/icons/teams-icon.svg";
-import AssignmentsIcon from "@/app/assets/icons/assignments-icon.svg";
-import NotificationsIcon from "@/app/assets/icons/notification-icon.svg";
-import ScheduleIcon from "@/app/assets/icons/schedule-icon.svg";
 
 import "./style.scss";
 
@@ -57,11 +52,6 @@ const MainComp = () => {
         router.push(path);
     };
 
-    const isActive = (path) => {
-        if (path === "/") return pathname === path;
-        return pathname.startsWith(path);
-    };
-
     const handleCardClick = (basePath, hasDetailPages = false) => {
         const isOnDetailPage = hasDetailPages
             ? pathname.startsWith(`/${basePath}/`) && params.id
@@ -86,70 +76,7 @@ const MainComp = () => {
             </header>
 
             <div className="main__content">
-                <aside className="main__sidebar">
-                    <ul className="main__sidebar-list">
-                        <Icon
-                            src={HomeIcon}
-                            alt="home-icon"
-                            onClick={() => handleNavigation("/")}
-                            className={
-                                isActive("/")
-                                    ? "main__sidebar-icon--active"
-                                    : "main__sidebar-icon"
-                            }
-                        />
-                        <Icon
-                            src={NotificationsIcon}
-                            alt="notifications-icon"
-                            onClick={() => handleNavigation("/notifications")}
-                            className={
-                                isActive("/notifications")
-                                    ? "main__sidebar-icon--active"
-                                    : "main__sidebar-icon"
-                            }
-                        />
-                        <Icon
-                            src={TeamsIcon}
-                            alt="teams-icon"
-                            onClick={() => handleNavigation("/teams")}
-                            className={
-                                isActive("/teams")
-                                    ? "main__sidebar-icon--active"
-                                    : "main__sidebar-icon"
-                            }
-                        />
-                        <Icon
-                            src={ChatIcon}
-                            alt="chat-icon"
-                            onClick={() => handleNavigation("/chats")}
-                            className={
-                                isActive("/chats")
-                                    ? "main__sidebar-icon--active"
-                                    : "main__sidebar-icon"
-                            }
-                        />
-                        <Icon
-                            src={AssignmentsIcon}
-                            alt="assignments-icon"
-                            onClick={() => handleNavigation("/assignments")}
-                            className={
-                                isActive("/assignments")
-                                    ? "main__sidebar-icon--active"
-                                    : "main__sidebar-icon"
-                            }
-                        />
-                        <Icon
-                            src={ScheduleIcon}
-                            alt="schedule-icon"
-                            onClick={() => handleNavigation("/schedule")}
-                            className={
-                                isActive("/schedule")
-                                    ? "main__sidebar-icon--active"
-                                    : "main__sidebar-icon"
-                            }
-                        />
-                    </ul>
-                </aside>
+                <Sidebar />
 
                 <section className="main__page-content">
                     <div className="main__content-wrapper">
@@ -208,7 +135,7 @@ const MainComp = () => {
                               !isModalOpen &&
                               pathname.startsWith("/assignments/") &&
                               params.id ? (
-                                <AssignmentsDetailPage id={params.id} />
+                                <AssignmentDetailPage id={params.id} />
                             ) : !showSearchMenu &&
                               !isModalOpen &&
                               pathname.startsWith("/teams") &&

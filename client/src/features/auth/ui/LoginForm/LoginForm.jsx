@@ -1,15 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import Cookies from "js-cookie";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setIsAuth, setUser } from "@/entities/user/model/userStore";
-import { MyButton } from "@/shared/uikit/MyButton";
 import { login } from "@/shared/api/userAPI";
+
 import "./style.scss";
-import * as buttonStyles from "../../../../shared/uikit/MyButton/MyButton.module.scss";
-import { useRouter } from "next/navigation";
+
+import Cookies from "js-cookie";
+import Image from "next/image";
+import { MyButton } from "@/shared/uikit/MyButton";
+
+import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import LockIcon from "@/app/assets/icons/lock-icon.png";
@@ -129,16 +132,19 @@ function LoginForm() {
                                 <a href="#" className="login__forgot-password">
                                     Забыли пароль? Восстановить
                                 </a>
+
+                                <div>
+                                    <MyButton
+                                        text="Войти"
+                                        className={buttonStyles.loginButton}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className="login__logo-wrapper">
                             <Image src={Logo} alt="Logo" />
                         </div>
                     </div>
-                    <MyButton
-                        text="Войти"
-                        className={buttonStyles.loginButton}
-                    />
                 </form>
             </div>
         </div>
