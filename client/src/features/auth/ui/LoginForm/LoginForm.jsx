@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { setIsAuth, setUser } from "@/entities/user/model/userStore";
 import { login } from "@/shared/api/userAPI";
 
-import "./style.scss";
+import "./LoginForm.scss";
 
 import Cookies from "js-cookie";
 import Image from "next/image";

@@ -3,7 +3,7 @@
 import React, { useEffect, useState, memo, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAssignments } from "@/shared/api/assignmentsAPI";
-import "./style.scss";
+import "./AssignmentsComp.scss";
 import { MyButton } from "@/shared/uikit/MyButton";
 
 const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {

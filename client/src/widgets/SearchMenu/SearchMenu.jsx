@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import "./style.scss";
+import "./SearchMenu.scss";
 import { getTeams } from "@/shared/api/teamAPI";
 import { getUsers } from "@/shared/api/userAPI";
 

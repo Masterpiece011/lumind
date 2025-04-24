@@ -1,11 +1,14 @@
 "use client";
 
 import React from "react";
-import "./style.scss";
 import { useAccordion } from "@/shared/lib/hooks/useAccordion";
+
+import "./HomeComp.scss";
+
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "@/shared/uikit/MyButton";
-import { Icon } from "../../shared/uikit/icons";
+import { Icon } from "@/shared/uikit/icons";
+
 import Arrow from "@/app/assets/icons/arrow-icon.svg";
 import SheduleImg from "@/app/assets/img/shedule-img.png";
 import ChatImg from "@/app/assets/img/chat-img.png";

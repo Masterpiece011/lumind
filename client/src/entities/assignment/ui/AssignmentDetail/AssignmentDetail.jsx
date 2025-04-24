@@ -1,6 +1,6 @@
 "use client";
 
-import "./style.scss";
+import "./AssignmentDetail.scss";
 
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";

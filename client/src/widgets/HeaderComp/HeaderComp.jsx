@@ -9,7 +9,7 @@ import Settings from "@/app/assets/icons/settings.svg";
 import SearchIcon from "@/app/assets/icons/search-icon.svg";
 import ThemeIcon from "@/app/assets/icons/theme-icon.svg";
 
-import "./style.scss";
+import "./HeaderComp.scss";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 
 import { MyButton } from "@/shared/uikit/MyButton";

@@ -2,8 +2,8 @@
 
 import React, { useState, useRef, useEffect } from "react";
 
-import * as buttonStyles from "../../../../shared/uikit/MyButton/MyButton.module.scss";
-import "./style.scss";
+import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
+import "./ChatComp.scss";
 import { MyButton } from "@/shared/uikit/MyButton";
 import SearchIcon from "@/shared/assets/icons/search-icon.svg";
 import PaperClipIcon from "@/shared/assets/icons/paperclip-icon.svg";
