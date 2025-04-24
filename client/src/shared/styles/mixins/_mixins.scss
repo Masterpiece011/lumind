@@ -1,4 +1,11 @@
 
+@mixin apply-theme($theme: 'dark') {
+  // Общие стили для всех тем
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 // Шрифт
 @mixin fontOptions($size, $weight, $line-height) {
     font-size: $size;
@@ -53,4 +60,6 @@ $ease-default: cubic-bezier(0.4, 0, 0.2, 1);
   
   &-active { transform: translateX(0); }
 }
+
+
 

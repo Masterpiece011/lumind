@@ -5,6 +5,7 @@ import groupReducer from "../store/groupStore";
 import teamReducer from "../../entities/team/model/teamStore";
 import assignmentReducer from "../../entities/assignment/model/assignmentStore";
 import submissionReducer from "../../features/submissions/model/submissionStore";
+import themeReducer from "../../features/theme/model/themeStore";
 
 export const store = configureStore({
     reducer: {
@@ -14,5 +15,6 @@ export const store = configureStore({
         teams: teamReducer,
         assignments: assignmentReducer,
         submissions: submissionReducer,
+        theme: themeReducer,
     },
 });

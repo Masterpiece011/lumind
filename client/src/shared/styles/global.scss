@@ -1,23 +1,12 @@
 // src/app/scss/global.scss
 @use "mixins/mixins" as *;
 
+@use "variables/variables" as *;
+
 @use "./reset.scss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --font-inter: 'Inter', sans-serif; 
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-.container {
-  background-color: #202020;
+  @include apply-theme('dark'); 
 }
 
 body {
