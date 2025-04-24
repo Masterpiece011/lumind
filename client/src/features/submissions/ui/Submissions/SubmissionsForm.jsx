@@ -1,23 +1,16 @@
-import React, {
-    useEffect,
-    useState,
-    forwardRef,
-    useImperativeHandle,
-} from "react";
-import { useSelector, useDispatch } from "react-redux";
 import "./style.scss";
 
+import React, { useState, forwardRef, useImperativeHandle } from "react";
+
+import { useSelector, useDispatch } from "react-redux";
+
 import { MyButton } from "@/shared/uikit/MyButton";
-import { fetchSubmissionById } from "@/features/submissions/model/submissionStore";
-import { createSubmission, updateSubmission } from "@/shared/api/submissionAPI";
-import { uploadFile, uploadMultipleFiles } from "@/shared/api/uploadFileAPI";
 import { FileItem } from "@/shared/ui/FileComp";
 
+import { uploadFile, uploadMultipleFiles } from "@/shared/api/uploadFileAPI";
+
 const SubmissionForm = forwardRef(
-    (
-        { assignment_id, submission_id, onSubmissionSuccess, isSubmitted },
-        ref,
-    ) => {
+    ({ onSubmissionSuccess, isSubmitted }, ref) => {
         const [comment, setComment] = useState("");
         const [files, setFiles] = useState([]);
         const [loading, setLoading] = useState(false);
@@ -25,25 +18,6 @@ const SubmissionForm = forwardRef(
 
         const user_id = useSelector((state) => state.user.user?.id);
         const dispatch = useDispatch();
-        const submission = useSelector((state) => state.submissions);
-
-        useEffect(() => {
-            if (user_id && submission_id) {
-                dispatch(
-                    fetchSubmissionById({
-                        submission_id,
-                        userId: user_id,
-                    }),
-                );
-            }
-        }, [user_id, submission_id, dispatch]);
-
-        useEffect(() => {
-            if (submission) {
-                setComment(submission.comment || "");
-                setFiles(submission.Assignments_investments || []);
-            }
-        }, [submission]);
 
         const handleFileChange = async (e) => {
             const uploadedFiles = Array.from(e.target.files);
@@ -103,21 +77,6 @@ const SubmissionForm = forwardRef(
 
                 let response;
 
-                if (submission && submission.id) {
-                    response = await updateSubmission({
-                        submission_id: submission.id,
-                        comment,
-                        investments: fileIds,
-                    });
-                } else {
-                    response = await createSubmission({
-                        user_id,
-                        assignment_id: assignment_id,
-                        comment,
-                        investments: fileIds,
-                    });
-                }
-
                 console.log("Ответ от сервера:", response);
 
                 const updatedFiles =
@@ -160,24 +119,6 @@ const SubmissionForm = forwardRef(
                         onChange={handleFileChange}
                     />
                 </div>
-
-                {files.length > 0 && (
-                    <div>
-                        <h3>Прикрепленные файлы:</h3>
-                        <ul className="submission-form__file-list">
-                            {files.map((file, index) => (
-                                <li key={file.id || index}>
-                                    <FileItem
-                                        fileUrl={file.file_url}
-                                        onDelete={() =>
-                                            handleDeleteFile(file.id)
-                                        }
-                                    />
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
             </form>
         );
     },

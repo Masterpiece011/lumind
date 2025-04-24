@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
     getSubmissionById,
     getUserSubmissions,
-} from "../../../shared/api/submissionAPI";
+} from "@/shared/api/submissionAPI";
 
 export const fetchSubmissionById = createAsyncThunk(
     "submissions/fetchById",

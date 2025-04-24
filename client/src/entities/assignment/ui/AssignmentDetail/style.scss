@@ -60,14 +60,14 @@
     }
 
     &__submit-btn {
-        background-color: rgba(#aeaeae, 0.5);
+        background-color: rgba(#aeaeae, 0.4);
         color: whitesmoke;
         padding: 8px 16px;
         border-radius: 4px;
         transition: background-color 0.2s;
 
         &:hover {
-            background-color: #444;
+            background-color: rgba(#aeaeae, 0.2);
         }
 
         &:disabled {
@@ -129,6 +129,10 @@
             color: #aeaeae;
             margin: 0;
         }
+    }
+
+    .files-title {
+        margin-bottom: 15px;
     }
 
     &__files-list {

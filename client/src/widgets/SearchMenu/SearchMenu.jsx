@@ -18,9 +18,9 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
     const dispatch = useDispatch();
     const { teams = [] } = useSelector((state) => state.teams);
     const usersArray = useSelector((state) => state.users.users) || [];
-    const { submissions: submissionsData = [] } = useSelector(
-        (state) => state.submissions,
-    );
+    // const { submissions: submissionsData = [] } = useSelector(
+    //     (state) => state.submissions,
+    // );
     const user_id = useSelector((state) => state.user.user?.id);
 
     const [userFiles, setUserFiles] = useState([]);
@@ -41,34 +41,34 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
         if (user_id) dispatch(getUserSubmissions(user_id));
     }, [dispatch, teams.length, usersArray.length, user_id]);
 
-    useEffect(() => {
-        if (Array.isArray(submissionsData)) {
-            const uniqueFiles = new Map();
+    // useEffect(() => {
+    //     if (Array.isArray(submissionsData)) {
+    //         const uniqueFiles = new Map();
 
-            submissionsData.forEach((submission) => {
-                (submission.submissions_investments || []).forEach((file) => {
-                    if (!uniqueFiles.has(file.file_url)) {
-                        uniqueFiles.set(file.file_url, {
-                            ...file,
-                            submissionDate: submission.created_at,
-                            assignmentTitle:
-                                submission.Assignment?.title ||
-                                "Неизвестное задание",
-                        });
-                    }
-                });
-            });
+    //         submissionsData.forEach((submission) => {
+    //             (submission.submissions_investments || []).forEach((file) => {
+    //                 if (!uniqueFiles.has(file.file_url)) {
+    //                     uniqueFiles.set(file.file_url, {
+    //                         ...file,
+    //                         submissionDate: submission.created_at,
+    //                         assignmentTitle:
+    //                             submission.Assignment?.title ||
+    //                             "Неизвестное задание",
+    //                     });
+    //                 }
+    //             });
+    //         });
 
-            const recentFiles = Array.from(uniqueFiles.values())
-                .sort(
-                    (a, b) =>
-                        new Date(b.submissionDate) - new Date(a.submissionDate),
-                )
-                .slice(0, 8);
+    //         const recentFiles = Array.from(uniqueFiles.values())
+    //             .sort(
+    //                 (a, b) =>
+    //                     new Date(b.submissionDate) - new Date(a.submissionDate),
+    //             )
+    //             .slice(0, 8);
 
-            setUserFiles(recentFiles);
-        }
-    }, [submissionsData]);
+    //         setUserFiles(recentFiles);
+    //     }
+    // }, [submissionsData]);
 
     useEffect(() => {
         const query = searchQuery.toLowerCase();

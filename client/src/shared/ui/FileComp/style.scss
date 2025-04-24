@@ -1,20 +1,20 @@
-@use "../../styles/mixins/mixins" as *;
+@use "@/shared/styles/mixins/mixins" as *;
 
 .file-item {
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        border: 1px solid #eee;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        margin-bottom: 20px;
-        background-color: #AEAEAE;
-        gap:20px;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 20px;
+    background-color: rgba(174, 174, 174, 0.2);
+    gap: 20px;
 
-        &:hover {
-            background-color: #f5f5f5;
-        }
+    &:hover {
+        background-color: #f5f5f5;
+    }
 
     .file-icon {
         display: flex;
@@ -30,7 +30,7 @@
 
     .file-name {
         @include fontOptions(18px, 400, 18px);
-        color: #000000;
+        color: #aeaeae;
     }
 
     .file-additional-info {
@@ -40,7 +40,6 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
-
 
     .file-actions {
         position: relative;
@@ -72,7 +71,7 @@
             z-index: 100;
             min-width: 150px;
             margin-top: 4px;
-    
+
             .file-menu-item {
                 display: flex;
                 align-items: center;
@@ -85,7 +84,6 @@
                 @include fontOptions(14px, 400, 14px);
                 color: #333;
                 gap: 20px;
-                
 
                 & img {
                     width: 34px;
@@ -96,16 +94,16 @@
                 & p {
                     @include fontOptions(16px, 400, 16px);
                 }
-    
+
                 &:hover {
                     background-color: #f1f1f1;
                 }
-    
+
                 &:first-child {
                     border-top-left-radius: 4px;
                     border-top-right-radius: 4px;
                 }
-    
+
                 &:last-child {
                     border-bottom-left-radius: 4px;
                     border-bottom-right-radius: 4px;
@@ -113,49 +111,49 @@
             }
         }
 
-    .file-item-delete {
-        background: none;
-        border: none;
-        color: #ff4d4f;
-        cursor: pointer;
-        margin-left: auto;
+        .file-item-delete {
+            background: none;
+            border: none;
+            color: #ff4d4f;
+            cursor: pointer;
+            margin-left: auto;
 
-        &:hover {
-            text-decoration: underline;
+            &:hover {
+                text-decoration: underline;
+            }
         }
     }
-}
 
- &--compact {
-    width: 155px;
-    padding: 4px;
-    margin-bottom: 0;
-    background-color: rgba(174, 174, 174, 0.2);
-    gap: 5px;
-    border: 0;
-    transition: 
-    background 0.2s ease,
-    transform 0.2s ease;
+    &--compact {
+        width: 155px;
+        padding: 4px;
+        margin-bottom: 0;
+        background-color: rgba(174, 174, 174, 0.2);
+        gap: 5px;
+        border: 0;
+        transition:
+            background 0.2s ease,
+            transform 0.2s ease;
 
-    &:hover {
-        transform: translateX(3px);
-        background-color: transparent;
-      }
+        &:hover {
+            transform: translateX(3px);
+            background-color: transparent;
+        }
 
-    .file-icon img {
-        width: 16px;
-        height: 16px;
-        margin: 0;
+        .file-icon img {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+        }
+
+        .file-name {
+            @include fontOptions(12px, 400, 12px);
+            white-space: nowrap;
+            color: #ffffff;
+        }
+
+        .file-additional-info {
+            display: none;
+        }
     }
-
-    .file-name {
-        @include fontOptions(12px, 400, 12px);
-        white-space: nowrap;
-        color: #FFFFFF;
-    }
-
-    .file-additional-info {
-        display: none;
-    }
-  }
 }
