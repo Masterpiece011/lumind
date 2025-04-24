@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { getTeamById, getTeamFiles } from "@/shared/api/teamAPI";
 import { getAssignments } from "@/shared/api/assignmentsAPI";
-import "../TeamDetail/style.scss";
+import "./TeamDetail.scss";
 import { MyButton } from "@/shared/uikit/MyButton";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";

@@ -1,4 +1,4 @@
-import "./style.scss";
+import "./SubmissionsForm.scss";
 
 import React, { useState, forwardRef, useImperativeHandle } from "react";
 

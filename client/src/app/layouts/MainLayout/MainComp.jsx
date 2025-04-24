@@ -20,7 +20,7 @@ import { useSearch } from "@/shared/lib/hooks/useSearch";
 import { ChatPage } from "@/features/chat/ui/ChatComp";
 import { SchedulePage } from "@/features/schedule/ui/SheduleComp";
 
-import "./style.scss";
+import "./MainComp.scss";
 
 const MainComp = () => {
     const router = useRouter();
@@ -124,7 +124,7 @@ const MainComp = () => {
                             />
                         ) : pathname.startsWith("/assignments/") &&
                           params.id ? (
-                            <AssignmentsDetailPage id={params.id} />
+                            <AssignmentDetailPage id={params.id} />
                         ) : pathname.startsWith("/teams") && userId ? (
                             <TeamsPage
                                 userId={userId}

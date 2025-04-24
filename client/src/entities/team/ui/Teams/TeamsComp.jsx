@@ -6,7 +6,7 @@ import { MyButton } from "@/shared/uikit/MyButton";
 import { Icon } from "@/shared/uikit/icons";
 import Arrow from "@/app/assets/icons/arrow-icon.svg";
 
-import "./style.scss";
+import "./TeamsComp.scss";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 
 import { getTeams } from "@/shared/api/teamAPI";

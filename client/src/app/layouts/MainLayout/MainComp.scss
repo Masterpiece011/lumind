@@ -8,7 +8,6 @@
 
     &__content {
         display: flex;
-        color: whitesmoke;
     }
 
     &__page-content {
@@ -44,6 +43,7 @@
     }
 
     &__page {
+        width: 100%;
         transition:
             filter 0.3s ease,
             opacity 0.3s ease;

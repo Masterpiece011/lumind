@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-import "./style.scss";
+import "./FileComp.scss";
 
 import { MyButton } from "@/shared/uikit/MyButton";
 import { Icon } from "@/shared/uikit/icons";

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { MyButton } from "@/shared/uikit/MyButton";
-import "./style.scss";
+import "./ScheduleComp.scss";
 
 const SchedulePage = () => {
     const [activeWeek, setActiveWeek] = useState("Неделя 1");

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import "./style.scss";
+import "./ClockLoader.scss";
 
 const ClockLoader = ({ loading }) => {
     const [hourDeg, setHourDeg] = useState(0);
