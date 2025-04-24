@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
+import { useTheme } from "@/features/theme/model/useTheme";
 
 import Settings from "@/app/assets/icons/settings.svg";
 import SearchIcon from "@/app/assets/icons/search-icon.svg";
@@ -27,6 +28,8 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
 
     const [searchQuery, setSearchQuery] = useState("");
 
+    const { theme, toggleTheme } = useTheme();
+
     useEffect(() => {
         dispatch(getUsers());
         dispatch(getTeams());
@@ -38,7 +41,6 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
 
     const handleLogoutClick = () => {
         dispatch(logout());
-        // Очищаем историю и перенаправляем на login
         window.history.replaceState(null, "", "/login");
         router.replace("/login");
     };
@@ -83,7 +85,10 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
                 )}
                 <div className="header__content">
                     <div className="header__content-wrapper">
-                        <MyButton className={buttonStyles.headerButton}>
+                        <MyButton
+                            className={buttonStyles.headerButton}
+                            onClick={toggleTheme}
+                        >
                             <Image src={ThemeIcon} alt="theme-icon" />
                         </MyButton>
 

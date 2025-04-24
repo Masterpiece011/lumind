@@ -1,15 +1,17 @@
-@use "@/shared/styles/mixins/mixins" as *;
+@use "../../../../shared/styles/variables/variables" as *;
+@use "../../../../shared/styles/mixins/mixins" as *;
 
 .assignments {
     border-radius: 16px;
-    box-shadow: 0px 0px 10px 10px #0000000d;
-    background-color: #aeaeae1a;
+    box-shadow: 0px 0px 10px 10px var(--shadow-color);
+    background-color: var(--card-bg);
     padding: 40px 60px;
     flex-direction: column;
 
     &__title {
         @include fontOptions(24px, 400, 22px);
         margin-bottom: 20px;
+        color: var(--text-color);
     }
 
     &__filters {
@@ -21,19 +23,21 @@
 
         .assignments__filter-button {
             padding: 8px 16px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--card-border);
             border-radius: 4px;
-            background-color: rgba(174, 174, 174, 0.1019607843);
+            background-color: var(--card-bg);
             cursor: pointer;
             transition: all 0.3s;
+            color: var(--text-color);
 
             &:hover {
-                background-color: #7e57c2;
+                background-color: var(--active-color);
+                color: white;
             }
 
             &--active {
-                background: #7e57c2;
-                border-color: #7e57c2;
+                background: var(--active-color);
+                border-color: var(--active-color);
                 color: white;
             }
         }
@@ -43,7 +47,7 @@
         width: 100%;
         height: 2px;
         border-radius: 50%;
-        background: #aeaeae80;
+        background: var(--divider-color);
         margin-bottom: 20px;
     }
 
@@ -62,9 +66,9 @@
 
     &__card {
         width: 100%;
-        color: #f9f9f9;
-        background-color: rgba(174, 174, 174, 0.1019607843);
-        border: 1px solid #ddd;
+        color: var(--text-color);
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border);
         border-radius: 8px;
         padding: 15px;
         margin-bottom: 15px;
@@ -72,14 +76,14 @@
         transition: all 0.3s;
 
         &:hover {
-            background-color: rgba(174, 174, 174, 0.306);
+            background-color: var(--hover-color);
             border-color: transparent;
         }
 
         p,
         span,
         h2 {
-            color: #f9f9f9;
+            color: var(--text-color);
         }
     }
 
@@ -88,7 +92,7 @@
         justify-content: space-between;
         margin-bottom: 10px;
         @include fontOptions(14px, 400, 14px);
-        color: #555;
+        color: var(--text-muted);
     }
 
     &__status {
@@ -103,19 +107,18 @@
     &__name {
         font-size: 18px;
         margin-bottom: 10px;
-        color: #333;
+        color: var(--text-color);
     }
 
     &__deadline {
         @include fontOptions(14px, 400, 14px);
-        color: #777;
+        color: var(--text-muted);
     }
 
     &__loading,
-    &__error,
     &__empty {
         @include fontOptions(16px, 400, 16px);
-        color: #333;
+        color: var(--text-color);
         text-align: center;
         margin-top: 20px;
     }

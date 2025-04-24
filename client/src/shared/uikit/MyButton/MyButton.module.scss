@@ -1,4 +1,5 @@
-@use "@/shared/styles/mixins/mixins" as *;
+@use "../../../shared/styles/variables/variables" as *;
+@use "../../../shared/styles/mixins/mixins" as *;
 
 .loginButton {
     padding: 8px 12px;
@@ -31,21 +32,21 @@
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    border: 1px solid #aeaeae80;
+    border: 1px solid var(--card-border);
     background-color: transparent;
-    color: #ffffff;
+    color: var(--text-color);
     cursor: pointer;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
 
     &:hover {
         opacity: 1;
-        background: #4914a5;
-        color: #171717;
+        background: var(--active-color);
+        color: var(--text-color);
     }
 
     &:active {
-        background-color: #505050;
-        border-color: #ffffff;
+        background-color: var(--hover-color);
+        border-color: var(--text-color);
     }
 }
 
@@ -54,7 +55,7 @@
     height: 30px;
     background: transparent;
     border: none;
-    color: #ffffff;
+    color: var(--text-color);
     display: flex;
     align-items: center;
     padding: 10px 0;
@@ -68,11 +69,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid #aeaeae80;
+        border: 1px solid var(--card-border);
         border-radius: 4px;
         margin-right: 5px;
         cursor: pointer;
-        box-shadow: 0px 4px 4px 0px #00000040;
+        box-shadow: 0px 4px 4px 0px var(--shadow-color);
 
         & img {
             width: 12px;
@@ -83,7 +84,7 @@
 
     .sidebarInfo {
         @include fontOptions(18px, 400, 18px);
-        color: #ffffff;
+        color: var(--text-color);
     }
 }
 
@@ -95,7 +96,7 @@
     .accordionInfo {
         display: flex;
         align-items: center;
-        color: #ffffff;
+        color: var(--text-color);
 
         & .accordionTittle {
             @include fontOptions(24px, 400, 22px);
@@ -106,7 +107,7 @@
 
 .users__filterBtn {
     padding: 8px 16px;
-    background-color: #4914a5;
+    background-color: var(--active-color);
     color: white;
     border: none;
     border-radius: 4px;
@@ -114,7 +115,7 @@
     transition: background-color 0.2s;
 
     &:hover {
-        background-color: #5a1dc0;
+        background-color: var(--text-accent);
     }
 }
 
