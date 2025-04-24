@@ -29,6 +29,7 @@ const SearchMenu = ({
     const dispatch = useDispatch();
     const { teams = [] } = useSelector((state) => state.teams);
     const usersArray = useSelector((state) => state.users.users) || [];
+
     const user_id = useSelector((state) => state.user.user?.id);
 
     const userFiles = useUserFiles(user_id);
@@ -52,6 +53,36 @@ const SearchMenu = ({
         if (!usersArray.length) dispatch(getUsers({ page: 1, quantity: 100 }));
         if (user_id) dispatch(getUserSubmissions(user_id));
     }, [dispatch, teams.length, usersArray.length, user_id]);
+
+
+
+    useEffect(() => {
+        const query = searchQuery.toLowerCase();
+
+        setFilteredUsers(
+            usersArray.filter(
+                (user) =>
+                    user.email.toLowerCase().includes(query) ||
+                    user.name?.toLowerCase().includes(query),
+            ),
+        );
+
+        setFilteredTeams(
+            teams.filter(
+                (team) =>
+                    team.name.toLowerCase().includes(query) ||
+                    team.description?.toLowerCase().includes(query),
+            ),
+        );
+
+        setFilteredFiles(
+            userFiles.filter(
+                (file) =>
+                    file.file_url.toLowerCase().includes(query) ||
+                    file.assignmentTitle?.toLowerCase().includes(query),
+            ),
+        );
+    }, [searchQuery, usersArray, teams, userFiles]);
 
     return (
         <div

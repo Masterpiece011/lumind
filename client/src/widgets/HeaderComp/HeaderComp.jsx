@@ -10,7 +10,7 @@ import SearchIcon from "@/app/assets/icons/search-icon.svg";
 import ThemeIcon from "@/app/assets/icons/theme-icon.svg";
 
 import "./style.scss";
-import * as buttonStyles from "../../shared/uikit/MyButton/MyButton.module.scss";
+import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "@/shared/uikit/MyButton";
 import { getUsers } from "@/shared/api/userAPI";
 import { getTeams } from "@/shared/api/teamAPI";

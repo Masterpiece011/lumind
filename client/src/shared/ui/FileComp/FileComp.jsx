@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
+
+import "./style.scss";
+
 import { MyButton } from "@/shared/uikit/MyButton";
-import { Icon } from "../../uikit/icons";
+import { Icon } from "@/shared/uikit/icons";
 
 import WordIcon from "@/app/assets/icons/word-icon.svg";
 import PDFIcon from "@/app/assets/icons/pdf-icon.svg";
@@ -9,7 +12,6 @@ import FileIcon from "@/app/assets/icons/file-icon.svg";
 import EllipsisVertical from "@/app/assets/icons/ellipsis-vertical.svg";
 import CloudDowloadArrow from "@/app/assets/icons/cloud-arrow-down-solid.svg";
 
-import "./style.scss";
 import { downloadFile } from "@/shared/api/uploadFileAPI";
 
 const getFileType = (fileUrl) => {

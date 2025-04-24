@@ -1,9 +1,12 @@
 "use client";
 
+import "./style.scss";
+
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+
 import { getAssignmentById } from "@/shared/api/assignmentsAPI";
-import "./style.scss";
+
 import { MyButton } from "@/shared/uikit/MyButton";
 import { FileItem } from "@/shared/ui/FileComp";
 import { SubmissionForm } from "@/features/submissions/ui/Submissions/SubmissionsForm";
@@ -14,7 +17,7 @@ const AssignmentDetailPage = () => {
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [showWorkForm, setShowWorkForm] = useState(false);
+    // const [showWorkForm, setShowWorkForm] = useState(true);
     const workFormRef = useRef(null);
 
     useEffect(() => {
@@ -36,6 +39,8 @@ const AssignmentDetailPage = () => {
             fetchAssignment();
         }
     }, [id]);
+
+    const isActive = false;
 
     const handleSubmitWork = async (files) => {
         try {
@@ -59,10 +64,12 @@ const AssignmentDetailPage = () => {
         switch (assignment.status) {
             case "assigned":
                 return "Назначено";
+            case "submitted":
+                return "Сдано на проверку";
             case "in_progress":
                 return "В работе";
             case "completed":
-                return "Ожидает оценки";
+                return "Выполнено";
             case "failed":
                 return "Провалено";
             default:
@@ -76,13 +83,18 @@ const AssignmentDetailPage = () => {
 
     if (!assignment) return <div>Задание не найдено</div>;
 
+    console.log(assignment);
+
     return (
         <div className="assignment-detail">
             <div className="assignment-detail__header">
                 <div className="assignment-detail__header-left">
                     <h1 className="assignment-detail__header-left-title">
-                        {assignment.title}
+                        {assignment.task.title}
                     </h1>
+                </div>
+
+                <div className="assignment-detail__header-right">
                     <div className="meta">
                         <span className="assignment-detail__header-left-term">
                             Срок:{" "}
@@ -92,30 +104,27 @@ const AssignmentDetailPage = () => {
                         </span>
                         <span>Статус: {getStatusText()}</span>
                     </div>
-                </div>
-                <div className="assignment-detail__header-right">
+
                     {assignment.assessment && (
                         <div className="score">
-                            Оценка: {assignment.assessment.score}
-                            {assignment.assessment.comment && (
-                                <div className="comment">
-                                    {assignment.assessment.comment}
-                                </div>
-                            )}
+                            Оценка: {assignment.assessment}
                         </div>
                     )}
+
+                    <MyButton
+                        className={`assignment-detail__submit-btn ${
+                            isActive
+                                ? "assignment-detail__submit-btn--active"
+                                : ""
+                        }`}
+                        text={"Сдать работу"}
+                        onClick={handleSubmitWork}
+                    />
                 </div>
             </div>
 
             <div className="assignment-detail__body">
                 <div className="assignment-detail__info">
-                    <section>
-                        <h2 className="assignment-detail__info-caption">
-                            Описание задания:{" "}
-                        </h2>
-                        <p>{assignment.description || "Нет описания"}</p>
-                    </section>
-
                     <section>
                         <h2 className="assignment-detail__info-caption">
                             Преподаватель:{" "}
@@ -130,8 +139,50 @@ const AssignmentDetailPage = () => {
 
                     <section>
                         <h2 className="assignment-detail__info-caption">
-                            Файлы задания:{" "}
+                            Описание задания:{" "}
                         </h2>
+                        <p>{assignment.task.description || "Нет описания"}</p>
+                    </section>
+
+                    {assignment.comment && (
+                        <section>
+                            <h2 className="assignment-detail__info-caption">
+                                Комментарий к заданию:{" "}
+                            </h2>
+                            <p className="description">{assignment.task.comment}</p>
+                        </section>
+                    )}
+
+                    {assignment.task_files?.length !== 0 && (
+                        <section>
+                            <h2 className="assignment-detail__info-caption">
+                                Файлы задания:{" "}
+                            </h2>
+                            <ul className="files-list">
+                                {assignment.task_files.map((file) => (
+                                    <li key={file.id}>
+                                        <FileItem fileUrl={file.file_url} />
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    )}
+                </div>
+
+                <div className="assignment-detail__work">
+                    <div className="work-header">
+                        <h2>Моя работа</h2>
+                    </div>
+
+                    <SubmissionForm
+                        ref={workFormRef}
+                        assignment_id={id}
+                        initialFiles={assignment.user_files}
+                        onSubmit={handleSubmitWork}
+                    />
+
+                    <section>
+                        <h3 className="files-title">Прикреплённые файлы: </h3>
                         {assignment.assignment_files?.length > 0 ? (
                             <ul className="files-list">
                                 {assignment.assignment_files.map((file) => (
@@ -141,49 +192,9 @@ const AssignmentDetailPage = () => {
                                 ))}
                             </ul>
                         ) : (
-                            <p>Нет прикреплённых файлов</p>
+                            <p>Вы ещё не прикрепили файлы</p>
                         )}
                     </section>
-                </div>
-
-                <div className="assignment-detail__work">
-                    <div className="work-header">
-                        <h2>Моя работа</h2>
-                        <MyButton
-                            onClick={() => setShowWorkForm(!showWorkForm)}
-                            disabled={assignment.status === "evaluated"}
-                        >
-                            {showWorkForm
-                                ? "Скрыть"
-                                : assignment.user_files
-                                  ? "Редактировать"
-                                  : "Добавить работу"}
-                        </MyButton>
-                    </div>
-
-                    {showWorkForm ? (
-                        <SubmissionForm
-                            ref={workFormRef}
-                            assignment_id={id}
-                            initialFiles={assignment.user_files}
-                            onSubmit={handleSubmitWork}
-                        />
-                    ) : (
-                        <section>
-                            <h3>Прикреплённые файлы</h3>
-                            {assignment.user_files?.length > 0 ? (
-                                <ul className="files-list">
-                                    {assignment.user_files.map((file) => (
-                                        <li key={file.id}>
-                                            <FileItem fileUrl={file.file_url} />
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p>Вы ещё не прикрепили файлы</p>
-                            )}
-                        </section>
-                    )}
 
                     {assignment.status === "completed" && (
                         <div className="status-notice">
