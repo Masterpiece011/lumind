@@ -62,6 +62,20 @@ const MainComp = () => {
         return pathname.startsWith(path);
     };
 
+    const handleCardClick = (basePath, hasDetailPages = false) => {
+        const isOnDetailPage = hasDetailPages
+            ? pathname.startsWith(`/${basePath}/`) && params.id
+            : false;
+
+        if (!pathname.startsWith(`/${basePath}`) || isOnDetailPage) {
+            handleNavigation(`/${basePath}`);
+        }
+        setShowSearchMenu(false);
+    };
+
+    const handleTeamsCardClick = () => handleCardClick("teams", true);
+    const handleUsersCardClick = () => handleCardClick("users");
+
     return (
         <div className="main">
             <header>
@@ -152,9 +166,15 @@ const MainComp = () => {
                             >
                                 <SearchMenu
                                     searchQuery={searchQuery}
-                                    onSelectTeam={(teamId) =>
-                                        handleNavigation(`/teams/${teamId}`)
-                                    }
+                                    onSelectTeam={(teamId) => {
+                                        console.log("Clicked team ID:", teamId);
+                                        handleNavigation(`/teams/${teamId}`);
+                                    }}
+                                    menuRef={searchMenuRef}
+                                    onTeamsCardClick={handleTeamsCardClick}
+                                    onUsersCardClick={handleUsersCardClick}
+                                    isTeamsPageActive={pathname === "/teams"}
+                                    isUsersPageActive={pathname === "/users"}
                                 />
                             </div>
                         )}
