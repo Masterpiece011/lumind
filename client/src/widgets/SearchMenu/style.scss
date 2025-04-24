@@ -28,6 +28,7 @@
     border-radius: 8px;
     border: 1px solid rgba(174, 174, 174, 0.5);
     @include lift(-3px);
+    cursor: pointer;
 
     &:hover {
       background: rgba(174, 174, 174, 0.2);
@@ -131,6 +132,7 @@
     border-radius: 8px;
     border: 1px solid rgba(174, 174, 174, 0.5);
     @include lift(-3px);
+    cursor: pointer;
 
     &:hover {
       background: rgba(174, 174, 174, 0.2);

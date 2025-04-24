@@ -11,20 +11,9 @@ import CloseIcon from "@/app/assets/icons/close-icon.svg";
 
 import { MyButton } from "@/shared/uikit/MyButton";
 import { UiModal } from "@/shared/uikit/UiModal/UiModal";
+import { getTranslatedRole } from "@/shared/lib/utils/getTranslatedRole";
 
 const UserModal = ({ user, onClose }) => {
-    const roleTranslations = {
-        user: "Студент",
-        instructor: "Преподаватель",
-        admin: "Администратор",
-        moderator: "Модератор",
-    };
-
-    const getTranslatedRole = (roleName) => {
-        if (!roleName) return "Роль не указана";
-        return roleTranslations[roleName.toLowerCase()] || roleName;
-    };
-
     return (
         <>
             <UiModal.Header>
@@ -56,7 +45,7 @@ const UserModal = ({ user, onClose }) => {
                                 {user.middle_name}
                             </h2>
                             <p className="user-profile__position">
-                                {getTranslatedRole(user.role?.name)}
+                                {getTranslatedRole(user.role)}
                             </p>
                             <p className="user-profile__department">
                                 {user?.group?.title ||

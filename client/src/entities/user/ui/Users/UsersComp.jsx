@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getUsers } from "@/shared/api/userAPI";
+
 import "./style.scss";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "@/shared/uikit/MyButton";
+import { formatUserName } from "@/shared/lib/utils/formatUserName";
+import { getTranslatedRole } from "@/shared/lib/utils/getTranslatedRole";
 
 const UsersPage = () => {
     const dispatch = useDispatch();
@@ -60,7 +63,8 @@ const UsersPage = () => {
                     filteredUsers.map((user) => (
                         <div key={user.id} className="users__item">
                             <p className="users__text">
-                                {user.email} ({user.role.name})
+                                {formatUserName(user)}{" "}
+                                {getTranslatedRole(user.role)}
                             </p>
                         </div>
                     ))
