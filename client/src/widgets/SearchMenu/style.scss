@@ -1,6 +1,11 @@
 @use "@/shared/styles/mixins/mixins" as *;
 
 .search-menu {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
   width: 748px;
   overflow: hidden;
   display: flex;
@@ -16,7 +21,6 @@
     0 8px 24px rgba(0, 0, 0, 0.2);
   max-height: 80vh;
   overflow-y: auto;
-  @include grow(0.98, 1);
 
   &__card {
     min-width: 139px;
