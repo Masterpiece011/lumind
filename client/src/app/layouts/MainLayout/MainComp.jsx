@@ -4,8 +4,8 @@ import React, { useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { HeaderComp } from "@/widgets/HeaderComp";
 
+import { HeaderComp } from "@/widgets/HeaderComp";
 import { TeamsPage } from "@/entities/team/ui/Teams";
 import { AssignmentsPage } from "@/entities/assignment/ui/Assignments";
 import { UsersPage } from "@/entities/user/ui/Users";
@@ -152,94 +152,73 @@ const MainComp = () => {
                 </aside>
 
                 <section className="main__page-content">
-                    <div className="main__content-wrapper">
-                        {showSearchMenu && (
-                            <div
-                                ref={searchMenuRef}
-                                onMouseEnter={handleMouseEnter}
-                                onMouseLeave={handleMouseLeave}
-                                className={`main__search-wrapper ${
-                                    showSearchMenu
-                                        ? "main__search-wrapper_visible"
-                                        : ""
-                                }`}
-                            >
-                                <SearchMenu
-                                    searchQuery={searchQuery}
-                                    onSelectTeam={(teamId) => {
-                                        console.log("Clicked team ID:", teamId);
-                                        handleNavigation(`/teams/${teamId}`);
-                                    }}
-                                    menuRef={searchMenuRef}
-                                    onTeamsCardClick={handleTeamsCardClick}
-                                    onUsersCardClick={handleUsersCardClick}
-                                    isTeamsPageActive={pathname === "/teams"}
-                                    isUsersPageActive={pathname === "/users"}
-                                />
-                            </div>
-                        )}
-
+                    {showSearchMenu && (
                         <div
-                            className={`main__page ${showSearchMenu || isModalOpen ? "main__page_blurred" : ""}`}
+                            ref={searchMenuRef}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                            className="main__search-overlay"
                         >
-                            {!showSearchMenu &&
-                            !isModalOpen &&
-                            pathname === "/" ? (
-                                <HomeComp />
-                            ) : !showSearchMenu &&
-                              !isModalOpen &&
-                              pathname.startsWith("/chats") ? (
-                                <div className="chat-page-wrapper">
-                                    <ChatPage userId={userId} />
-                                </div>
-                            ) : !showSearchMenu &&
-                              !isModalOpen &&
-                              pathname.startsWith("/teams/") &&
-                              params.id ? (
-                                <TeamDetailPage
-                                    id={params.id}
-                                    onSelectAssignment={(assignmentId) =>
-                                        handleNavigation(
-                                            `/assignments/${assignmentId}`,
-                                        )
-                                    }
-                                />
-                            ) : !showSearchMenu &&
-                              !isModalOpen &&
-                              pathname.startsWith("/assignments/") &&
-                              params.id ? (
-                                <AssignmentsDetailPage id={params.id} />
-                            ) : !showSearchMenu &&
-                              !isModalOpen &&
-                              pathname.startsWith("/teams") &&
-                              userId ? (
-                                <TeamsPage
-                                    userId={userId}
-                                    onSelectTeam={(teamId) =>
-                                        handleNavigation(`/teams/${teamId}`)
-                                    }
-                                />
-                            ) : !showSearchMenu &&
-                              !isModalOpen &&
-                              pathname.startsWith("/assignments") ? (
-                                <AssignmentsPage
-                                    userId={userId}
-                                    onSelectAssignment={(assignmentId) =>
-                                        handleNavigation(
-                                            `/assignments/${assignmentId}`,
-                                        )
-                                    }
-                                />
-                            ) : !showSearchMenu &&
-                              !isModalOpen &&
-                              pathname.startsWith("/users") ? (
-                                <UsersPage />
-                            ) : !showSearchMenu &&
-                              !isModalOpen &&
-                              pathname.startsWith("/schedule") ? (
-                                <SchedulePage />
-                            ) : null}
+                            <SearchMenu
+                                searchQuery={searchQuery}
+                                onSelectTeam={(teamId) =>
+                                    handleNavigation(`/teams/${teamId}`)
+                                }
+                                menuRef={searchMenuRef}
+                                onTeamsCardClick={handleTeamsCardClick}
+                                onUsersCardClick={handleUsersCardClick}
+                                isTeamsPageActive={pathname === "/teams"}
+                                isUsersPageActive={pathname === "/users"}
+                            />
                         </div>
+                    )}
+
+                    <div
+                        className={`main__page ${
+                            showSearchMenu || isModalOpen
+                                ? "main__page_blurred"
+                                : ""
+                        }`}
+                    >
+                        {pathname === "/" && !isModalOpen ? (
+                            <HomeComp />
+                        ) : pathname.startsWith("/chats") && !isModalOpen ? (
+                            <div className="chat-page-wrapper">
+                                <ChatPage userId={userId} />
+                            </div>
+                        ) : pathname.startsWith("/teams/") && params.id ? (
+                            <TeamDetailPage
+                                id={params.id}
+                                onSelectAssignment={(assignmentId) =>
+                                    handleNavigation(
+                                        `/assignments/${assignmentId}`,
+                                    )
+                                }
+                            />
+                        ) : pathname.startsWith("/assignments/") &&
+                          params.id ? (
+                            <AssignmentsDetailPage id={params.id} />
+                        ) : pathname.startsWith("/teams") && userId ? (
+                            <TeamsPage
+                                userId={userId}
+                                onSelectTeam={(teamId) =>
+                                    handleNavigation(`/teams/${teamId}`)
+                                }
+                            />
+                        ) : pathname.startsWith("/assignments") ? (
+                            <AssignmentsPage
+                                userId={userId}
+                                onSelectAssignment={(assignmentId) =>
+                                    handleNavigation(
+                                        `/assignments/${assignmentId}`,
+                                    )
+                                }
+                            />
+                        ) : pathname.startsWith("/users") ? (
+                            <UsersPage />
+                        ) : pathname.startsWith("/schedule") ? (
+                            <SchedulePage />
+                        ) : null}
                     </div>
                 </section>
             </div>
