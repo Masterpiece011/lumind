@@ -30,9 +30,11 @@ const usersSlice = createSlice({
                 state.loading = true;
             })
             .addCase(getUsers.fulfilled, (state, action) => {
+                console.log("Fetched users:", action.payload.users);
                 state.users = action.payload.users;
                 state.loading = false;
             })
+
             .addCase(getUsers.rejected, (state, action) => {
                 state.error = action.error.message;
                 state.loading = false;

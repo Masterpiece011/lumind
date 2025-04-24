@@ -2,73 +2,59 @@
 
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import "./SearchMenu.scss";
+import "./style.scss";
 import { getTeams } from "@/shared/api/teamAPI";
 import { getUsers } from "@/shared/api/userAPI";
+
 import { Icon } from "@/shared/uikit/icons";
 import nonAvatar from "@/app/assets/img/non-avatar.png";
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import TeamsIcon from "@/app/assets/icons/teams-icon-search.svg";
 import FilesIcon from "@/app/assets/icons/file-icon.svg";
+
 import { FileItem } from "@/shared/ui/FileComp";
 import { getUserSubmissions } from "@/shared/api/submissionAPI";
 import { useUserModal } from "@/shared/lib/hooks/useUserModal";
+import { useSearchFilter } from "@/shared/lib/hooks/useSearchFilter";
+import { formatUserName } from "@/shared/lib/utils/formatUserName";
+import { useUserFiles } from "@/shared/lib/hooks/useUserFiles";
 
-const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
+const SearchMenu = ({
+    onSelectTeam,
+    searchQuery = "",
+    menuRef,
+    onTeamsCardClick,
+    onUsersCardClick,
+}) => {
     const dispatch = useDispatch();
     const { teams = [] } = useSelector((state) => state.teams);
     const usersArray = useSelector((state) => state.users.users) || [];
-    // const { submissions: submissionsData = [] } = useSelector(
-    //     (state) => state.submissions,
-    // );
+
     const user_id = useSelector((state) => state.user.user?.id);
 
-    const [userFiles, setUserFiles] = useState([]);
-    const [filteredUsers, setFilteredUsers] = useState([]);
-    const [filteredTeams, setFilteredTeams] = useState([]);
-    const [filteredFiles, setFilteredFiles] = useState([]);
+    const userFiles = useUserFiles(user_id);
     const { showUserModal } = useUserModal();
 
+    const { filteredUsers, filteredTeams, filteredFiles } = useSearchFilter(
+        searchQuery,
+        usersArray,
+        teams,
+        userFiles,
+    );
+
     const handleUserClick = (user, e) => {
+        e.preventDefault();
         e.stopPropagation();
-        e.nativeEvent.stopImmediatePropagation();
         showUserModal(user);
     };
 
     useEffect(() => {
         if (!teams.length) dispatch(getTeams());
-        if (!usersArray.length) dispatch(getUsers());
+        if (!usersArray.length) dispatch(getUsers({ page: 1, quantity: 100 }));
         if (user_id) dispatch(getUserSubmissions(user_id));
     }, [dispatch, teams.length, usersArray.length, user_id]);
 
-    // useEffect(() => {
-    //     if (Array.isArray(submissionsData)) {
-    //         const uniqueFiles = new Map();
 
-    //         submissionsData.forEach((submission) => {
-    //             (submission.submissions_investments || []).forEach((file) => {
-    //                 if (!uniqueFiles.has(file.file_url)) {
-    //                     uniqueFiles.set(file.file_url, {
-    //                         ...file,
-    //                         submissionDate: submission.created_at,
-    //                         assignmentTitle:
-    //                             submission.Assignment?.title ||
-    //                             "Неизвестное задание",
-    //                     });
-    //                 }
-    //             });
-    //         });
-
-    //         const recentFiles = Array.from(uniqueFiles.values())
-    //             .sort(
-    //                 (a, b) =>
-    //                     new Date(b.submissionDate) - new Date(a.submissionDate),
-    //             )
-    //             .slice(0, 8);
-
-    //         setUserFiles(recentFiles);
-    //     }
-    // }, [submissionsData]);
 
     useEffect(() => {
         const query = searchQuery.toLowerCase();
@@ -107,7 +93,13 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
                 e.nativeEvent.stopImmediatePropagation();
             }}
         >
-            <div className="search-menu__card">
+            <div
+                className="search-menu__card"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onUsersCardClick();
+                }}
+            >
                 <h2 className="search-menu__section-title">
                     <span className="search-menu__title-icon">
                         <Icon src={UserIcon} alt="user-icon" />
@@ -122,12 +114,13 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
                                 key={user.id}
                                 className="search-menu__user-item"
                                 onClick={(e) => handleUserClick(user, e)}
+                                onMouseDown={(e) => e.preventDefault()}
                             >
                                 <span className="search-menu__avatar">
                                     <Icon src={nonAvatar} alt="none-avatar" />
                                 </span>
                                 <span className="search-menu__user-name">
-                                    {user.email}
+                                    {formatUserName(user)}
                                 </span>
                             </div>
                         ))
@@ -165,7 +158,13 @@ const SearchMenu = ({ onSelectTeam, searchQuery = "", menuRef }) => {
                 </div>
             </div>
 
-            <div className="search-menu__card-team">
+            <div
+                className="search-menu__card-team"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onTeamsCardClick();
+                }}
+            >
                 <h2 className="search-menu__section-title">
                     <span className="search-menu__title-icon">
                         <Icon src={TeamsIcon} alt="teams-icon" />

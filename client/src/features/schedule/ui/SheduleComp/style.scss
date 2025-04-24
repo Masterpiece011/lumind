@@ -1,0 +1,149 @@
+@use "../../../../shared/styles/mixins/mixins" as *;
+
+.schedule {
+    background-color: #aeaeae1a;
+    border-radius: 16px;
+    box-shadow: 0px 0px 10px 10px #0000000d;
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+
+    &__header {
+        position: sticky;
+        top: 0;
+        padding: 10px 0;
+        z-index: 10;
+        margin-bottom: 20px;
+    }
+
+    &__week-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    &__week-button {
+        background-color: rgba(174, 174, 174, 0.1);
+        color: rgba(174, 174, 174, 0.9);
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        @include fontOptions(16px, 400, 24px);
+        cursor: pointer;
+        transition: all 0.3s;
+
+        &--active {
+            background-color: #7e57c2;
+            color: white;
+        }
+    }
+
+    &__filters {
+        display: flex;
+        gap: 20px;
+    }
+
+    &__filter {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    &__filter-label {
+        @include fontOptions(16px, 400, 24px);
+        color: rgba(174, 174, 174, 0.9);
+        margin-bottom: 5px;
+    }
+
+    &__filter-input {
+        background-color: rgba(174, 174, 174, 0.1);
+        border: 1px solid rgba(174, 174, 174, 0.3);
+        border-radius: 8px;
+        padding: 8px 12px;
+        color: #f9f9f9;
+        outline: none;
+
+        &:focus {
+            border-color: #7e57c2;
+        }
+    }
+
+    &__table {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    &__table-header {
+        display: grid;
+        grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1fr;
+        background-color: rgba(126, 87, 194, 0.2);
+        border-radius: 8px;
+        padding: 12px 0;
+        margin-bottom: 5px;
+    }
+
+    &__table-cell {
+        @include fontOptions(14px, 600, 16px);
+        color: #7e57c2;
+        padding: 0 15px;
+        position: relative;
+    }
+
+    &__divider {
+        border-left: 2px solid #AEAEAE80
+    }
+
+    &__day-container {
+        margin-bottom: 15px;
+    }
+
+    &__day-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+        padding: 5px 0;
+    }
+
+    &__day-name {
+        @include fontOptions(18px, 600, 24px);
+        color: #f9f9f9;
+    }
+
+    &__day-date {
+        @include fontOptions(16px, 400, 24px);
+        color: rgba(174, 174, 174, 0.7);
+    }
+
+    &__table-row {
+        display: grid;
+        grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1fr;
+        background-color: rgba(174, 174, 174, 0.05);
+        border-radius: 8px;
+        padding: 12px 0;
+        margin-bottom: 5px;
+        align-items: center;
+    }
+
+    &__no-entries {
+        color: rgba(174, 174, 174, 0.7);
+        @include fontOptions(14px, 400, 16px);
+        grid-template-columns: 1fr;
+        padding-left: 15px;
+    }
+
+    &__time {
+        @include fontOptions(16px, 600, 24px);
+    }
+
+    &__title,
+    &__teachers,
+    &__type,
+    &__location {
+        @include fontOptions(16px, 400, 16px);
+        color: rgba(174, 174, 174, 0.9);
+    }
+}

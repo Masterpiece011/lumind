@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { HeaderComp } from "@/widgets/HeaderComp";
+
 import { TeamsPage } from "@/entities/team/ui/Teams";
 import { AssignmentsPage } from "@/entities/assignment/ui/Assignments";
 import { UsersPage } from "@/entities/user/ui/Users";
@@ -12,9 +13,11 @@ import { SearchMenu } from "@/widgets/SearchMenu";
 import { TeamDetailPage } from "@/entities/team/ui/TeamDetail";
 import AssignmentsDetailPage from "@/entities/assignment/ui/AssignmentDetail";
 import { HomeComp } from "@/widgets/StartComp";
-import { Icon } from "@/shared/uikit/icons";
 import { useSearch } from "@/shared/lib/hooks/useSearch";
 import { ChatPage } from "@/features/chat/ui/ChatComp";
+import { SchedulePage } from "@/features/schedule/ui/SheduleComp";
+
+import { Icon } from "@/shared/uikit/icons";
 import HomeIcon from "@/app/assets/icons/home-icon.svg";
 import ChatIcon from "@/app/assets/icons/chat-icon.svg";
 import TeamsIcon from "@/app/assets/icons/teams-icon.svg";
@@ -58,6 +61,20 @@ const MainComp = () => {
         if (path === "/") return pathname === path;
         return pathname.startsWith(path);
     };
+
+    const handleCardClick = (basePath, hasDetailPages = false) => {
+        const isOnDetailPage = hasDetailPages
+            ? pathname.startsWith(`/${basePath}/`) && params.id
+            : false;
+
+        if (!pathname.startsWith(`/${basePath}`) || isOnDetailPage) {
+            handleNavigation(`/${basePath}`);
+        }
+        setShowSearchMenu(false);
+    };
+
+    const handleTeamsCardClick = () => handleCardClick("teams", true);
+    const handleUsersCardClick = () => handleCardClick("users");
 
     return (
         <div className="main">
@@ -149,9 +166,15 @@ const MainComp = () => {
                             >
                                 <SearchMenu
                                     searchQuery={searchQuery}
-                                    onSelectTeam={(teamId) =>
-                                        handleNavigation(`/teams/${teamId}`)
-                                    }
+                                    onSelectTeam={(teamId) => {
+                                        console.log("Clicked team ID:", teamId);
+                                        handleNavigation(`/teams/${teamId}`);
+                                    }}
+                                    menuRef={searchMenuRef}
+                                    onTeamsCardClick={handleTeamsCardClick}
+                                    onUsersCardClick={handleUsersCardClick}
+                                    isTeamsPageActive={pathname === "/teams"}
+                                    isUsersPageActive={pathname === "/users"}
                                 />
                             </div>
                         )}
@@ -211,6 +234,10 @@ const MainComp = () => {
                               !isModalOpen &&
                               pathname.startsWith("/users") ? (
                                 <UsersPage />
+                            ) : !showSearchMenu &&
+                              !isModalOpen &&
+                              pathname.startsWith("/schedule") ? (
+                                <SchedulePage />
                             ) : null}
                         </div>
                     </div>
