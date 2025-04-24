@@ -149,7 +149,9 @@ const AssignmentDetailPage = () => {
                             <h2 className="assignment-detail__info-caption">
                                 Комментарий к заданию:{" "}
                             </h2>
-                            <p className="description">{assignment.task.comment}</p>
+                            <p className="description">
+                                {assignment.task.comment}
+                            </p>
                         </section>
                     )}
 
@@ -207,4 +209,4 @@ const AssignmentDetailPage = () => {
     );
 };
 
-export default AssignmentDetailPage;
+export { AssignmentDetailPage };

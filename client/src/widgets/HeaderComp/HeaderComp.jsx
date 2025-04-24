@@ -11,6 +11,7 @@ import ThemeIcon from "@/app/assets/icons/theme-icon.svg";
 
 import "./style.scss";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
+
 import { MyButton } from "@/shared/uikit/MyButton";
 import { getUsers } from "@/shared/api/userAPI";
 import { getTeams } from "@/shared/api/teamAPI";
@@ -56,7 +57,9 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
         <div className="header">
             <div className="header__wrapper">
                 <div className="header__logo-wrapper">
-                    <Image src={Logo} alt="logo" />
+                    <a href="/">
+                        <Image src={Logo} alt="logo" />
+                    </a>
                 </div>
                 {isAuth && (
                     <div className="header__search">
