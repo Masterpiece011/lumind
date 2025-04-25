@@ -48,6 +48,11 @@
         background-color: var(--hover-color);
         border-color: var(--text-color);
     }
+
+    & img {
+        width: 22px;
+        height: 24px ;
+    }
 }
 
 .teamButton {
