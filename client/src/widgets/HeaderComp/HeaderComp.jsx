@@ -1,18 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { useTheme } from "@/features/theme/model/useTheme";
+import { useUserModal } from "@/shared/lib/hooks/useUserModal";
 
-import Settings from "@/app/assets/icons/settings.svg";
-import SearchIcon from "@/app/assets/icons/search-icon.svg";
-import ThemeIcon from "@/app/assets/icons/theme-icon.svg";
+import Settings from "@/shared/assets/icons/settings.svg";
+import SearchIcon from "@/shared/assets/icons/search-icon.svg";
+import MoonIcon from "@/shared/assets/icons/theme-icon.svg";
+import SunIcon from "@/shared/assets/icons/theme-icon-2.svg";
+import ProfileIcon from "@/shared/assets/icons/user-profile.svg";
 
 import "./HeaderComp.scss";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 
+import { Icon } from "@/shared/uikit/icons";
 import { MyButton } from "@/shared/uikit/MyButton";
 import { getUsers } from "@/shared/api/userAPI";
 import { getTeams } from "@/shared/api/teamAPI";
@@ -23,17 +26,23 @@ import Logout from "@/app/assets/icons/logout-icon.svg";
 function HeaderComp({ onSearchFocus, onSearchChange }) {
     const router = useRouter();
     const dispatch = useDispatch();
-    const { isAuth } = useSelector((state) => state.user);
+    const { isAuth, user } = useSelector((state) => state.user);
+    const { showUserModal } = useUserModal();
     const searchInputRef = useRef(null);
 
     const [searchQuery, setSearchQuery] = useState("");
-
     const { theme, toggleTheme } = useTheme();
 
     useEffect(() => {
         dispatch(getUsers());
         dispatch(getTeams());
     }, [dispatch]);
+
+    const handleProfileClick = () => {
+        if (user) {
+            showUserModal(user);
+        }
+    };
 
     const handleLoginClick = () => {
         router.push("/login");
@@ -60,13 +69,13 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
             <div className="header__wrapper">
                 <div className="header__logo-wrapper">
                     <a href="/">
-                        <Image src={Logo} alt="logo" />
+                        <Icon src={Logo} alt="logo" />
                     </a>
                 </div>
                 {isAuth && (
                     <div className="header__search">
                         <div className="header__search-bar">
-                            <Image
+                            <Icon
                                 className="header__search-icon"
                                 src={SearchIcon}
                                 alt="search"
@@ -87,13 +96,27 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
                     <div className="header__content-wrapper">
                         <MyButton
                             className={buttonStyles.headerButton}
+                            onClick={handleProfileClick}
+                        >
+                            <Icon src={ProfileIcon} alt="settings-icon" />
+                        </MyButton>
+
+                        <MyButton
+                            className={buttonStyles.headerButton}
                             onClick={toggleTheme}
                         >
-                            <Image src={ThemeIcon} alt="theme-icon" />
+                            <Icon
+                                src={theme === "dark" ? SunIcon : MoonIcon}
+                                alt={
+                                    theme === "dark"
+                                        ? "dark-theme-icon"
+                                        : "light-theme-icon"
+                                }
+                            />
                         </MyButton>
 
                         <MyButton className={buttonStyles.headerButton}>
-                            <Image src={Settings} alt="settings-icon" />
+                            <Icon src={Settings} alt="settings-icon" />
                         </MyButton>
 
                         {isAuth ? (
@@ -101,14 +124,14 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
                                 className={buttonStyles.headerButton}
                                 onClick={handleLogoutClick}
                             >
-                                <Image src={Logout} alt="logout-icon" />
+                                <Icon src={Logout} alt="logout-icon" />
                             </MyButton>
                         ) : (
                             <MyButton
                                 className={buttonStyles.headerButton}
                                 onClick={handleLoginClick}
                             >
-                                <Image src={Logout} alt="logout-icon" />
+                                <Icon src={Logout} alt="logout-icon" />
                             </MyButton>
                         )}
                     </div>
