@@ -12,29 +12,30 @@ import { FileItem } from "@/shared/ui/FileComp";
 import { SubmissionForm } from "@/features/submissions/ui/Submissions/SubmissionsForm";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 
+import { ASSIGNMENTS_STATUSES } from "@/shared/constants/assignments";
+import Text from "@/shared/ui/Text";
+
 const AssignmentDetailPage = () => {
     const { id } = useParams();
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    // const [showWorkForm, setShowWorkForm] = useState(true);
     const workFormRef = useRef(null);
 
-    useEffect(() => {
-        const fetchAssignment = async () => {
-            try {
-                setLoading(true);
-                const response = await getAssignmentById({ assignmentId: id });
-                setAssignment(response.assignment);
-                setError(null);
-            } catch (err) {
-                setError(err.message || "Ошибка загрузки задания");
-                setAssignment(null);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchAssignment = async () => {
+        try {
+            setLoading(true);
+            const response = await getAssignmentById({ assignmentId: id });
+            setAssignment(response.assignment);
+            setError(null);
+            setLoading(false);
+        } catch (err) {
+            setError(err.message || "Ошибка загрузки назначения");
+            setAssignment(null);
+        }
+    };
 
+    useEffect(() => {
         if (id) {
             fetchAssignment();
         }
@@ -62,53 +63,65 @@ const AssignmentDetailPage = () => {
         if (!assignment) return "";
 
         switch (assignment.status) {
-            case "assigned":
+            case ASSIGNMENTS_STATUSES.ASSIGNED:
                 return "Назначено";
-            case "submitted":
+            case ASSIGNMENTS_STATUSES.SUBMITTED:
                 return "Сдано на проверку";
-            case "in_progress":
+            case ASSIGNMENTS_STATUSES.IN_PROGRES:
                 return "В работе";
-            case "completed":
+            case ASSIGNMENTS_STATUSES.SUBMITTED:
                 return "Выполнено";
-            case "failed":
+            case ASSIGNMENTS_STATUSES.FAILED:
                 return "Провалено";
             default:
                 return "";
         }
     };
 
+    const getSubmitButtonText = () => {
+        switch (assignment.status) {
+            case ASSIGNMENTS_STATUSES.COMPLETED:
+            case ASSIGNMENTS_STATUSES.SUBMITTED:
+            case ASSIGNMENTS_STATUSES.FAILED:
+                return "Отменить сдачу";
+            default:
+                return "Сдать работу";
+        }
+    };
+
     if (loading) return <ClockLoader />;
 
-    if (error) return <div>Ошибка: {error}</div>;
+    if (error) return <Text tag="p">Ошибка: {error}</Text>;
 
-    if (!assignment) return <div>Задание не найдено</div>;
-
-    console.log(assignment);
+    if (!assignment) return <Text tag="p">Задание не найдено</Text>;
 
     return (
         <div className="assignment-detail">
             <div className="assignment-detail__header">
                 <div className="assignment-detail__header-left">
-                    <h1 className="assignment-detail__header-left-title">
+                    <Text
+                        tag="h1"
+                        className={"assignment-detail__header-left-title"}
+                    >
                         {assignment.task.title}
-                    </h1>
+                    </Text>
                 </div>
 
                 <div className="assignment-detail__header-right">
-                    <div className="meta">
-                        <span className="assignment-detail__header-left-term">
-                            Срок:{" "}
-                            {new Date(
-                                assignment.plan_date,
-                            ).toLocaleDateString()}
-                        </span>
-                        <span>Статус: {getStatusText()}</span>
-                    </div>
+                    <Text
+                        tag="span"
+                        className="assignment-detail__header-left-term"
+                    >
+                        Срок:{" "}
+                        {new Date(assignment.plan_date).toLocaleDateString()}
+                    </Text>
+
+                    <Text tag="p">Статус: {getStatusText()}</Text>
 
                     {assignment.assessment && (
-                        <div className="score">
+                        <Text tag="p" className="score">
                             Оценка: {assignment.assessment}
-                        </div>
+                        </Text>
                     )}
 
                     <MyButton
@@ -117,7 +130,7 @@ const AssignmentDetailPage = () => {
                                 ? "assignment-detail__submit-btn--active"
                                 : ""
                         }`}
-                        text={"Сдать работу"}
+                        text={getSubmitButtonText()}
                         onClick={handleSubmitWork}
                     />
                 </div>
@@ -126,40 +139,53 @@ const AssignmentDetailPage = () => {
             <div className="assignment-detail__body">
                 <div className="assignment-detail__info">
                     <section>
-                        <h2 className="assignment-detail__info-caption">
-                            Преподаватель:{" "}
-                        </h2>
-                        <p>
+                        <Text
+                            tag="h2"
+                            className={"assignment-detail__info-caption"}
+                        >
+                            Преподаватель:
+                        </Text>
+                        <Text tag="p">
+                            {assignment.creator?.last_name}{" "}
                             {assignment.creator?.first_name}{" "}
-                            {assignment.creator?.last_name}
-                            {assignment.creator?.email &&
-                                ` (${assignment.creator.email})`}
-                        </p>
+                            {assignment.creator?.middle_name}
+                        </Text>
                     </section>
 
                     <section>
-                        <h2 className="assignment-detail__info-caption">
-                            Описание задания:{" "}
-                        </h2>
-                        <p>{assignment.task.description || "Нет описания"}</p>
+                        <Text
+                            tag="h2"
+                            className="assignment-detail__info-caption"
+                        >
+                            Описание задания:
+                        </Text>
+                        <Text tag="p">
+                            {assignment.task.description || "Нет описания"}
+                        </Text>
                     </section>
 
                     {assignment.comment && (
                         <section>
-                            <h2 className="assignment-detail__info-caption">
-                                Комментарий к заданию:{" "}
-                            </h2>
-                            <p className="description">
+                            <Text
+                                tag="h2"
+                                className="assignment-detail__info-caption"
+                            >
+                                Комментарий к заданию:
+                            </Text>
+                            <Text tag="p" className="description">
                                 {assignment.task.comment}
-                            </p>
+                            </Text>
                         </section>
                     )}
 
                     {assignment.task_files?.length !== 0 && (
                         <section>
-                            <h2 className="assignment-detail__info-caption">
-                                Файлы задания:{" "}
-                            </h2>
+                            <Text
+                                tag="h2"
+                                className="assignment-detail__info-caption"
+                            >
+                                Файлы задания:
+                            </Text>
                             <ul className="files-list">
                                 {assignment.task_files.map((file) => (
                                     <li key={file.id}>
@@ -173,7 +199,7 @@ const AssignmentDetailPage = () => {
 
                 <div className="assignment-detail__work">
                     <div className="work-header">
-                        <h2>Моя работа</h2>
+                        <Text tag="h2">Моя работа</Text>
                     </div>
 
                     <SubmissionForm
@@ -184,7 +210,9 @@ const AssignmentDetailPage = () => {
                     />
 
                     <section>
-                        <h3 className="files-title">Прикреплённые файлы: </h3>
+                        <Text tag="h3" className="files-title">
+                            Прикреплённые файлы:{" "}
+                        </Text>
                         {assignment.assignment_files?.length > 0 ? (
                             <ul className="files-list">
                                 {assignment.assignment_files.map((file) => (
@@ -194,15 +222,9 @@ const AssignmentDetailPage = () => {
                                 ))}
                             </ul>
                         ) : (
-                            <p>Вы ещё не прикрепили файлы</p>
+                            <Text tag="p">Вы ещё не прикрепили файлы</Text>
                         )}
                     </section>
-
-                    {assignment.status === "completed" && (
-                        <div className="status-notice">
-                            Работа отправлена на проверку
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
