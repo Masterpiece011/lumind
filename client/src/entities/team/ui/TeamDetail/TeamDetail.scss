@@ -34,6 +34,7 @@
         color: #ffffff;
 
         h2 {
+            margin: 15px 0;
             @include fontOptions(24px, 400, 24px);
         }
     }
@@ -66,15 +67,19 @@
         padding: 20px;
     }
 
+    &__tab-title {
+        margin-bottom: 10px;
+    }
+
     &__members-list {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        column-gap: 10px;
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: 5px;
         row-gap: 8px;
     }
 
     &__member {
-        width: 160px;
+        width: 190px;
         height: 80px;
         display: flex;
         flex-direction: column;

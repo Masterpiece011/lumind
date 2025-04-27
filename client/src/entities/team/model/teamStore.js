@@ -59,12 +59,12 @@ const teamSlice = createSlice({
                 state.loading = false;
             })
             .addCase(getTeamById.pending, (state) => {
+                state.currentTeam = {};
                 state.loading = true;
                 state.error = null;
             })
             .addCase(getTeamById.fulfilled, (state, { payload }) => {
-                // Изменяем сохранение данных
-                state.currentTeam = payload.team || payload; // Обрабатываем оба варианта
+                state.currentTeam = payload.team || payload;
                 state.loading = false;
             })
             .addCase(getTeamById.rejected, (state, { error }) => {
