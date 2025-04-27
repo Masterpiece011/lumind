@@ -3,14 +3,15 @@ import { $authHost } from "./page";
 
 export const getAssignments = createAsyncThunk(
     "assignments/getAssignments",
-    async ({ userId, searchQuery, status }) => {
+    async ({ userId, teamId, searchQuery, status }) => {
         try {
             const { data } = await $authHost.post("/api/assignments", {
                 user_id: userId,
+                team_id: teamId,
                 search_text: searchQuery,
                 status: status,
+                include: ["task", "files"],
             });
-
             return data;
         } catch (error) {
             throw new Error(error.data?.message || "Ошибка получения заданий");

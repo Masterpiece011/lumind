@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import "./style.scss";
+import "./UserProfile.scss";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 
 import { Icon } from "../../../../shared/uikit/icons";

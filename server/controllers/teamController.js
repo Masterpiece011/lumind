@@ -1,7 +1,15 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { Users, Teams, Users_Teams } from "../models/models.js";
+import {
+    Users,
+    Teams,
+    Tasks,
+    Assignments,
+    Users_Teams,
+    Teams_Tasks,
+    Files,
+} from "../models/models.js";
 
 import ApiError from "../error/ApiError.js";
 
@@ -71,9 +79,12 @@ class TeamController {
     async getOne(req, res, next) {
         try {
             const { id } = req.params;
+            const { user_id } = req.query;
 
             if (!id) {
-                return ApiError.badRequest("Необходимо указать ID команды");
+                return next(
+                    ApiError.badRequest("Необходимо указать ID команды")
+                );
             }
 
             const team = await Teams.findOne({
@@ -82,57 +93,76 @@ class TeamController {
                     {
                         model: Users,
                         as: "users",
-                        attributes: [
-                            "id",
-                            "img",
-                            "email",
-                            "first_name",
-                            "middle_name",
-                            "last_name",
-                            "role_id",
-                        ],
+                        attributes: ["id", "email", "first_name", "last_name"],
                         through: { attributes: [] },
                     },
                 ],
-                attributes: {
-                    exclude: ["created_at", "updated_at"],
-                },
             });
 
             if (!team) {
                 return next(
-                    ApiError.notFound(
-                        `Команда с указанным ID: ${id} не найдена`
-                    )
+                    ApiError.notFound(`Команда с ID: ${id} не найдена`)
                 );
             }
 
-            const teamCreator = await Users.findByPk(team.creator_id);
+            const userAssignments = await Assignments.findAll({
+                where: {
+                    user_id: team.users.map((user) => user.id),
+                },
+                include: [
+                    {
+                        model: Tasks,
+                        include: [
+                            {
+                                model: Files,
+                                where: { entity_type: "task" },
+                                required: false,
+                            },
+                        ],
+                    },
+                    {
+                        model: Files,
+                        where: { entity_type: "assignment" },
+                        required: false,
+                    },
+                ],
+            });
 
-            if (!teamCreator) {
-                return next(
-                    ApiError.notFound(`Не может быть команды без создателя`)
-                );
-            }
+            const uniqueTasks = [];
+            const taskMap = new Map();
 
-            const teamData = {
+            userAssignments.forEach((assignment) => {
+                if (assignment.task && !taskMap.has(assignment.task.id)) {
+                    taskMap.set(assignment.task.id, true);
+                    uniqueTasks.push({
+                        ...assignment.task.get({ plain: true }),
+                        assignments: userAssignments
+                            .filter((a) => a.task_id === assignment.task_id)
+                            .map((a) => ({
+                                ...a.get({ plain: true }),
+                                files: a.files,
+                            })),
+                    });
+                }
+            });
+
+            const creator = await Users.findByPk(team.creator_id, {
+                attributes: ["id", "first_name", "last_name", "display_name"],
+            });
+
+            const response = {
                 id: team.id,
                 name: team.name,
                 description: team.description,
                 creator: {
-                    creator_id: teamCreator.id,
-                    first_name: teamCreator.first_name,
-                    last_name: teamCreator.last_name,
-                    middle_name: teamCreator.middle_name,
-                    display_name: teamCreator.display_name,
-                    avatar: teamCreator.avatar,
+                    id: creator.id,
+                    display_name: creator.display_name,
                 },
                 users: team.users,
+                tasks: uniqueTasks,
             };
 
-            return res.json({
-                team: teamData,
-            });
+            return res.json({ team: response });
         } catch (error) {
             next(
                 ApiError.internal(

@@ -34,9 +34,11 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
     const { theme, toggleTheme } = useTheme();
 
     useEffect(() => {
-        dispatch(getUsers());
-        dispatch(getTeams());
-    }, [dispatch]);
+        if (isAuth && user?.id) {
+            dispatch(getUsers({ page: 1, quantity: 100 }));
+            dispatch(getTeams({ userId: user.id }));
+        }
+    }, [dispatch, isAuth, user?.id]);
 
     const handleProfileClick = () => {
         if (user) {

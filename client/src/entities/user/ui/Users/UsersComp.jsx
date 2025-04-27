@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getUsers } from "@/shared/api/userAPI";
 
-import "./style.scss";
+import "./UsersComp.scss";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 import { MyButton } from "@/shared/uikit/MyButton";
 import { formatUserName } from "@/shared/lib/utils/formatUserName";
