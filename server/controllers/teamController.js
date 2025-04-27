@@ -154,6 +154,7 @@ class TeamController {
                 id: team.id,
                 name: team.name,
                 description: team.description,
+                avatar_color: team.avatar_color,
                 creator: {
                     id: creator.id,
                     display_name: creator.display_name,
