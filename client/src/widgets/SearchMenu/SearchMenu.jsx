@@ -49,9 +49,12 @@ const SearchMenu = ({
     };
 
     useEffect(() => {
-        if (!teams.length) dispatch(getTeams());
-        if (!usersArray.length) dispatch(getUsers({ page: 1, quantity: 100 }));
-        if (user_id) dispatch(getUserSubmissions(user_id));
+        if (user_id) {
+            if (!teams.length) dispatch(getTeams({ userId: user_id }));
+            if (!usersArray.length)
+                dispatch(getUsers({ page: 1, quantity: 100 }));
+            dispatch(getUserSubmissions(user_id));
+        }
     }, [dispatch, teams.length, usersArray.length, user_id]);
 
     return (

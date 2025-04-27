@@ -4,25 +4,18 @@ import { $authHost, $host } from "./page";
 export const getTeams = createAsyncThunk(
     "teams/getTeams",
     async (
-        { userId, pageNumber = 1, searchQuery = "" },
+        { userId, page = 1, quantity = 100, searchQuery = "" },
         { rejectWithValue },
     ) => {
         try {
-            if (!userId) {
-                throw new Error("User ID is required");
-            }
-
             const response = await $authHost.post("/api/teams", {
                 user_id: userId,
-                page: pageNumber,
+                page,
+                quantity,
                 search_text: searchQuery,
             });
             return response.data;
         } catch (error) {
-            if (error.message === "User ID is required") {
-                console.warn("Attempted to fetch teams without userId");
-                return rejectWithValue(error.message);
-            }
             return rejectWithValue(
                 error.response?.data?.message || "Ошибка получения команд",
             );
@@ -51,6 +44,7 @@ export const getTeamById = createAsyncThunk(
         try {
             const response = await $authHost.get(`/api/teams/${teamId}`, {
                 params: { user_id: userId },
+                include: ["tasks", "tasks.assignments"],
             });
             return response.data;
         } catch (error) {

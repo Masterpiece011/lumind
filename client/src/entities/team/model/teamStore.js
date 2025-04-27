@@ -9,7 +9,7 @@ const initialState = {
     loading: false,
     initialized: false,
     error: null,
-    lastUserId: null, 
+    lastUserId: null,
 };
 
 const teamSlice = createSlice({
@@ -63,7 +63,8 @@ const teamSlice = createSlice({
                 state.error = null;
             })
             .addCase(getTeamById.fulfilled, (state, { payload }) => {
-                state.currentTeam = payload;
+                // Изменяем сохранение данных
+                state.currentTeam = payload.team || payload; // Обрабатываем оба варианта
                 state.loading = false;
             })
             .addCase(getTeamById.rejected, (state, { error }) => {
