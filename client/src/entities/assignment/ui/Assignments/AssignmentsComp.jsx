@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useEffect, useState, memo, useMemo } from "react";
+import React, { useEffect, useState, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAssignments } from "@/shared/api/assignmentsAPI";
+import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
+import { Filters } from "../Filters";
+import { AssignmentsList } from "../AssignmentsList";
+
 import "./AssignmentsComp.scss";
+
 import { MyButton } from "@/shared/uikit/MyButton";
 import Text from "@/shared/ui/Text";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
+
 
 const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const dispatch = useDispatch();
@@ -19,12 +25,14 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
             prev.error === next.error,
     );
 
+    const [filter, setFilter] = useState("all");
+    const [isFilterLoading, setIsFilterLoading] = useState(false);
+
     useEffect(() => {
-        if (!userId) {
-            return;
-        }
+        if (!userId) return;
         dispatch(getAssignments({ userId }));
     }, [dispatch, userId]);
+
 
     const [filter, setFilter] = useState("all");
 
@@ -34,10 +42,14 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const handleSetNewFilter = (newFilter) => {
         if (newFilter !== filter) {
             setFilter(newFilter);
-
-            dispatch(getAssignments({ userId, status: newFilter }));
+            setIsFilterLoading(true);
+            dispatch(getAssignments({ userId, status: newFilter })).finally(
+                () => setIsFilterLoading(false),
+            );
         }
     };
+
+    if (error) return <div className="assignments__error">Ошибка: {error}</div>;
 
     return (
         <div className="assignments">
@@ -45,7 +57,6 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
                 Задания
             </Text>
 
-            {/* Фильтры с сохранением ссылок на функции */}
             <Filters
                 currentFilter={filter}
                 onFilterChange={handleSetNewFilter}
@@ -53,16 +64,23 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
 
             <div className="assignments__divider"></div>
 
-            {/* Список заданий */}
-            <AssignmentsList
-                assignments={assignments}
-                assignmentsTotal={assignmentsTotal}
-                onSelect={onSelectAssignment}
-                isLoading={loading}
-            />
+            {loading || isFilterLoading ? (
+                <div className="assignments__loader">
+                    <ClockLoader loading={true} />
+                </div>
+            ) : (
+                <AssignmentsList
+                    assignments={assignments}
+                    assignmentsTotal={assignmentsTotal}
+                    onSelect={onSelectAssignment}
+                    isLoading={loading}
+                    isFilterLoading={isFilterLoading}
+                />
+            )}
         </div>
     );
 });
+
 
 const Filters = memo(({ currentFilter, onFilterChange }) => (
     <div className="assignments__filters">
