@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setIsAuth, setUser } from "@/entities/user/model/userStore";
-import { login } from "@/shared/api/userAPI";
+import { getUserById, login } from "@/shared/api/userAPI";
 
 import "./LoginForm.scss";
 
@@ -37,8 +37,10 @@ function LoginForm() {
         try {
             const { user, token } = await login(email, password);
 
+            const userData = await getUserById(user.id);
+
             dispatch(setIsAuth(true));
-            dispatch(setUser(user));
+            dispatch(setUser(userData));
             Cookies.set("token", token, { expires: 1, path: "/" });
 
             // Явный редирект после успешного входа

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { check } from "@/shared/api/userAPI";
+import { check, getUserById } from "@/shared/api/userAPI";
 import { setUser, setIsAuth } from "@/entities/user/model/userStore";
 import { MainComp } from "@/app/layouts/MainLayout";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
@@ -33,7 +33,10 @@ const AppRouter = ({ children }) => {
                     router.push("/login");
                     return;
                 }
-                dispatch(setUser(authUser));
+
+                const userData = await getUserById(authUser.id);
+
+                dispatch(setUser(userData));
                 dispatch(setIsAuth(true));
             } catch {
                 dispatch(setIsAuth(false));
@@ -43,7 +46,7 @@ const AppRouter = ({ children }) => {
         };
 
         verifyAuth();
-    }, [dispatch]);
+    }, [dispatch, isAuth]);
 
     useEffect(() => {
         if (!loading) {

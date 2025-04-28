@@ -67,80 +67,82 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
     };
 
     return (
-        <div className="header">
-            <div className="header__wrapper">
-                <div className="header__logo-wrapper">
-                    <a href="/">
-                        <Icon src={Logo} alt="logo" />
-                    </a>
-                </div>
-                {isAuth && (
-                    <div className="header__search">
-                        <div className="header__search-bar">
-                            <Icon
-                                className="header__search-icon"
-                                src={SearchIcon}
-                                alt="search"
-                            />
-                            <input
-                                ref={searchInputRef}
-                                className="header__search-input"
-                                type="search"
-                                placeholder="Введите имя пользователя или название сообщества..."
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                onFocus={handleSearchFocus}
-                            />
+        <header>
+            <div className="header">
+                <div className="header__wrapper">
+                    <div className="header__logo-wrapper">
+                        <a href="/">
+                            <Icon src={Logo} alt="logo" />
+                        </a>
+                    </div>
+                    {isAuth && (
+                        <div className="header__search">
+                            <div className="header__search-bar">
+                                <Icon
+                                    className="header__search-icon"
+                                    src={SearchIcon}
+                                    alt="search"
+                                />
+                                <input
+                                    ref={searchInputRef}
+                                    className="header__search-input"
+                                    type="search"
+                                    placeholder="Введите имя пользователя или название сообщества..."
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    onFocus={handleSearchFocus}
+                                />
+                            </div>
+                        </div>
+                    )}
+                    <div className="header__content">
+                        <div className="header__content-wrapper">
+                            <MyButton
+                                className={buttonStyles.headerButton}
+                                onClick={handleProfileClick}
+                            >
+                                <Icon src={ProfileIcon} alt="profile-icon" />
+                            </MyButton>
+
+                            <MyButton
+                                className={buttonStyles.headerButton}
+                                onClick={toggleTheme}
+                            >
+                                <Icon
+                                    src={theme === "dark" ? SunIcon : MoonIcon}
+                                    alt={
+                                        theme === "dark"
+                                            ? "dark-theme-icon"
+                                            : "light-theme-icon"
+                                    }
+                                />
+                            </MyButton>
+
+                            <MyButton className={buttonStyles.headerButton}>
+                                <Icon src={Settings} alt="settings-icon" />
+                            </MyButton>
+
+                            {isAuth ? (
+                                <MyButton
+                                    className={buttonStyles.headerButton}
+                                    onClick={handleLogoutClick}
+                                >
+                                    <Icon src={Logout} alt="logout-icon" />
+                                </MyButton>
+                            ) : (
+                                <MyButton
+                                    className={buttonStyles.headerButton}
+                                    onClick={handleLoginClick}
+                                >
+                                    <Icon src={Logout} alt="logout-icon" />
+                                </MyButton>
+                            )}
                         </div>
                     </div>
-                )}
-                <div className="header__content">
-                    <div className="header__content-wrapper">
-                        <MyButton
-                            className={buttonStyles.headerButton}
-                            onClick={handleProfileClick}
-                        >
-                            <Icon src={ProfileIcon} alt="settings-icon" />
-                        </MyButton>
-
-                        <MyButton
-                            className={buttonStyles.headerButton}
-                            onClick={toggleTheme}
-                        >
-                            <Icon
-                                src={theme === "dark" ? SunIcon : MoonIcon}
-                                alt={
-                                    theme === "dark"
-                                        ? "dark-theme-icon"
-                                        : "light-theme-icon"
-                                }
-                            />
-                        </MyButton>
-
-                        <MyButton className={buttonStyles.headerButton}>
-                            <Icon src={Settings} alt="settings-icon" />
-                        </MyButton>
-
-                        {isAuth ? (
-                            <MyButton
-                                className={buttonStyles.headerButton}
-                                onClick={handleLogoutClick}
-                            >
-                                <Icon src={Logout} alt="logout-icon" />
-                            </MyButton>
-                        ) : (
-                            <MyButton
-                                className={buttonStyles.headerButton}
-                                onClick={handleLoginClick}
-                            >
-                                <Icon src={Logout} alt="logout-icon" />
-                            </MyButton>
-                        )}
-                    </div>
                 </div>
+                <div className="header__divider"></div>
             </div>
-            <div className="header__divider"></div>
-        </div>
+        </header>
     );
 }
 
