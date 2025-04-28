@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAssignments } from "@/shared/api/assignmentsAPI";
 import "./AssignmentsComp.scss";
 import { MyButton } from "@/shared/uikit/MyButton";
+import Text from "@/shared/ui/Text";
+import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 
 const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const dispatch = useDispatch();
@@ -26,7 +28,7 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
 
     const [filter, setFilter] = useState("all");
 
-    if (loading) return <div className="assignments__loading">Загрузка...</div>;
+    if (loading) return <ClockLoader className="assignments__loading" />;
     if (error) return <div className="assignments__error">Ошибка: {error}</div>;
 
     const handleSetNewFilter = (newFilter) => {
@@ -39,7 +41,9 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
 
     return (
         <div className="assignments">
-            <h1 className="assignments__title">Задания</h1>
+            <Text tag="h1" className="assignments__title">
+                Задания
+            </Text>
 
             {/* Фильтры с сохранением ссылок на функции */}
             <Filters
@@ -106,16 +110,20 @@ const AssignmentCard = memo(({ assignment, status, onSelect }) => {
             onClick={() => onSelect(assignment.id)}
         >
             <div className="assignments__header">
-                <span className="assignments__status">{labels[status]}</span>
-                {/* <span className="assignments__team">
+                <Text tag="span" className="assignments__status">
+                    {labels[status]}
+                </Text>
+                {/* <span className="assignments__team">        ПОКА ЧТО НЕ ДОРАБОТАНО
                     {assignment.teams?.[0]?.name || "Неизвестно"}
                 </span> */}
             </div>
-            <h2 className="assignments__name">{assignment.title}</h2>
+            <Text tag="h2" className="assignments__name">
+                {assignment.title}
+            </Text>
             <div className="assignments__deadline">
-                <p>
+                <Text tag="p">
                     Срок: {new Date(assignment.plan_date).toLocaleDateString()}
-                </p>
+                </Text>
             </div>
         </li>
     );
@@ -136,7 +144,9 @@ const AssignmentsList = memo(
                     />
                 ))
             ) : (
-                <p className="assignments__empty"></p>
+                <Text tag="p" className="assignments__empty">
+                    Заданий нет
+                </Text>
             )}
         </ul>
     ),

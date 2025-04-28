@@ -67,12 +67,10 @@ const MainComp = () => {
 
     return (
         <div className="main">
-            <header>
-                <HeaderComp
-                    onSearchFocus={handleSearchFocus}
-                    onSearchChange={handleSearchChange}
-                />
-            </header>
+            <HeaderComp
+                onSearchFocus={handleSearchFocus}
+                onSearchChange={handleSearchChange}
+            />
 
             <div className="main__content">
                 <Sidebar />
