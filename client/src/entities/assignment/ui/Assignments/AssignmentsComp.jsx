@@ -10,26 +10,30 @@ import { AssignmentsList } from "../AssignmentsList";
 import "./AssignmentsComp.scss";
 
 import Text from "@/shared/ui/Text";
-import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 
 const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const dispatch = useDispatch();
     const { assignments, assignmentsTotal, loading, error } = useSelector(
         (state) => state.assignments,
-        (prev, next) =>
-            prev.assignments === next.assignments &&
-            prev.assignmentsTotal === next.assignmentsTotal &&
-            prev.loading === next.loading &&
-            prev.error === next.error,
     );
 
     const [filter, setFilter] = useState("all");
     const [isFilterLoading, setIsFilterLoading] = useState(false);
 
     useEffect(() => {
-        if (!userId) return;
-        dispatch(getAssignments({ userId }));
-    }, [dispatch, userId]);
+        const refreshAssignments = () => {
+            dispatch(
+                getAssignments({
+                    userId,
+                    status: filter === "all" ? undefined : filter,
+                }),
+            );
+        };
+
+        if (userId) {
+            refreshAssignments();
+        }
+    }, [dispatch, userId, filter]);
 
     if (loading) return <ClockLoader className="assignments__loading" />;
     if (error) return <div className="assignments__error">Ошибка: {error}</div>;

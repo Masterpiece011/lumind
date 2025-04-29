@@ -5,7 +5,10 @@ import "./AssignmentDetail.scss";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 
-import { getAssignmentById } from "@/shared/api/assignmentsAPI";
+import {
+    getAssignmentById,
+    updateAssignment,
+} from "@/shared/api/assignmentsAPI";
 
 import { MyButton } from "@/shared/uikit/MyButton";
 import { FileItem } from "@/shared/ui/FileComp";
@@ -20,6 +23,7 @@ const AssignmentDetailPage = () => {
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showWorkForm, setShowWorkForm] = useState(false);
     const workFormRef = useRef(null);
 
     const fetchAssignment = async () => {
@@ -28,10 +32,11 @@ const AssignmentDetailPage = () => {
             const response = await getAssignmentById({ assignmentId: id });
             setAssignment(response.assignment);
             setError(null);
-            setLoading(false);
         } catch (err) {
             setError(err.message || "Ошибка загрузки назначения");
             setAssignment(null);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -41,22 +46,67 @@ const AssignmentDetailPage = () => {
         }
     }, [id]);
 
-    const isActive = false;
-
-    const handleSubmitWork = async (files) => {
+    const handleSubmitWork = async (updatedAssignment) => {
         try {
-            // Здесь должна быть логика отправки файлов на сервер
-            // После успешной отправки обновляем состояние
-            setAssignment((prev) => ({
-                ...prev,
-                status: "completed", // Меняем статус на "завершено"
-                user_files: files,
-            }));
+            const currentTaskData = assignment.task;
+            const currentCreatorData = assignment.creator;
+
+            setAssignment({
+                ...updatedAssignment,
+                task: currentTaskData,
+                creator: currentCreatorData,
+                assignment_files: updatedAssignment.assignment_files || [],
+                task_files: assignment.task_files || [],
+            });
 
             setShowWorkForm(false);
+            await fetchAssignment();
         } catch (err) {
             setError("Ошибка при отправке работы");
         }
+    };
+
+    const handleCancelSubmission = async () => {
+        try {
+            setLoading(true);
+            const response = await updateAssignment({
+                assignment_id: id,
+                status: ASSIGNMENTS_STATUSES.ASSIGNED,
+                comment: "",
+                investments: [],
+            });
+
+            setAssignment({
+                ...response.assignment,
+                task: assignment.task,
+                creator: assignment.creator,
+                assignment_files: [],
+                task_files: assignment.task_files || [],
+            });
+
+            setShowWorkForm(false);
+        } catch (err) {
+            console.error("Ошибка отмены отправки:", err);
+            setError(
+                err.response?.data?.message || "Ошибка при отмене отправки",
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmitClick = async () => {
+        // Если задание уже отправлено - отменяем отправку
+        if (
+            assignment?.status === ASSIGNMENTS_STATUSES.SUBMITTED ||
+            assignment?.status === ASSIGNMENTS_STATUSES.COMPLETED
+        ) {
+            await handleCancelSubmission();
+            return;
+        }
+
+        // Просто открываем/закрываем форму без отправки
+        setShowWorkForm(!showWorkForm);
     };
 
     const getStatusText = () => {
@@ -69,30 +119,35 @@ const AssignmentDetailPage = () => {
                 return "Сдано на проверку";
             case ASSIGNMENTS_STATUSES.IN_PROGRES:
                 return "В работе";
-            case ASSIGNMENTS_STATUSES.SUBMITTED:
+            case ASSIGNMENTS_STATUSES.COMPLETED:
                 return "Выполнено";
             case ASSIGNMENTS_STATUSES.FAILED:
                 return "Провалено";
             default:
-                return "";
+                return assignment.status;
         }
     };
 
     const getSubmitButtonText = () => {
+        if (!assignment) return "Загрузка...";
+
         switch (assignment.status) {
             case ASSIGNMENTS_STATUSES.COMPLETED:
             case ASSIGNMENTS_STATUSES.SUBMITTED:
-            case ASSIGNMENTS_STATUSES.FAILED:
                 return "Отменить сдачу";
             default:
-                return "Сдать работу";
+                return showWorkForm ? "Закрыть форму" : "Сдать работу";
         }
     };
 
+    const isSubmitButtonActive =
+        assignment?.status === ASSIGNMENTS_STATUSES.ASSIGNED ||
+        assignment?.status === ASSIGNMENTS_STATUSES.IN_PROGRES ||
+        showWorkForm ||
+        assignment?.status === ASSIGNMENTS_STATUSES.SUBMITTED;
+
     if (loading) return <ClockLoader />;
-
     if (error) return <Text tag="p">Ошибка: {error}</Text>;
-
     if (!assignment) return <Text tag="p">Задание не найдено</Text>;
 
     return (
@@ -101,9 +156,9 @@ const AssignmentDetailPage = () => {
                 <div className="assignment-detail__header-left">
                     <Text
                         tag="h1"
-                        className={"assignment-detail__header-left-title"}
+                        className="assignment-detail__header-left-title"
                     >
-                        {assignment.task.title}
+                        {assignment.task?.title || "Без названия"}
                     </Text>
                 </div>
 
@@ -124,15 +179,17 @@ const AssignmentDetailPage = () => {
                         </Text>
                     )}
 
-                    <MyButton
-                        className={`assignment-detail__submit-btn ${
-                            isActive
-                                ? "assignment-detail__submit-btn--active"
-                                : ""
-                        }`}
-                        text={getSubmitButtonText()}
-                        onClick={handleSubmitWork}
-                    />
+                    {isSubmitButtonActive && (
+                        <MyButton
+                            className={`assignment-detail__submit-btn ${
+                                showWorkForm
+                                    ? "assignment-detail__submit-btn--active"
+                                    : ""
+                            }`}
+                            text={getSubmitButtonText()}
+                            onClick={handleSubmitClick}
+                        />
+                    )}
                 </div>
             </div>
 
@@ -141,14 +198,14 @@ const AssignmentDetailPage = () => {
                     <section>
                         <Text
                             tag="h2"
-                            className={"assignment-detail__info-caption"}
+                            className="assignment-detail__info-caption"
                         >
                             Преподаватель:
                         </Text>
                         <Text tag="p">
-                            {assignment.creator?.last_name}{" "}
-                            {assignment.creator?.first_name}{" "}
-                            {assignment.creator?.middle_name}
+                            {assignment.creator?.last_name || ""}{" "}
+                            {assignment.creator?.first_name || ""}{" "}
+                            {assignment.creator?.middle_name || ""}
                         </Text>
                     </section>
 
@@ -160,11 +217,11 @@ const AssignmentDetailPage = () => {
                             Описание задания:
                         </Text>
                         <Text tag="p">
-                            {assignment.task.description || "Нет описания"}
+                            {assignment.task?.description || "Нет описания"}
                         </Text>
                     </section>
 
-                    {assignment.comment && (
+                    {assignment.task?.comment && (
                         <section>
                             <Text
                                 tag="h2"
@@ -178,7 +235,7 @@ const AssignmentDetailPage = () => {
                         </section>
                     )}
 
-                    {assignment.task_files?.length !== 0 && (
+                    {assignment.task_files?.length > 0 && (
                         <section>
                             <Text
                                 tag="h2"
@@ -202,12 +259,19 @@ const AssignmentDetailPage = () => {
                         <Text tag="h2">Моя работа</Text>
                     </div>
 
-                    <SubmissionForm
-                        ref={workFormRef}
-                        assignment_id={id}
-                        initialFiles={assignment.user_files}
-                        onSubmit={handleSubmitWork}
-                    />
+                    {(showWorkForm ||
+                        assignment.status ===
+                            ASSIGNMENTS_STATUSES.SUBMITTED) && (
+                        <SubmissionForm
+                            ref={workFormRef}
+                            assignmentId={id}
+                            onSubmissionSuccess={handleSubmitWork}
+                            isSubmitted={
+                                assignment.status ===
+                                ASSIGNMENTS_STATUSES.SUBMITTED
+                            }
+                        />
+                    )}
 
                     <section>
                         <Text tag="h3" className="files-title">

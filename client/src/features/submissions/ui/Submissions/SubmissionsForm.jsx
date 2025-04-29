@@ -1,16 +1,13 @@
 import "./SubmissionsForm.scss";
-
 import React, { useState, forwardRef, useImperativeHandle } from "react";
-
 import { useSelector, useDispatch } from "react-redux";
-
 import { MyButton } from "@/shared/uikit/MyButton";
 import { FileItem } from "@/shared/ui/FileComp";
-
 import { uploadFile, uploadMultipleFiles } from "@/shared/api/uploadFileAPI";
+import { updateAssignment } from "@/shared/api/assignmentsAPI";
 
 const SubmissionForm = forwardRef(
-    ({ onSubmissionSuccess, isSubmitted }, ref) => {
+    ({ onSubmissionSuccess, isSubmitted, assignmentId }, ref) => {
         const [comment, setComment] = useState("");
         const [files, setFiles] = useState([]);
         const [loading, setLoading] = useState(false);
@@ -49,6 +46,8 @@ const SubmissionForm = forwardRef(
                     (file) => file !== null,
                 );
                 setFiles((prevFiles) => [...prevFiles, ...successfulUploads]);
+                setError(null);
+            } catch (err) {
                 setError("Ошибка загрузки файла.");
             } finally {
                 setLoading(false);
@@ -62,29 +61,40 @@ const SubmissionForm = forwardRef(
         const handleSubmit = async (e) => {
             if (e) e.preventDefault();
             setLoading(true);
+            setError(null);
 
             try {
-                const fileIds = files
+                const fileUrls = files
                     .map((file) => file.file_url)
                     .filter((url) => url !== null && url !== undefined);
 
-                if (fileIds.length === 0 && comment.trim() === "") {
+                if (fileUrls.length === 0 && comment.trim() === "") {
                     setError(
                         "Необходимо прикрепить файлы или добавить комментарий.",
                     );
                     return;
                 }
 
-                let response;
-
-                console.log("Ответ от сервера:", response);
-
-                const updatedFiles =
-                    response.submission?.submissions_investments || [];
-                setFiles(updatedFiles);
+                const response = await updateAssignment({
+                    assignment_id: assignmentId,
+                    user_id: user_id,
+                    comment: comment,
+                    investments: fileUrls,
+                    status: "submitted",
+                });
 
                 if (onSubmissionSuccess) {
-                    onSubmissionSuccess(updatedFiles);
+                    if (!response.assignment.task) {
+                        response.assignment.task = {};
+                    }
+                    if (!response.assignment.assignment_files) {
+                        response.assignment.assignment_files = [];
+                    }
+                    if (!response.assignment.task_files) {
+                        response.assignment.task_files = [];
+                    }
+
+                    onSubmissionSuccess(response.assignment);
                 }
             } catch (err) {
                 console.error("Ошибка при отправке данных:", err);
@@ -100,6 +110,8 @@ const SubmissionForm = forwardRef(
 
         return (
             <form className="submission-form" onSubmit={handleSubmit}>
+                {error && <div className="submission-form__error">{error}</div>}
+
                 <div className="submission-form__group">
                     <label htmlFor="comment">Комментарий:</label>
                     <textarea
@@ -114,11 +126,32 @@ const SubmissionForm = forwardRef(
                     <label htmlFor="files">Прикрепить файлы:</label>
                     <input
                         type="file"
+                        id="files"
                         disabled={isSubmitted}
                         multiple
                         onChange={handleFileChange}
                     />
+                    <div className="submission-form__files">
+                        {files.map((file) => (
+                            <FileItem
+                                key={file.id}
+                                file={file}
+                                onDelete={() => handleDeleteFile(file.id)}
+                                disabled={isSubmitted}
+                            />
+                        ))}
+                    </div>
                 </div>
+
+                {!isSubmitted && (
+                    <MyButton
+                        type="submit"
+                        disabled={loading}
+                        className="submission-form__submit"
+                    >
+                        {loading ? "Отправка..." : "Отправить"}
+                    </MyButton>
+                )}
             </form>
         );
     },

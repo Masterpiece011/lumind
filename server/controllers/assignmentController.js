@@ -232,6 +232,7 @@ class AssignmentController {
                 investments = [],
                 assessment,
                 status,
+                user_id,
             } = req.body;
 
             if (!assignment_id) {
@@ -240,13 +241,22 @@ class AssignmentController {
                 );
             }
 
-            const assignment = await Assignments.findByPk(assignment_id);
+            const assignment = await Assignments.findByPk(assignment_id, {
+                include: [
+                    { model: Tasks, as: "task" },
+                    {
+                        model: Files,
+                        as: "files",
+                        where: { entity_type: "assignment" },
+                        required: false,
+                    },
+                ],
+            });
 
             if (!assignment) {
                 return next(ApiError.notFound("Назначение не найдено"));
             }
 
-            // Обновление назначения
             await assignment.update({
                 title: title || assignment.title,
                 description: description || assignment.description,
@@ -254,33 +264,48 @@ class AssignmentController {
                 assessment: assessment || assignment.assessment,
                 status: status || assignment.status,
                 plan_date: plan_date || assignment.plan_date,
+                user_id: user_id || assignment.user_id,
             });
 
-            let assignmentInvestments = [];
-
-            // Обновление вложений (удаляем старые и добавляем новые)
-            if (investments.length > 0) {
-                await Files.update({
+            if (investments.length > 0 || status) {
+                await Files.destroy({
                     where: {
                         entity_id: assignment_id,
                         entity_type: "assignment",
                     },
                 });
-                const investmentRecords = investments.map((fileUrl) => ({
-                    entity_id: assignment_id,
-                    entity_type: "assignment",
-                    file_url: fileUrl,
-                }));
-                assignmentInvestments = await Files.bulkCreate(
-                    investmentRecords
-                );
+
+                if (investments.length > 0) {
+                    const investmentRecords = investments.map((fileUrl) => ({
+                        entity_id: assignment_id,
+                        entity_type: "assignment",
+                        file_url: fileUrl,
+                    }));
+                    await Files.bulkCreate(investmentRecords);
+                }
             }
+
+            const updatedAssignment = await Assignments.findByPk(
+                assignment_id,
+                {
+                    include: [
+                        { model: Tasks, as: "task" },
+                        {
+                            model: Files,
+                            as: "files",
+                            where: { entity_type: "assignment" },
+                            required: false,
+                        },
+                    ],
+                }
+            );
 
             return res.json({
                 message: "Назначение успешно обновлено",
                 assignment: {
-                    assignment,
-                    investments: assignmentInvestments,
+                    ...updatedAssignment.get({ plain: true }),
+                    assignment_files: updatedAssignment.files || [],
+                    task_files: updatedAssignment.task?.files || [],
                 },
             });
         } catch (error) {
