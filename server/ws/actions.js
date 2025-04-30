@@ -1,12 +1,22 @@
+import WebSocket from "ws";
+
 export const connectionHandler = (ws, msg) => {
+    // Устанавливаем ID только для текущего клиента
     ws.id = msg.id;
-    broadcastConnection(ws, msg);
+    console.log(`Клиент ${msg.id} подключен`);
 };
 
-export const broadcastConnection = (ws, msg, aWss) => {
+export const broadcastConnection = (msg, aWss) => {
+    if (!aWss?.clients) {
+        console.error("WebSocket.Server не инициализирован");
+        return;
+    }
+
+    console.log(`Широковещательная рассылка для ${aWss.clients.size} клиентов`);
+
     aWss.clients.forEach((client) => {
-        if (client.id === msg.id) {
-            client.send(`Пользователь ${msg.username} подключился`);
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(msg));
         }
     });
 };

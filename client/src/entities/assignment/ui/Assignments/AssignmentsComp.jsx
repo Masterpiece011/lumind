@@ -10,7 +10,6 @@ import { AssignmentsList } from "../AssignmentsList";
 import "./AssignmentsComp.scss";
 
 import Text from "@/shared/ui/Text";
-import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 
 const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const dispatch = useDispatch();
