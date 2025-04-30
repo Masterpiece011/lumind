@@ -13,8 +13,28 @@ import { MyButton } from "@/shared/uikit/MyButton";
 import Text from "@/shared/ui/Text";
 import { UiModal } from "@/shared/uikit/UiModal/UiModal";
 import { getTranslatedRole } from "@/shared/lib/utils/getTranslatedRole";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
 
 const UserModal = ({ user, onClose }) => {
+    const router = useRouter();
+
+    const userId = useSelector(
+        (state) => state.user?.user?.id || null,
+        (prev, next) => prev === next,
+    );
+    let isMyProfile = false;
+
+    if (user.id === userId) {
+        isMyProfile = true;
+    }
+
+    const onChats = ({ userId }) => {
+        router.push("/chats");
+
+        onClose();
+    };
+
     return (
         <>
             <UiModal.Header>
@@ -54,6 +74,15 @@ const UserModal = ({ user, onClose }) => {
                             </Text>
                         </div>
                     </div>
+
+                    {!isMyProfile && (
+                        <MyButton
+                            className="write-btn"
+                            onClick={() => onChats({ userId: user.id })}
+                        >
+                            Написать
+                        </MyButton>
+                    )}
 
                     <div className="user-profile__divider"></div>
 

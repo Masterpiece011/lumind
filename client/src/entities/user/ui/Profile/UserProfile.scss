@@ -32,6 +32,20 @@
         border: 2px solid #eaeaea;
     }
 
+    .write-btn {
+        align-self: flex-start;
+        border: 1px solid #aeaeae;
+        border-radius: 8px;
+        padding: 8px 12px;
+        transition: all 0.2s;
+
+        &:hover,
+        &:active {
+            background-color: #9958db;
+            border-color: #9958db;
+        }
+    }
+
     &__info {
         display: flex;
         flex-direction: column;
@@ -40,18 +54,18 @@
     &__name {
         @include fontOptions(20px, 600, 24px);
         margin: 0 0 4px 0;
-        color: #333;
+        color: #fff;
     }
 
     &__position {
         @include fontOptions(14px, 400, 18px);
-        color: #666;
+        color: #fff;
         margin: 0 0 4px 0;
     }
 
     &__group {
         @include fontOptions(14px, 400, 18px);
-        color: #666;
+        color: #fff;
         margin: 0;
     }
 
@@ -74,11 +88,11 @@
 
     &__contact-label {
         @include fontOptions(14px, 500, 18px);
-        color: #555;
+        color: #fff;
     }
 
     &__contact-value {
         @include fontOptions(14px, 400, 18px);
-        color: #333;
+        color: #fff;
     }
 }

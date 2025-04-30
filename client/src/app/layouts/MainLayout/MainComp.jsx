@@ -4,6 +4,7 @@ import React, { useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
+import { useWebSocket } from "@/shared/lib/hooks/useWebsocket";
 
 import { HeaderComp } from "@/widgets/HeaderComp";
 import { TeamsPage } from "@/entities/team/ui/Teams";
@@ -43,6 +44,21 @@ const MainComp = () => {
         (prev, next) => prev === next,
     );
 
+    // Инициализация WebSocket
+    const { sendMessage, isConnected } = useWebSocket(
+        "ws://localhost:8080",
+        userId,
+    );
+
+    // Пример отправки сообщения
+    const handleTestMessage = () => {
+        sendMessage({
+            type: "CHAT_MESSAGE",
+            content: "Привет от фронтенда!",
+            chatId: "123",
+        });
+    };
+
     useEffect(() => {
         setShowSearchMenu(false);
     }, [pathname, params, setShowSearchMenu]);
@@ -67,6 +83,11 @@ const MainComp = () => {
 
     return (
         <div className="main">
+            {isConnected ? (
+                <div className="connection-status connected">Online</div>
+            ) : (
+                <div className="connection-status disconnected">Offline</div>
+            )}
             <HeaderComp
                 onSearchFocus={handleSearchFocus}
                 onSearchChange={handleSearchChange}

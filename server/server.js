@@ -18,6 +18,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const WSServer = expressWs(app);
 const aWss = WSServer.getWss();
+console.log("awss", aWss);
 
 import sequelize from "./db.js";
 import uploadRoutes from "./routes/uploadRouter.js";
@@ -25,8 +26,6 @@ import uploadRoutes from "./routes/uploadRouter.js";
 const PORT = process.env.PORT || 8080;
 
 import { MESSAGES, ACTIONS } from "./ws/index.js";
-
-// Middleware
 
 app.use(
     cors({
@@ -51,27 +50,28 @@ app.use(ErrorHandlingMiddleware);
 app.ws("/", (ws, req) => {
     console.log("ПОДКЛЮЧЕНИЕ УСТАНОВЛЕНО");
     ws.send("Ты успешно подключился");
-    ws.on("message", (msg) => {
+
+    ws.on("message", (rawMsg) => {
         try {
-            msg = JSON.parse(msg);
+            const msg = JSON.parse(rawMsg);
+            console.log("Получено сообщение:", msg);
+
             switch (msg.method) {
                 case MESSAGES.CONNECTION:
-                    ACTIONS.connectionHandler();
+                    ACTIONS.connectionHandler(ws, msg);
                     break;
+
                 case MESSAGES.UPDATE_CHATS:
-                    ACTIONS.connectionHandler(ws, msg);
-                    ACTIONS.broadcastConnection(ws, msg, aWss);
-                    break;
                 case MESSAGES.UPDATE_CHAT_MESSAGES:
-                    ACTIONS.connectionHandler(ws, msg);
-                    ACTIONS.broadcastConnection(ws, msg, aWss);
+                    // Только одна рассылка!
+                    ACTIONS.broadcastConnection(msg, aWss);
                     break;
+
                 default:
-                    break;
+                    console.warn("Неизвестный метод:", msg.method);
             }
-            console.log(msg); // Убрал JSON.parse, так как msg уже парсится
         } catch (error) {
-            console.error("Ошибка при обработке сообщения WebSocket:", error);
+            console.error("Ошибка обработки сообщения:", error);
         }
     });
 });
@@ -80,7 +80,10 @@ app.ws("/", (ws, req) => {
 const start = async () => {
     try {
         await sequelize.authenticate();
-        await sequelize.sync({ alter: true });
+        await sequelize
+            .sync
+            // { alter: true }  Внести в скобки если были изменения models
+            ();
 
         app.listen(PORT, () => {
             console.log(`Server started on port ${PORT}`);
