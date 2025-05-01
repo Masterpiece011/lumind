@@ -29,7 +29,14 @@ const AssignmentDetailPage = () => {
     const fetchAssignment = async () => {
         try {
             setLoading(true);
-            const response = await getAssignmentById({ assignmentId: id });
+            const response = await getAssignmentById({
+                assignmentId: id,
+                include: ["task", "files"], // Убедитесь, что передаете правильные параметры
+            });
+
+            // Проверяем структуру ответа
+            console.log("Assignment data:", response.assignment);
+
             setAssignment(response.assignment);
             setError(null);
         } catch (err) {
@@ -48,19 +55,8 @@ const AssignmentDetailPage = () => {
 
     const handleSubmitWork = async (updatedAssignment) => {
         try {
-            const currentTaskData = assignment.task;
-            const currentCreatorData = assignment.creator;
-
-            setAssignment({
-                ...updatedAssignment,
-                task: currentTaskData,
-                creator: currentCreatorData,
-                assignment_files: updatedAssignment.assignment_files || [],
-                task_files: assignment.task_files || [],
-            });
-
+            setAssignment(updatedAssignment);
             setShowWorkForm(false);
-            await fetchAssignment();
         } catch (err) {
             setError("Ошибка при отправке работы");
         }
@@ -234,24 +230,6 @@ const AssignmentDetailPage = () => {
                             </Text>
                         </section>
                     )}
-
-                    {assignment.task_files?.length > 0 && (
-                        <section>
-                            <Text
-                                tag="h2"
-                                className="assignment-detail__info-caption"
-                            >
-                                Файлы задания:
-                            </Text>
-                            <ul className="files-list">
-                                {assignment.task_files.map((file) => (
-                                    <li key={file.id}>
-                                        <FileItem fileUrl={file.file_url} />
-                                    </li>
-                                ))}
-                            </ul>
-                        </section>
-                    )}
                 </div>
 
                 <div className="assignment-detail__work">
@@ -287,6 +265,26 @@ const AssignmentDetailPage = () => {
                             </ul>
                         ) : (
                             <Text tag="p">Вы ещё не прикрепили файлы</Text>
+                        )}
+                    </section>
+
+                    <section>
+                        <Text
+                            tag="h2"
+                            className="assignment-detail__info-caption"
+                        >
+                            Файлы задания:
+                        </Text>
+                        {assignment.task_files?.length > 0 ? (
+                            <ul className="files-list">
+                                {assignment.task_files.map((file) => (
+                                    <li key={file.id}>
+                                        <FileItem fileUrl={file.file_url} />
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <Text tag="p">Файлы задания отсутствуют</Text>
                         )}
                     </section>
                 </div>

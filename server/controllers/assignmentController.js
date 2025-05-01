@@ -138,85 +138,55 @@ class AssignmentController {
         try {
             const { id } = req.params;
 
-            if (!id) {
-                return next(
-                    ApiError.badRequest("Необходимо указать ID назначения")
-                );
-            }
-
-            // Проверяем, в каких командах состоит пользователь
-            // const userTeams = await Users_Teams.findAll({
-            //     where: { user_id: user_id },
-            //     attributes: ["team_id"],
-            // });
-
-            // const teamIds = userTeams.map((team) => team.team_id);
-
-            // if (teamIds.length === 0) {
-            //     return next(
-            //         ApiError.forbidden(
-            //             "Пользователь не состоит в командах, связанных с этим заданием"
-            //         )
-            //     );
-            // }
-
+            // Получаем назначение с базовыми данными
             const assignment = await Assignments.findOne({
                 where: { id },
                 include: [
                     {
+                        model: Tasks,
+                        as: "task",
+                    },
+                    {
                         model: Files,
-                        attributes: [
-                            "id",
-                            "entity_id",
-                            "entity_type",
-                            "file_url",
-                        ],
+                        as: "files",
+                        where: { entity_type: "assignment" },
+                        required: false,
                     },
                 ],
             });
 
             if (!assignment) {
-                return next(ApiError.badRequest("Назначение не найдено"));
+                return next(ApiError.notFound("Назначение не найдено"));
             }
 
-            const assignmentInvestments = await Files.findAll({
-                where: { entity_id: assignment.id, entity_type: "assignment" },
-            });
-
-            const task = await Tasks.findByPk(assignment.task_id);
-
-            const taskInvestments = await Files.findAll({
-                where: { entity_id: assignment.task_id, entity_type: "task" },
-            });
-
-            const creator = await Users.findByPk(assignment.creator_id, {
-                attributes: {
-                    exclude: ["password", "created_at", "updated_at"],
+            // Явно получаем файлы задачи отдельным запросом
+            const taskFiles = await Files.findAll({
+                where: {
+                    entity_id: assignment.task_id,
+                    entity_type: "task",
                 },
             });
 
+            // Получаем создателя
+            const creator = await Users.findOne({
+                where: { id: assignment.creator_id },
+                attributes: { exclude: ["password"] },
+            });
+
+            // Формируем ответ
             const response = {
-                id: assignment.id,
-                title: assignment.title,
-                description: assignment.description,
-                comment: assignment.comment,
-                creator: creator || undefined,
-                task: task || undefined,
-                task_files: taskInvestments || [],
-                status: assignment.status,
-                user_id: assignment.user_id,
-                plan_date: assignment.plan_date,
-                created_at: assignment.created_at,
-                assignment_files: assignmentInvestments || [],
+                ...assignment.get({ plain: true }),
+                creator,
+                task: {
+                    ...assignment.task.get({ plain: true }),
+                    files: taskFiles || [], // Добавляем файлы в объект задачи
+                },
+                assignment_files: assignment.files || [],
             };
 
             return res.json({ assignment: response });
         } catch (error) {
-            next(
-                ApiError.internal(
-                    `Ошибка при получении задания: ${error.message}`
-                )
-            );
+            next(ApiError.internal(error.message));
         }
     }
 
@@ -243,20 +213,48 @@ class AssignmentController {
 
             const assignment = await Assignments.findByPk(assignment_id, {
                 include: [
-                    { model: Tasks, as: "task" },
+                    {
+                        model: Tasks,
+                        as: "task",
+                        include: [
+                            {
+                                model: Files,
+                                as: "files",
+                                where: { entity_type: "task" },
+                                required: false,
+                                // Явно указываем алиас, чтобы избежать путаницы
+                                attributes: [
+                                    "id",
+                                    "file_url",
+                                    "entity_type",
+                                    "entity_id",
+                                    "created_at",
+                                    "updated_at",
+                                ],
+                            },
+                        ],
+                    },
                     {
                         model: Files,
                         as: "files",
                         where: { entity_type: "assignment" },
                         required: false,
+                        attributes: [
+                            "id",
+                            "file_url",
+                            "entity_type",
+                            "entity_id",
+                            "created_at",
+                            "updated_at",
+                        ],
                     },
                 ],
             });
-
             if (!assignment) {
                 return next(ApiError.notFound("Назначение не найдено"));
             }
 
+            // Обновляем основные данные
             await assignment.update({
                 title: title || assignment.title,
                 description: description || assignment.description,
@@ -267,6 +265,7 @@ class AssignmentController {
                 user_id: user_id || assignment.user_id,
             });
 
+            // Обновляем только файлы ответов (assignment)
             if (investments.length > 0 || status) {
                 await Files.destroy({
                     where: {
@@ -276,20 +275,32 @@ class AssignmentController {
                 });
 
                 if (investments.length > 0) {
-                    const investmentRecords = investments.map((fileUrl) => ({
+                    const answerFiles = investments.map((fileUrl) => ({
                         entity_id: assignment_id,
                         entity_type: "assignment",
                         file_url: fileUrl,
                     }));
-                    await Files.bulkCreate(investmentRecords);
+                    await Files.bulkCreate(answerFiles);
                 }
             }
 
+            // Получаем обновленные данные
             const updatedAssignment = await Assignments.findByPk(
                 assignment_id,
                 {
                     include: [
-                        { model: Tasks, as: "task" },
+                        {
+                            model: Tasks,
+                            as: "task",
+                            include: [
+                                {
+                                    model: Files,
+                                    as: "files",
+                                    where: { entity_type: "task" },
+                                    required: false,
+                                },
+                            ],
+                        },
                         {
                             model: Files,
                             as: "files",
@@ -300,12 +311,14 @@ class AssignmentController {
                 }
             );
 
+            // Формируем ответ с правильными алиасами
+            const responseData = updatedAssignment.get({ plain: true });
             return res.json({
                 message: "Назначение успешно обновлено",
                 assignment: {
-                    ...updatedAssignment.get({ plain: true }),
-                    assignment_files: updatedAssignment.files || [],
-                    task_files: updatedAssignment.task?.files || [],
+                    ...responseData,
+                    task_files: responseData.task?.files || [],
+                    assignment_files: responseData.files || [],
                 },
             });
         } catch (error) {
