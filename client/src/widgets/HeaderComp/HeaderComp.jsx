@@ -57,7 +57,7 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
     };
 
     const handleSearchChange = (e) => {
-        const value = e.target.value;
+        const value = e.target.value.trim();
         setSearchQuery(value);
         onSearchChange(value);
     };

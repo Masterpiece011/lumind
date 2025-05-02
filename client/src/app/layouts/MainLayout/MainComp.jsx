@@ -120,9 +120,7 @@ const MainComp = () => {
 
                     <div
                         className={`main__page ${
-                            showSearchMenu || isModalOpen
-                                ? "main__page_blurred"
-                                : ""
+                            isModalOpen ? "main__page_blurred" : ""
                         }`}
                     >
                         {pathname === "/" && !isModalOpen ? (

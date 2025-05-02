@@ -46,11 +46,17 @@ $ease-default: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 // Плавное появление сверху/снизу
-@mixin slideY($from: -20px, $duration: 0.3s) {
+@mixin fade-slideY($from: -20px, $duration: 0.3s) {
+  opacity: 0;
   transform: translateY($from);
-  transition: transform $duration $ease-default;
-  
-  &-active { transform: translateY(0); }
+  animation: fadeSlideY $duration $ease-default forwards;
+
+  @keyframes fadeSlideY {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 // Плавное появление слева/справа

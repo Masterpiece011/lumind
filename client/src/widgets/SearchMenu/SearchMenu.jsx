@@ -58,117 +58,124 @@ const SearchMenu = ({
     }, [dispatch, teams.length, usersArray.length, user_id]);
 
     return (
-        <div
-            className="search-menu"
-            ref={menuRef}
-            onClick={(e) => {
-                e.stopPropagation();
-                e.nativeEvent.stopImmediatePropagation();
-            }}
-        >
+        <div class="search-menu-wrapper">
             <div
-                className="search-menu__card"
+                className="search-menu"
+                ref={menuRef}
                 onClick={(e) => {
                     e.stopPropagation();
-                    onUsersCardClick();
+                    e.nativeEvent.stopImmediatePropagation();
                 }}
             >
-                <h2 className="search-menu__section-title">
-                    <span className="search-menu__title-icon">
-                        <Icon src={UserIcon} alt="user-icon" />
-                    </span>
-                    <span className="search-menu__title-text">Люди</span>
-                </h2>
+                <div
+                    className="search-menu__card"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onUsersCardClick();
+                    }}
+                >
+                    <h2 className="search-menu__section-title">
+                        <span className="search-menu__title-icon">
+                            <Icon src={UserIcon} alt="user-icon" />
+                        </span>
+                        <span className="search-menu__title-text">Люди</span>
+                    </h2>
 
-                <div className="search-menu__users-content">
-                    {filteredUsers.length > 0 ? (
-                        filteredUsers.map((user) => (
-                            <div
-                                key={user.id}
-                                className="search-menu__user-item"
-                                onClick={(e) => handleUserClick(user, e)}
-                                onMouseDown={(e) => e.preventDefault()}
-                            >
-                                <span className="search-menu__avatar">
-                                    <Icon src={nonAvatar} alt="none-avatar" />
-                                </span>
-                                <span className="search-menu__user-name">
-                                    {formatUserName(user)}
-                                </span>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="search-menu__empty-message">
-                            {searchQuery
-                                ? "Нет результатов"
-                                : "Нет пользователей"}
-                        </p>
-                    )}
-                </div>
-            </div>
-
-            <div className="search-menu__card">
-                <h2 className="search-menu__section-title">
-                    <span className="search-menu__title-icon">
-                        <Icon src={FilesIcon} alt="files-icon" />
-                    </span>
-                    <span className="search-menu__title-text">Файлы</span>
-                </h2>
-                <div className="search-menu__files-list">
-                    {filteredFiles.length > 0 ? (
-                        filteredFiles.map((file) => (
-                            <FileItem
-                                key={file.id}
-                                fileUrl={file.file_url}
-                                compact
-                            />
-                        ))
-                    ) : (
-                        <p className="search-menu__empty-message">
-                            {searchQuery ? "Нет результатов" : "Нет файлов"}
-                        </p>
-                    )}
-                </div>
-            </div>
-
-            <div
-                className="search-menu__card-team"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onTeamsCardClick();
-                }}
-            >
-                <h2 className="search-menu__section-title">
-                    <span className="search-menu__title-icon">
-                        <Icon src={TeamsIcon} alt="teams-icon" />
-                    </span>
-                    <span className="search-menu__title-text">Команды</span>
-                </h2>
-                <div className="search-menu__teams-content">
-                    {filteredTeams.length > 0 ? (
-                        filteredTeams.map((team) => (
-                            <li
-                                className="teams-content__list"
-                                key={team.id}
-                                onClick={() => onSelectTeam(team.id)}
-                            >
+                    <div className="search-menu__users-content">
+                        {filteredUsers.length > 0 ? (
+                            filteredUsers.map((user) => (
                                 <div
-                                    className="list__avatar"
-                                    style={{
-                                        backgroundColor: team.avatar_color,
-                                    }}
-                                ></div>
-                                <div className="list__info">
-                                    <div className="info__divider"></div>
-                                    <h3 className="info__name">{team.name}</h3>
+                                    key={user.id}
+                                    className="search-menu__user-item"
+                                    onClick={(e) => handleUserClick(user, e)}
+                                    onMouseDown={(e) => e.preventDefault()}
+                                >
+                                    <span className="search-menu__avatar">
+                                        <Icon
+                                            src={nonAvatar}
+                                            alt="none-avatar"
+                                        />
+                                    </span>
+                                    <span className="search-menu__user-name">
+                                        {formatUserName(user)}
+                                    </span>
                                 </div>
-                            </li>
-                        ))
-                    ) : (
-                        <p className="search-menu__empty-message">
-                            {searchQuery ? "Нет результатов" : "Нет команд"}
-                        </p>
-                    )}
+                            ))
+                        ) : (
+                            <p className="search-menu__empty-message">
+                                {searchQuery
+                                    ? "Нет результатов"
+                                    : "Нет пользователей"}
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="search-menu__card">
+                    <h2 className="search-menu__section-title">
+                        <span className="search-menu__title-icon">
+                            <Icon src={FilesIcon} alt="files-icon" />
+                        </span>
+                        <span className="search-menu__title-text">Файлы</span>
+                    </h2>
+                    <div className="search-menu__files-list">
+                        {filteredFiles.length > 0 ? (
+                            filteredFiles.map((file) => (
+                                <FileItem
+                                    key={file.id}
+                                    fileUrl={file.file_url}
+                                    compact
+                                />
+                            ))
+                        ) : (
+                            <p className="search-menu__empty-message">
+                                {searchQuery ? "Нет результатов" : "Нет файлов"}
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                <div
+                    className="search-menu__card-team"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onTeamsCardClick();
+                    }}
+                >
+                    <h2 className="search-menu__section-title">
+                        <span className="search-menu__title-icon">
+                            <Icon src={TeamsIcon} alt="teams-icon" />
+                        </span>
+                        <span className="search-menu__title-text">Команды</span>
+                    </h2>
+                    <div className="search-menu__teams-content">
+                        {filteredTeams.length > 0 ? (
+                            filteredTeams.map((team) => (
+                                <li
+                                    className="teams-content__list"
+                                    key={team.id}
+                                    onClick={() => onSelectTeam(team.id)}
+                                >
+                                    <div
+                                        className="list__avatar"
+                                        style={{
+                                            backgroundColor: team.avatar_color,
+                                        }}
+                                    ></div>
+                                    <div className="list__info">
+                                        <div className="info__divider"></div>
+                                        <h3 className="info__name">
+                                            {team.name}
+                                        </h3>
+                                    </div>
+                                </li>
+                            ))
+                        ) : (
+                            <p className="search-menu__empty-message">
+                                {searchQuery ? "Нет результатов" : "Нет команд"}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
