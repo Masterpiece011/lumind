@@ -1,11 +1,14 @@
 @use "../../shared/styles/variables/variables" as *;
 @use "../../shared/styles/mixins/mixins" as *;
 
-.search-menu {
+.search-menu-wrapper {
   position: absolute;
   top: 40px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.search-menu {
   z-index: 999;
   width: 748px;
   overflow: hidden;
@@ -22,6 +25,7 @@
     0 8px 24px var(--shadow-color);
   max-height: 80vh;
   overflow-y: auto;
+  @include fade-slideY(-15px, 0.3s);
 
   &__card {
     min-width: 139px;

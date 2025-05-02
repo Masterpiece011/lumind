@@ -4,39 +4,53 @@
   }
   
   // Темная тема
-  [data-theme="dark"] {
-    // Основные цвета
-    --bg-color: #202020;
-    --text-color: #f5f5f5;
-    --card-bg: rgba(174, 174, 174, 0.1);
-    --card-border: rgba(174, 174, 174, 0.5);
-    --active-color: #7e57c2;
-    
-    // Дополнительные цвета
-    --hover-color: rgba(126, 87, 194, 0.2);
-    --shadow-color: rgba(0, 0, 0, 0.5);
-    --divider-color: rgba(174, 174, 174, 0.3);
-    
-    // Текст
-    --text-muted: rgba(245, 245, 245, 0.7);
-    --text-accent: #b388ff;
-  }
+[data-theme="dark"] {
+  // Основные цвета
+  --bg-color: #202020;
+  --text-color: #f5f5f5;
+  --text-secondary: #aeaeae;
+  --text-tertiary: #dedede;
+  --card-bg: rgba(174, 174, 174, 0.1);
+  --card-border: rgba(174, 174, 174, 0.5);
+  --active-color: #7e57c2;
+  --primary-accent: #9f70fd;
+  --primary-hover: #8a5cf6;
   
-  // Светлая тема
-  [data-theme="light"] {
-    // Основные цвета
-    --bg-color: #f5f5f5;
-    --text-color: #333333;
-    --card-bg: rgba(255, 255, 255, 0.9);
-    --card-border: rgba(0, 0, 0, 0.1);
-    --active-color: #673ab7;
-    
-    // Дополнительные цвета
-    --hover-color: rgba(103, 58, 183, 0.1);
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --divider-color: rgba(0, 0, 0, 0.1);
-    
-    // Текст
-    --text-muted: rgba(51, 51, 51, 0.7);
-    --text-accent: #7c4dff;
-  }
+  // Дополнительные цвета
+  --hover-color: rgba(126, 87, 194, 0.2);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --divider-color: rgba(174, 174, 174, 0.3);
+  --input-border: rgba(174, 174, 174, 0.5);
+  --input-bg: transparent;
+  
+  // Текст
+  --text-muted: rgba(245, 245, 245, 0.7);
+  --text-accent: #b388ff;
+  --error-color: #d9534f;
+}
+
+// Светлая тема
+[data-theme="light"] {
+  // Основные цвета
+  --bg-color: #f5f5f5;
+  --text-color: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #444444;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(0, 0, 0, 0.1);
+  --active-color: #673ab7;
+  --primary-accent: #7c4dff;
+  --primary-hover: #6a3bff;
+  
+  // Дополнительные цвета
+  --hover-color: rgba(103, 58, 183, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --divider-color: rgba(0, 0, 0, 0.1);
+  --input-border: rgba(0, 0, 0, 0.2);
+  --input-bg: #ffffff;
+  
+  // Текст
+  --text-muted: rgba(51, 51, 51, 0.7);
+  --text-accent: #7c4dff;
+  --error-color: #d9534f;
+}

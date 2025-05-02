@@ -1,11 +1,13 @@
-@use "@/shared/styles/mixins/mixins" as *;
+@use "../../../../shared/styles/variables/variables" as *;
+@use "../../../../shared/styles/mixins/mixins" as *;
 
 .assignment-detail {
     display: flex;
     flex-direction: column;
     gap: 20px;
     padding: 20px;
-    color: #ffffff;
+    color: var(--text-color);
+    background-color: var(--bg-color);
     overflow: hidden;
 
     &__header {
@@ -21,10 +23,12 @@
 
             &-title {
                 text-transform: uppercase;
+                color: var(--text-color);
             }
 
             &-term {
                 margin-right: 12px;
+                color: var(--text-secondary);
             }
         }
 
@@ -32,47 +36,51 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            color: var(--text-secondary);
         }
     }
 
     &__title {
         @include fontOptions(24px, 400, 1.2);
-        color: #aeaeae;
+        color: var(--text-secondary);
         margin: 0;
-    }
-
-    &__meta {
-        @include fontOptions(14px, 400, 1.4);
-        color: #aeaeae;
-        display: flex;
-        gap: 15px;
     }
 
     &__score {
         @include fontOptions(16px, 400, 1.4);
-        color: #aeaeae;
+        color: var(--text-secondary);
 
         .comment {
             font-size: 14px;
-            color: #9f70fd;
+            color: var(--primary-accent);
             margin-top: 4px;
         }
     }
 
     &__submit-btn {
-        background-color: rgba(#aeaeae, 0.4);
-        color: whitesmoke;
+        background-color: var(--card-bg);
+        color: var(--text-color);
         padding: 8px 16px;
-        border-radius: 4px;
-        transition: background-color 0.2s;
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+        border: 1px solid var(--card-border);
 
         &:hover {
-            background-color: rgba(#aeaeae, 0.2);
+            background-color: var(--hover-color);
         }
 
         &:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        &--active {
+            background-color: var(--primary-accent);
+            color: white;
+
+            &:hover {
+                background-color: var(--primary-hover);
+            }
         }
     }
 
@@ -90,28 +98,29 @@
 
         &-caption {
             margin-bottom: 8px;
+            color: var(--text-secondary);
         }
     }
 
     &__section {
         &-title {
             @include fontOptions(18px, 400, 1.4);
-            color: #aeaeae;
+            color: var(--text-secondary);
             margin: 0 0 8px 0;
         }
 
         &-text {
             @include fontOptions(16px, 400, 1.6);
             margin: 0;
-            color: #dedede;
+            color: var(--text-tertiary);
         }
     }
 
     &__work {
         flex: 2;
-        background: transparent;
-        border: 2px solid #9f70fd;
-        border-radius: 6px;
+        background: var(--card-bg);
+        border: 1px solid var(--primary-accent);
+        border-radius: var(--border-radius);
         padding: 20px;
         display: flex;
         flex-direction: column;
@@ -126,13 +135,14 @@
 
         &-title {
             @include fontOptions(18px, 400, 1.4);
-            color: #aeaeae;
+            color: var(--text-secondary);
             margin: 0;
         }
     }
 
     .files-title {
         margin-bottom: 15px;
+        color: var(--text-secondary);
     }
 
     &__files-list {
@@ -146,22 +156,10 @@
 
     &__status-notice {
         @include fontOptions(14px, 400, 1.4);
-        color: #9f70fd;
+        color: var(--primary-accent);
         padding: 8px;
-        background-color: rgba(#9f70fd, 0.1);
+        background-color: var(--hover-color);
         border-radius: 4px;
         text-align: center;
-    }
-
-    &__my-work-btn {
-        background-color: #9f70fd;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 4px;
-        transition: opacity 0.2s;
-
-        &:hover {
-            opacity: 0.9;
-        }
     }
 }

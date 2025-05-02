@@ -138,7 +138,6 @@ class AssignmentController {
         try {
             const { id } = req.params;
 
-            // Получаем назначение с базовыми данными
             const assignment = await Assignments.findOne({
                 where: { id },
                 include: [
@@ -159,7 +158,6 @@ class AssignmentController {
                 return next(ApiError.notFound("Назначение не найдено"));
             }
 
-            // Явно получаем файлы задачи отдельным запросом
             const taskFiles = await Files.findAll({
                 where: {
                     entity_id: assignment.task_id,
@@ -167,19 +165,17 @@ class AssignmentController {
                 },
             });
 
-            // Получаем создателя
             const creator = await Users.findOne({
                 where: { id: assignment.creator_id },
                 attributes: { exclude: ["password"] },
             });
 
-            // Формируем ответ
             const response = {
                 ...assignment.get({ plain: true }),
                 creator,
                 task: {
                     ...assignment.task.get({ plain: true }),
-                    files: taskFiles || [], // Добавляем файлы в объект задачи
+                    files: taskFiles || [],
                 },
                 assignment_files: assignment.files || [],
             };
@@ -190,7 +186,6 @@ class AssignmentController {
         }
     }
 
-    // Обновление назначения
     async update(req, res, next) {
         try {
             const {
@@ -222,7 +217,7 @@ class AssignmentController {
                                 as: "files",
                                 where: { entity_type: "task" },
                                 required: false,
-                                // Явно указываем алиас, чтобы избежать путаницы
+
                                 attributes: [
                                     "id",
                                     "file_url",
@@ -254,7 +249,6 @@ class AssignmentController {
                 return next(ApiError.notFound("Назначение не найдено"));
             }
 
-            // Обновляем основные данные
             await assignment.update({
                 title: title || assignment.title,
                 description: description || assignment.description,
@@ -265,7 +259,6 @@ class AssignmentController {
                 user_id: user_id || assignment.user_id,
             });
 
-            // Обновляем только файлы ответов (assignment)
             if (investments.length > 0 || status) {
                 await Files.destroy({
                     where: {
@@ -284,7 +277,6 @@ class AssignmentController {
                 }
             }
 
-            // Получаем обновленные данные
             const updatedAssignment = await Assignments.findByPk(
                 assignment_id,
                 {
@@ -311,7 +303,6 @@ class AssignmentController {
                 }
             );
 
-            // Формируем ответ с правильными алиасами
             const responseData = updatedAssignment.get({ plain: true });
             return res.json({
                 message: "Назначение успешно обновлено",
