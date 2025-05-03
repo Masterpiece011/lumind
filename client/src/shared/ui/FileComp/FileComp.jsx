@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-
 import "./FileComp.scss";
 
 import { MyButton } from "@/shared/uikit/MyButton";
@@ -118,7 +117,6 @@ export const FileItem = ({
     const fullFileName = decodeFileName(
         fileUrl.replace(/\\/g, "/").split("/").pop(),
     );
-
     const fileName = fullFileName.split("-").pop();
 
     const handleDownload = async () => {
@@ -140,14 +138,41 @@ export const FileItem = ({
         <div className={`file-item ${compact ? "file-item--compact" : ""}`}>
             <div className="file-icon">{getFileIcon(fileType)}</div>
             <div className="file-info">
-                <span className="file-name">{fileName}</span>
+                <span className="file-name" title={fullFileName}>
+                    {compact
+                        ? fileName.length > 20
+                            ? `${fileName.substring(0, 17)}...`
+                            : fileName
+                        : fileName}
+                </span>
                 {!compact && additionalInfo && (
                     <span className="file-additional-info">
                         {additionalInfo}
                     </span>
                 )}
             </div>
-            {!compact && (
+
+            {compact ? (
+                <MyButton
+                    className="file-download-compact"
+                    onClick={handleDownload}
+                    style={{
+                        minWidth: "20px",
+                        width: "20px",
+                        height: "20px",
+                        padding: "2px",
+                    }}
+                >
+                    <Icon
+                        src={CloudDowloadArrow}
+                        alt="download"
+                        style={{
+                            width: "12px",
+                            height: "12px",
+                        }}
+                    />
+                </MyButton>
+            ) : (
                 <div className="file-actions" ref={buttonRef}>
                     <MyButton
                         className="file-item-menu"

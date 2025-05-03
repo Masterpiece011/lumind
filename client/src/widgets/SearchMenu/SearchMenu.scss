@@ -17,7 +17,9 @@
   flex-wrap: wrap;
   gap: 10px;
   padding: 25px;
-  background: var(--card-bg);
+  background: var(--bg-color); 
+  backdrop-filter: none; 
+  opacity: 1; 
   border-radius: 10px;
   border: 1px solid var(--card-border);
   box-shadow: 

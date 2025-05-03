@@ -1,48 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserSubmissions } from "@/shared/api/submissionAPI";
+import { getUserFiles } from "@/shared/api/uploadFileAPI";
 
 const useUserFiles = (userId) => {
     const dispatch = useDispatch();
-    const submissionsData = useSelector(
-        (state) => state.submissions.submissions || [],
-    );
-    const [userFiles, setUserFiles] = useState([]);
+    const { userFiles, loading, error } = useSelector((state) => ({
+        userFiles: state.file?.userFiles || [],
+        loading: state.file?.loading || false,
+        error: state.file?.error || null,
+    }));
+
+    const isInitialMount = useRef(true);
 
     useEffect(() => {
-        if (userId) {
-            dispatch(getUserSubmissions(userId));
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            if (userId && !loading && userFiles.length === 0) {
+                console.log("Fetching files for user:", userId);
+                dispatch(getUserFiles(userId));
+            }
         }
-    }, [dispatch, userId]);
-
-    useEffect(() => {
-        if (Array.isArray(submissionsData)) {
-            const uniqueFiles = new Map();
-
-            submissionsData.forEach((submission) => {
-                (submission.submissions_investments || []).forEach((file) => {
-                    if (!uniqueFiles.has(file.file_url)) {
-                        uniqueFiles.set(file.file_url, {
-                            ...file,
-                            submissionDate: submission.created_at,
-                            assignmentTitle:
-                                submission.Assignment?.title ||
-                                "Неизвестное задание",
-                        });
-                    }
-                });
-            });
-
-            const recentFiles = Array.from(uniqueFiles.values())
-                .sort(
-                    (a, b) =>
-                        new Date(b.submissionDate) - new Date(a.submissionDate),
-                )
-                .slice(0, 8);
-
-            setUserFiles(recentFiles);
-        }
-    }, [submissionsData]);
+    }, [userId, loading, dispatch]);
 
     return userFiles;
 };
