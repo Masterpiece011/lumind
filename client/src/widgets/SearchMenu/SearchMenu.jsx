@@ -13,7 +13,6 @@ import TeamsIcon from "@/app/assets/icons/teams-icon-search.svg";
 import FilesIcon from "@/app/assets/icons/file-icon.svg";
 
 import { FileItem } from "@/shared/ui/FileComp";
-import { getUserSubmissions } from "@/shared/api/submissionAPI";
 import { useUserModal } from "@/shared/lib/hooks/useUserModal";
 import { useSearchFilter } from "@/shared/lib/hooks/useSearchFilter";
 import { formatUserName } from "@/shared/lib/utils/formatUserName";
@@ -29,7 +28,6 @@ const SearchMenu = ({
     const dispatch = useDispatch();
     const { teams = [] } = useSelector((state) => state.teams);
     const usersArray = useSelector((state) => state.users.users) || [];
-
     const user_id = useSelector((state) => state.user.user?.id);
 
     const userFiles = useUserFiles(user_id);
@@ -53,12 +51,11 @@ const SearchMenu = ({
             if (!teams.length) dispatch(getTeams({ userId: user_id }));
             if (!usersArray.length)
                 dispatch(getUsers({ page: 1, quantity: 100 }));
-            dispatch(getUserSubmissions(user_id));
         }
-    }, [dispatch, teams.length, usersArray.length, user_id]);
+    }, [dispatch, user_id]);
 
     return (
-        <div class="search-menu-wrapper">
+        <div className="search-menu-wrapper">
             <div
                 className="search-menu"
                 ref={menuRef}
@@ -118,14 +115,20 @@ const SearchMenu = ({
                         </span>
                         <span className="search-menu__title-text">Файлы</span>
                     </h2>
+
                     <div className="search-menu__files-list">
                         {filteredFiles.length > 0 ? (
                             filteredFiles.map((file) => (
-                                <FileItem
+                                <div
                                     key={file.id}
-                                    fileUrl={file.file_url}
-                                    compact
-                                />
+                                    className="search-menu__file-item"
+                                >
+                                    <FileItem
+                                        fileUrl={file.file_url}
+                                        compact
+                                        additionalInfo={file.assignmentTitle}
+                                    />
+                                </div>
                             ))
                         ) : (
                             <p className="search-menu__empty-message">

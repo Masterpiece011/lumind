@@ -1,4 +1,16 @@
+import { createAsyncThunk } from "@reduxjs/toolkit";
 import { $authHost } from "./page";
+
+export const getUserFiles = createAsyncThunk(
+    "file/getUserFiles",
+    async (userId) => {
+        const response = await $authHost.get("/api/files/user", {
+            params: { user_id: userId },
+        });
+        console.log("API response data:", response.data);
+        return response.data;
+    },
+);
 
 export const uploadFile = async (file) => {
     const formData = new FormData();
