@@ -80,6 +80,7 @@ const MainComp = () => {
 
     const handleTeamsCardClick = () => handleCardClick("teams", true);
     const handleUsersCardClick = () => handleCardClick("users");
+    const handleFilesCardClick = () => handleCardClick("files");
 
     return (
         <div className="main">
@@ -112,8 +113,10 @@ const MainComp = () => {
                                 menuRef={searchMenuRef}
                                 onTeamsCardClick={handleTeamsCardClick}
                                 onUsersCardClick={handleUsersCardClick}
+                                onFilesCardClick={handleFilesCardClick}
                                 isTeamsPageActive={pathname === "/teams"}
                                 isUsersPageActive={pathname === "/users"}
+                                isFilesPageActive={pathname === "/files"}
                             />
                         </div>
                     )}
@@ -159,6 +162,8 @@ const MainComp = () => {
                             />
                         ) : pathname.startsWith("/users") ? (
                             <UsersPage />
+                        ) : pathname.startsWith("/files") ? (
+                            <FilesPage />
                         ) : pathname.startsWith("/schedule") ? (
                             <SchedulePage />
                         ) : null}

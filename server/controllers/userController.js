@@ -145,13 +145,22 @@ class UserController {
                 quantity = 10,
                 order = "ASC",
                 search_text = "",
+                role = "",
+                group_id = null,
             } = req.body;
 
-            // Рассчитываем смещение (offset)
             const offset = (page - 1) * quantity;
 
-            // Формируем условия для поиска
             const where = {};
+
+            if (role) {
+                where["$role.name$"] = role.toUpperCase();
+            }
+
+            if (group_id) {
+                where.group_id = group_id;
+            }
+
             if (search_text) {
                 where[Op.or] = [
                     { first_name: { [Op.iLike]: `%${search_text}%` } },
@@ -161,7 +170,6 @@ class UserController {
                 ];
             }
 
-            // Нормализация параметра сортировки
             const normalizeOrder = (orderParam) => {
                 if (
                     orderParam.toUpperCase() === "ASC" ||
@@ -184,21 +192,28 @@ class UserController {
 
             const sequelizeOrder = normalizeOrder(order);
 
-            // Получаем общее количество пользователей
-            const totalUsers = await Users.count({ where });
+            const totalUsers = await Users.count({
+                where,
+                include: [
+                    {
+                        model: Roles,
+                        as: "role",
+                        attributes: [],
+                    },
+                ],
+            });
 
-            // Получаем пользователей с пагинацией
             const users = await Users.findAll({
                 where,
                 include: [
                     {
                         model: Groups,
-                        as: "group", // Должно соответствовать ассоциации в модели
+                        as: "group",
                         attributes: ["id", "title"],
                     },
                     {
                         model: Roles,
-                        as: "role", // Должно соответствовать ассоциации в модели
+                        as: "role",
                         attributes: ["name"],
                     },
                     {
@@ -224,10 +239,9 @@ class UserController {
                     last_name: user.last_name,
                     display_name: user.display_name,
                     email: user.email,
-                    role: user.role.name, // Используем lowercase
+                    role: user.role.name,
                     group: user.group
                         ? {
-                              // Используем lowercase
                               id: user.group.id,
                               title: user.group.title,
                           }

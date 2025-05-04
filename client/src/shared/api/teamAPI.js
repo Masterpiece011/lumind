@@ -23,30 +23,15 @@ export const getTeams = createAsyncThunk(
     },
 );
 
-export const getTeamFiles = createAsyncThunk(
-    "teams/getTeamFiles",
-    async (teamId) => {
-        try {
-            const response = await $authHost.get(`/api/teams/${teamId}/files`);
-            return response.data;
-        } catch (error) {
-            throw new Error(
-                error.response?.data?.message ||
-                    "Ошибка получения файлов команды",
-            );
-        }
-    },
-);
-
 export const getTeamById = createAsyncThunk(
     "teams/getTeamById",
     async ({ teamId, userId }) => {
         try {
-            const response = await $authHost.get(`/api/teams/${teamId}`, {
+            const { data } = await $authHost.get(`/api/teams/${teamId}`, {
                 params: { user_id: userId },
-                include: ["tasks", "tasks.assignments"],
             });
-            return response.data;
+            console.log("Team data:", data); // Логируем ответ для отладки
+            return data.team;
         } catch (error) {
             throw new Error(
                 error.response?.data?.message || "Ошибка загрузки команды",

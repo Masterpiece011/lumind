@@ -3,12 +3,24 @@ import { $authHost } from "./page";
 
 export const getUserFiles = createAsyncThunk(
     "file/getUserFiles",
-    async (userId) => {
-        const response = await $authHost.get("/api/files/user", {
-            params: { user_id: userId },
-        });
-        console.log("API response data:", response.data);
-        return response.data;
+    async (
+        { userId, page = 1, quantity = 8, searchQuery = "" },
+        { rejectWithValue },
+    ) => {
+        try {
+            const response = await $authHost.post("/api/files/user", {
+                user_id: userId,
+                page,
+                quantity,
+                search_text: searchQuery,
+            });
+
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Ошибка получения файлов",
+            );
+        }
     },
 );
 

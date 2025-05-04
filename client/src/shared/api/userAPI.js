@@ -39,6 +39,8 @@ export const getUsers = createAsyncThunk(
         quantity = 100,
         order = "ASC",
         search_text = "",
+        role = "",
+        group_id = null,
     } = {}) => {
         try {
             const { data } = await $authHost.post("/api/users", {
@@ -46,6 +48,8 @@ export const getUsers = createAsyncThunk(
                 quantity,
                 order,
                 search_text,
+                role,
+                group_id,
             });
             return { users: data.data };
         } catch (error) {

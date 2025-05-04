@@ -9,6 +9,8 @@ import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { FileItem } from "@/shared/ui/FileComp";
 import { MyButton } from "@/shared/uikit/MyButton";
 
+//import { useTeamFiles } from "@/shared/lib/hooks/useTeamFiles";
+
 import { Icon } from "@/shared/uikit/icons";
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import Assignment from "@/app/assets/icons/assignments-icon.svg";
@@ -20,6 +22,7 @@ import "./TeamDetail.scss";
 
 const TeamDetailPage = ({ onSelectAssignment }) => {
     const { id } = useParams();
+
     const dispatch = useDispatch();
     const {
         currentTeam,
@@ -41,36 +44,13 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
             activeTab,
         });
 
+    //const { files: teamFiles, loading: filesLoading } = useTeamFiles(id);
+
     useEffect(() => {
         if (id && user_id) {
             dispatch(getTeamById({ teamId: id, userId: user_id }));
         }
     }, [id, user_id, dispatch]);
-
-    const allFiles = useMemo(() => {
-        const taskFiles =
-            currentTeam?.tasks?.flatMap((task) =>
-                (task.files || []).map((file) => ({
-                    ...file,
-                    taskTitle: task.title,
-                    taskId: task.id,
-                })),
-            ) || [];
-
-        const assignmentFiles =
-            currentTeam?.tasks?.flatMap(
-                (task) =>
-                    task.assignments?.flatMap((assignment) =>
-                        (assignment.files || []).map((file) => ({
-                            ...file,
-                            assignmentTitle: assignment.title,
-                            assignmentId: assignment.id,
-                        })),
-                    ) || [],
-            ) || [];
-
-        return [...taskFiles, ...assignmentFiles];
-    }, [currentTeam]);
 
     const tabContent = {
         members: <MembersTabContent users={currentTeam?.users} />,
@@ -93,7 +73,8 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
         ),
         files: (
             <FilesTabContent
-                files={allFiles}
+                files={teamFiles}
+                loading={filesLoading}
                 onSelectAssignment={onSelectAssignment}
             />
         ),
@@ -140,25 +121,25 @@ const MembersTabContent = ({ users }) => (
     </div>
 );
 
-const FilesTabContent = ({ files, onSelectAssignment }) => (
+const FilesTabContent = ({ files, loading, onSelectAssignment }) => (
     <div className="team-files">
-        <h3>Файлы команды</h3>
-        {files.length > 0 ? (
+        <h3>Файлы заданий команды</h3>
+        {loading ? (
+            <div>Загрузка файлов...</div>
+        ) : files.length > 0 ? (
             <div className="file-list">
                 {files.map((file) => (
                     <FileItem
                         key={file.id}
                         fileUrl={file.file_url}
-                        additionalInfo={file.assignmentTitle || "Файл задания"}
-                        onClick={() =>
-                            file.assignmentId &&
-                            onSelectAssignment(file.assignmentId)
-                        }
+                        fileName={file.original_name}
+                        additionalInfo={file.taskTitle}
+                        onClick={() => onSelectAssignment(file.taskId)}
                     />
                 ))}
             </div>
         ) : (
-            <p>Нет файлов</p>
+            <p>Нет файлов заданий</p>
         )}
     </div>
 );

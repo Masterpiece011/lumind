@@ -81,12 +81,7 @@ class TeamController {
             const { id } = req.params;
             const { user_id } = req.query;
 
-            if (!id) {
-                return next(
-                    ApiError.badRequest("Необходимо указать ID команды")
-                );
-            }
-
+            // Получаем основную информацию о команде
             const team = await Teams.findOne({
                 where: { id },
                 include: [
@@ -96,6 +91,16 @@ class TeamController {
                         attributes: ["id", "email", "first_name", "last_name"],
                         through: { attributes: [] },
                     },
+                    {
+                        model: Tasks,
+                        through: Teams_Tasks,
+                        attributes: [
+                            "id",
+                            "title",
+                            "description",
+                            "creator_id",
+                        ],
+                    },
                 ],
             });
 
@@ -104,47 +109,6 @@ class TeamController {
                     ApiError.notFound(`Команда с ID: ${id} не найдена`)
                 );
             }
-
-            const userAssignments = await Assignments.findAll({
-                where: {
-                    user_id: team.users.map((user) => user.id),
-                },
-                include: [
-                    {
-                        model: Tasks,
-                        include: [
-                            {
-                                model: Files,
-                                where: { entity_type: "task" },
-                                required: false,
-                            },
-                        ],
-                    },
-                    {
-                        model: Files,
-                        where: { entity_type: "assignment" },
-                        required: false,
-                    },
-                ],
-            });
-
-            const uniqueTasks = [];
-            const taskMap = new Map();
-
-            userAssignments.forEach((assignment) => {
-                if (assignment.task && !taskMap.has(assignment.task.id)) {
-                    taskMap.set(assignment.task.id, true);
-                    uniqueTasks.push({
-                        ...assignment.task.get({ plain: true }),
-                        assignments: userAssignments
-                            .filter((a) => a.task_id === assignment.task_id)
-                            .map((a) => ({
-                                ...a.get({ plain: true }),
-                                files: a.files,
-                            })),
-                    });
-                }
-            });
 
             const creator = await Users.findByPk(team.creator_id, {
                 attributes: ["id", "first_name", "last_name", "display_name"],
@@ -160,7 +124,14 @@ class TeamController {
                     display_name: creator.display_name,
                 },
                 users: team.users,
-                tasks: uniqueTasks,
+                tasks: team.Tasks
+                    ? team.Tasks.map((task) => ({
+                          id: task.id,
+                          title: task.title,
+                          description: task.description,
+                          creator_id: task.creator_id,
+                      }))
+                    : [],
             };
 
             return res.json({ team: response });
