@@ -1,35 +1,33 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { getUsers } from "@/shared/api/userAPI";
-
-import "./UsersComp.scss";
-import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
-import { MyButton } from "@/shared/uikit/MyButton";
+import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { formatUserName } from "@/shared/lib/utils/formatUserName";
 import { getTranslatedRole } from "@/shared/lib/utils/getTranslatedRole";
+import { useUserModal } from "@/shared/lib/hooks/useUserModal";
+import { useFilteredUsers } from "@/entities/user/model/useFilteredUsers";
+import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
+import { Icon } from "@/shared/uikit/icons";
+import nonAvatar from "@/app/assets/img/non-avatar.png";
+
+import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
+import "./UsersComp.scss";
+import { MyButton } from "@/shared/uikit/MyButton";
 
 const UsersPage = () => {
-    const dispatch = useDispatch();
-    const usersArray = useSelector((state) => state.users.users) || [];
-
+    const searchParams = useSearchParams();
+    const searchQuery = searchParams.get("q") || "";
+    const { showUserModal } = useUserModal();
     const [filter, setFilter] = useState("all");
 
-    useEffect(() => {
-        dispatch(getUsers());
-    }, [dispatch]);
+    const { filteredUsers, isLoading } = useFilteredUsers(filter, searchQuery);
 
-    const filteredUsers = usersArray.filter((user) => {
-        if (user.role.name === "ADMIN" || user.role.name === "MODERATOR") {
-            return false;
-        }
+    const handleUserClick = (user) => {
+        showUserModal(user);
+    };
 
-        if (filter === "instructors") return user.role.name === "INSTRUCTOR";
-        if (filter === "users") return user.role.name === "USER";
-
-        return true;
-    });
+    if (isLoading) return;
+    <ClockLoader className="users__loading" />;
 
     return (
         <div className="users">
@@ -37,39 +35,72 @@ const UsersPage = () => {
                 <MyButton
                     onClick={() => setFilter("all")}
                     text="Все"
-                    className={buttonStyles.users__filterBtn}
+                    className={`${buttonStyles.users__filterBtn} ${
+                        filter === "all" ? buttonStyles.active : ""
+                    }`}
                 />
 
                 <MyButton
                     onClick={() => setFilter("instructors")}
                     text="Преподаватели"
-                    className={buttonStyles.users__filterBtn}
+                    className={`${buttonStyles.users__filterBtn} ${
+                        filter === "instructors" ? buttonStyles.active : ""
+                    }`}
                 />
 
                 <MyButton
                     onClick={() => setFilter("users")}
-                    text="Группа"
-                    className={buttonStyles.users__filterBtn}
+                    text="Студенты"
+                    className={`${buttonStyles.users__filterBtn} ${
+                        filter === "users" ? buttonStyles.active : ""
+                    }`}
                 />
 
                 <MyButton
                     onClick={() => setFilter("teams")}
-                    text="Команды"
-                    className={buttonStyles.users__filterBtn}
+                    text="Группа"
+                    className={`${buttonStyles.users__filterBtn} ${
+                        filter === "teams" ? buttonStyles.active : ""
+                    }`}
                 />
             </div>
             <div className="users__list">
                 {filteredUsers.length > 0 ? (
                     filteredUsers.map((user) => (
-                        <div key={user.id} className="users__item">
-                            <p className="users__text">
-                                {formatUserName(user)}{" "}
-                                {getTranslatedRole(user.role)}
-                            </p>
+                        <div
+                            key={user.id}
+                            className="users__item"
+                            onClick={() => handleUserClick(user)}
+                        >
+                            <div className="users__avatar">
+                                <Icon src={nonAvatar} alt="avatar" />
+                            </div>
+                            <div className="users__info">
+                                <p className="users__name">
+                                    {formatUserName(user)}
+                                </p>
+                                <p className="users__role">
+                                    {getTranslatedRole(user.role)}
+                                </p>
+                                <p className="users__email">{user.email}</p>
+                                {user.group?.title && (
+                                    <p className="users__group">
+                                        {user.group.title}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     ))
                 ) : (
-                    <p className="users__empty">Пользователей не найдено</p>
+                    <p className="users__empty">
+                        {searchQuery
+                            ? "Ничего не найдено"
+                            : filter === "users"
+                              ? "Студентов не найдено"
+                              : filter === "instructors"
+                                ? "Преподавателей не найдено"
+                                : "Пользователей не найдено"}
+                    </p>
                 )}
             </div>
         </div>

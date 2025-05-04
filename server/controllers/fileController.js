@@ -1,11 +1,17 @@
-import { Files, Assignments, Tasks } from "../models/models.js";
+import { Op } from "sequelize";
+import { Files, Assignments, Tasks, Teams_Tasks } from "../models/models.js";
 import ApiError from "../error/ApiError.js";
 
 class FileController {
     async getUserFiles(req, res, next) {
         try {
-            const { user_id } = req.query;
-            console.log("Requested files for user:", user_id);
+            const {
+                user_id,
+                page = 1,
+                quantity = 8,
+                order = "DESC",
+                search_text = "",
+            } = req.body;
 
             if (!user_id) {
                 return next(
@@ -13,9 +19,26 @@ class FileController {
                 );
             }
 
-            const userFiles = await Files.findAll({
+            const offset = (page - 1) * quantity;
+
+            const { count, rows: userFiles } = await Files.findAndCountAll({
                 where: {
                     entity_type: "assignment",
+                    ...(search_text && {
+                        [Op.or]: [
+                            { file_url: { [Op.iLike]: `%${search_text}%` } },
+                            {
+                                "$assignment.title$": {
+                                    [Op.iLike]: `%${search_text}%`,
+                                },
+                            },
+                            {
+                                "$assignment.task.title$": {
+                                    [Op.iLike]: `%${search_text}%`,
+                                },
+                            },
+                        ],
+                    }),
                 },
                 include: [
                     {
@@ -33,11 +56,13 @@ class FileController {
                         ],
                     },
                 ],
-                order: [["created_at", "DESC"]],
-                limit: 8,
+                order: [
+                    [order === "DESC" ? "created_at" : "created_at", order],
+                ],
+                limit: quantity,
+                offset: offset,
+                distinct: true,
             });
-
-            console.log("Found files:", userFiles.length);
 
             const formattedFiles = userFiles.map((file) => ({
                 id: file.id,
@@ -49,7 +74,12 @@ class FileController {
                     file.assignment?.task?.title || "Неизвестное задание",
             }));
 
-            return res.json({ files: formattedFiles });
+            return res.json({
+                files: formattedFiles,
+                total: count,
+                page,
+                totalPages: Math.ceil(count / quantity),
+            });
         } catch (error) {
             console.error("Controller error:", error);
             next(

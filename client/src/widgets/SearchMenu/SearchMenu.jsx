@@ -30,7 +30,7 @@ const SearchMenu = ({
     const usersArray = useSelector((state) => state.users.users) || [];
     const user_id = useSelector((state) => state.user.user?.id);
 
-    const userFiles = useUserFiles(user_id);
+    const { files: userFiles } = useUserFiles(user_id);
     const { showUserModal } = useUserModal();
 
     const { filteredUsers, filteredTeams, filteredFiles } = useSearchFilter(

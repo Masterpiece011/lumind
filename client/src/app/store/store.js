@@ -6,7 +6,7 @@ import teamReducer from "../../entities/team/model/teamStore";
 import assignmentReducer from "../../entities/assignment/model/assignmentStore";
 import submissionReducer from "../../features/submissions/model/submissionStore";
 import themeReducer from "../../features/theme/model/themeStore";
-import fileReducer from "../../shared/ui/FileComp/model/fileStore";
+import fileReducer from "../../entities/files/model/fileStore";
 
 export const store = configureStore({
     reducer: {

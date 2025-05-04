@@ -4,25 +4,55 @@ import { getUserFiles } from "@/shared/api/uploadFileAPI";
 
 const useUserFiles = (userId) => {
     const dispatch = useDispatch();
-    const { userFiles, loading, error } = useSelector((state) => ({
+    const {
+        userFiles,
+        loading,
+        error,
+        total = 0,
+        page = 1,
+    } = useSelector((state) => ({
         userFiles: state.file?.userFiles || [],
         loading: state.file?.loading || false,
         error: state.file?.error || null,
+        total: state.file?.total || 0,
+        page: state.file?.page || 1,
     }));
 
-    const isInitialMount = useRef(true);
+    const initialLoadDone = useRef(false);
 
     useEffect(() => {
-        if (isInitialMount.current) {
-            isInitialMount.current = false;
-            if (userId && !loading && userFiles.length === 0) {
-                console.log("Fetching files for user:", userId);
-                dispatch(getUserFiles(userId));
-            }
+        if (userId && !initialLoadDone.current) {
+            initialLoadDone.current = true;
+            dispatch(
+                getUserFiles({
+                    userId,
+                    page: 1,
+                    quantity: 8,
+                }),
+            );
         }
-    }, [userId, loading, dispatch]);
+    }, [userId, dispatch]);
 
-    return userFiles;
+    const loadMore = () => {
+        if (!loading && userFiles.length < total) {
+            dispatch(
+                getUserFiles({
+                    userId,
+                    page: page + 1,
+                    quantity: 8,
+                }),
+            );
+        }
+    };
+
+    return {
+        files: userFiles,
+        loading,
+        error,
+        total,
+        loadMore,
+        hasMore: userFiles.length < total,
+    };
 };
 
 export { useUserFiles };
