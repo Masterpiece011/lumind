@@ -24,6 +24,65 @@ export const getUserFiles = createAsyncThunk(
     },
 );
 
+export const getTeamFiles = createAsyncThunk(
+    "files/getTeamFiles",
+    async ({ teamId, page = 1, quantity = 10 }, { rejectWithValue }) => {
+        console.groupCollapsed(
+            `API: Запрос файлов команды (teamId: ${teamId})`,
+        );
+        try {
+            console.log("Отправка запроса:", {
+                endpoint: `/api/files/team/${teamId}`,
+                method: "POST",
+                params: { page, quantity },
+                timestamp: new Date().toISOString(),
+            });
+
+            const startTime = performance.now();
+            const response = await $authHost.post(`/api/files/team/${teamId}`, {
+                page,
+                quantity,
+            });
+            const endTime = performance.now();
+
+            console.log("Успешный ответ:", {
+                status: response.status,
+                data: {
+                    filesCount: response.data.files?.length || 0,
+                    totalFiles: response.data.total,
+                    page: response.data.page,
+                    totalPages: response.data.totalPages,
+                },
+                time: `${(endTime - startTime).toFixed(2)}ms`,
+                timestamp: new Date().toISOString(),
+            });
+
+            console.groupEnd();
+            return response.data;
+        } catch (error) {
+            console.error("Ошибка запроса:", {
+                error: {
+                    message: error.message,
+                    response: {
+                        status: error.response?.status,
+                        data: error.response?.data,
+                    },
+                    stack: error.stack,
+                },
+                timestamp: new Date().toISOString(),
+            });
+
+            console.groupEnd();
+            return rejectWithValue({
+                message:
+                    error.response?.data?.message ||
+                    "Ошибка загрузки файлов команды",
+                status: error.response?.status,
+            });
+        }
+    },
+);
+
 export const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append("file", file);

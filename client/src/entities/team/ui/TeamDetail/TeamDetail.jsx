@@ -9,7 +9,7 @@ import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { FileItem } from "@/shared/ui/FileComp";
 import { MyButton } from "@/shared/uikit/MyButton";
 
-//import { useTeamFiles } from "@/shared/lib/hooks/useTeamFiles";
+import { useTeamFiles } from "@/shared/lib/hooks/useTeamFiles";
 
 import { Icon } from "@/shared/uikit/icons";
 import UserIcon from "@/app/assets/icons/user-icon.png";
@@ -44,7 +44,7 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
             activeTab,
         });
 
-    //const { files: teamFiles, loading: filesLoading } = useTeamFiles(id);
+    const { files: teamFiles, loading: filesLoading } = useTeamFiles(id);
 
     useEffect(() => {
         if (id && user_id) {
