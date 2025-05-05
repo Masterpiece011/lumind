@@ -29,6 +29,24 @@ const fileSlice = createSlice({
             .addCase(getUserFiles.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
+            })
+
+            .addCase(getTeamFiles.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getTeamFiles.fulfilled, (state, action) => {
+                state.loading = false;
+                state.teamFiles =
+                    action.payload.page === 1
+                        ? action.payload.files
+                        : [...state.teamFiles, ...action.payload.files];
+                state.total = action.payload.total;
+                state.page = action.payload.page;
+            })
+            .addCase(getTeamFiles.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
             });
     },
 });

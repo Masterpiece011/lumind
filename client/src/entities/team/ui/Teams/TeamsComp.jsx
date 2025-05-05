@@ -38,7 +38,6 @@ const TeamsPage = memo(({ userId, onSelectTeam }) => {
     );
 
     useEffect(() => {
-        // Пропускаем первый рендер и случаи, когда userId не изменился
         if (initialRender.current || userId === lastUserId.current) {
             initialRender.current = false;
             return;
