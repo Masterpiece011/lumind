@@ -1,11 +1,10 @@
-@use "../../../../shared/styles/variables/variables" as *;
-@use "../../../../shared/styles/mixins/mixins" as *;
+@use "@/shared/styles/variables/variables" as *;
+@use "@/shared/styles/mixins/mixins" as *;
 
 .assignment-detail {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding: 20px;
     color: var(--text-color);
     background-color: var(--bg-color);
     overflow: hidden;

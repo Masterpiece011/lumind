@@ -49,7 +49,7 @@ app.use(ErrorHandlingMiddleware);
 // WebSocket
 app.ws("/", (ws, req) => {
     console.log("ПОДКЛЮЧЕНИЕ УСТАНОВЛЕНО");
-    ws.send("Ты успешно подключился");
+    ws.send({ data: "Ты успешно подключился" });
 
     ws.on("message", (rawMsg) => {
         try {

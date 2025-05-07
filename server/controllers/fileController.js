@@ -2,6 +2,13 @@ import { Op } from "sequelize";
 import { Files, Assignments, Tasks, Teams_Tasks } from "../models/models.js";
 import ApiError from "../error/ApiError.js";
 
+import path from "path";
+import fs from "fs/promises";
+import { v4 as uuidv4 } from "uuid";
+
+import FileService from "../multer/fileService.js";
+import { fileConfig } from "../multer/multerConfig.js";
+
 class FileController {
     async getUserFiles(req, res, next) {
         try {
@@ -142,6 +149,72 @@ class FileController {
             });
         } catch (error) {
             next(ApiError.internal(error.message));
+        }
+    }
+
+    async upload(req, res, next) {
+        try {
+            if (!req.file) {
+                throw ApiError.badRequest("No file uploaded");
+            }
+
+            const result = await FileService.promoteTempFile(
+                req.file.path,
+                req.body.entityType || "general"
+            );
+
+            if (!result.success) {
+                throw ApiError.internal("File processing failed");
+            }
+
+            res.json({
+                url: `/uploads/${result.relativePath}`,
+                originalName: req.file.originalname,
+                size: req.file.size,
+            });
+        } catch (error) {
+            await FileService.delete(req.file?.path);
+            next(error);
+        }
+    }
+
+    async download(req, res, next) {
+        try {
+            const filePath = path.join(
+                fileConfig.UPLOADS_BASE_DIR,
+                req.params.path
+            );
+
+            if (
+                !(await fs
+                    .access(filePath)
+                    .then(() => true)
+                    .catch(() => false))
+            ) {
+                throw ApiError.notFound("File not found");
+            }
+
+            res.download(filePath);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async delete(req, res, next) {
+        try {
+            const filePath = path.join(
+                fileConfig.UPLOADS_BASE_DIR,
+                req.params.path
+            );
+            const result = await FileService.delete(filePath);
+
+            if (!result.success) {
+                throw ApiError.internal("File deletion failed");
+            }
+
+            res.json({ success: true });
+        } catch (error) {
+            next(error);
         }
     }
 }

@@ -1,94 +1,111 @@
-import fs from "fs";
-
+import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import { fileConfig } from "./multerConfig.js";
+import { sanitizeFilename } from "./encodingUtils.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-import { normalizeFilename, sanitizeFilename } from "./encodingUtils.js";
-
 class FileService {
-    static async moveFile(sourcePath, destinationPath) {
-        return new Promise((resolve, reject) => {
-            fs.rename(sourcePath, destinationPath, (err) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(destinationPath);
-                }
-            });
-        });
+    /**
+     * Перемещает файл из временной директории в постоянную
+     */
+    static async promoteTempFile(tempPath, targetDir, newFilename = null) {
+        try {
+            const filename = newFilename || path.basename(tempPath);
+            const safeFilename = sanitizeFilename(filename);
+            const destination = path.join(
+                fileConfig.UPLOADS_BASE_DIR,
+                targetDir,
+                safeFilename
+            );
+
+            await fs.mkdir(path.dirname(destination), { recursive: true });
+            await fs.rename(tempPath, destination);
+
+            return {
+                success: true,
+                path: destination,
+                relativePath: path.join(targetDir, safeFilename),
+            };
+        } catch (error) {
+            console.error(`File promotion failed: ${error.message}`);
+            return { success: false, error };
+        }
     }
 
-    static async deleteFile(filePath) {
-        return new Promise((resolve, reject) => {
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
-        });
+    /**
+     * Удаляет файл или директорию
+     */
+    static async delete(pathToDelete) {
+        try {
+            const stat = await fs.stat(pathToDelete);
+
+            if (stat.isDirectory()) {
+                await fs.rm(pathToDelete, { recursive: true });
+            } else {
+                await fs.unlink(pathToDelete);
+            }
+
+            return { success: true };
+        } catch (error) {
+            if (error.code === "ENOENT") {
+                return { success: true }; // Файл уже не существует
+            }
+            return { success: false, error };
+        }
     }
 
-    static async moveFilesFromTemp(tempPaths, baseUploadsDir) {
-        const movedFiles = await Promise.all(
-            tempPaths.map(async (tempPath) => {
-                try {
-                    const relativePath = path.relative(
-                        path.resolve(__dirname, "..", "temp_uploads"),
-                        tempPath
-                    );
+    /**
+     * Удаляет все файлы, связанные с сущностью
+     */
+    static async deleteEntityFiles(entity, fileField) {
+        if (!entity || !entity[fileField]?.length) {
+            return { deleted: 0 };
+        }
 
-                    const dirname = path.dirname(relativePath);
-                    let basename = path.basename(relativePath);
-
-                    // Нормализуем имя файла перед перемещением
-                    basename = normalizeFilename(basename);
-                    basename = sanitizeFilename(basename);
-
-                    // Сохраняем расширение файла
-                    const ext = path.extname(basename);
-                    const nameWithoutExt = path.basename(basename, ext);
-
-                    // Создаем новое имя файла
-                    const newBasename = nameWithoutExt + ext;
-                    const newRelativePath = path.join(dirname, newBasename);
-                    const destinationPath = path.join(
-                        baseUploadsDir,
-                        newRelativePath
-                    );
-
-                    // Создаем целевую директорию, если ее нет
-                    const destinationDir = path.dirname(destinationPath);
-                    if (!fs.existsSync(destinationDir)) {
-                        fs.mkdirSync(destinationDir, { recursive: true });
-                    }
-
-                    // Перемещаем файл
-                    await this.moveFile(tempPath, destinationPath);
-                    return destinationPath;
-                } catch (err) {
-                    console.error("Ошибка перемещения файла:", err);
-                    return null;
-                }
+        const results = await Promise.all(
+            entity[fileField].map(async (file) => {
+                const result = await this.delete(file.file_url);
+                return result.success ? 1 : 0;
             })
         );
 
-        return movedFiles.filter((filePath) => filePath !== null);
+        return { deleted: results.reduce((a, b) => a + b, 0) };
     }
 
-    static async cleanupTempFiles(tempPaths) {
-        await Promise.all(
-            tempPaths.map(async (tempPath) => {
-                try {
-                    await this.deleteFile(tempPath);
-                } catch (err) {
-                    console.error("Ошибка удаления временного файла:", err);
+    /**
+     * Очищает временные файлы старше 24 часов
+     */
+    static async cleanupTempFiles() {
+        const now = Date.now();
+        const cutoff = now - 24 * 60 * 60 * 1000; // 24 часа назад
+
+        async function cleanDirectory(dirPath) {
+            try {
+                const files = await fs.readdir(dirPath);
+
+                await Promise.all(
+                    files.map(async (file) => {
+                        const filePath = path.join(dirPath, file);
+                        const stat = await fs.stat(filePath);
+
+                        if (stat.mtimeMs < cutoff) {
+                            await this.delete(filePath);
+                        }
+                    })
+                );
+            } catch (error) {
+                if (error.code !== "ENOENT") {
+                    console.error(
+                        `Cleanup error in ${dirPath}: ${error.message}`
+                    );
                 }
-            })
-        );
+            }
+        }
+
+        await cleanDirectory(fileConfig.TEMP_UPLOADS_DIR);
     }
 }
 

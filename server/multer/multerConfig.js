@@ -1,95 +1,82 @@
 import multer from "multer";
 import path from "path";
-import fs from "fs";
+import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { normalizeFilename, sanitizeFilename } from "./encodingUtils.js";
 
-// Получаем текущий путь к файлу
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Конфигурация путей
+const UPLOADS_BASE_DIR = path.resolve(__dirname, "..", "uploads");
 const TEMP_UPLOADS_DIR = path.resolve(__dirname, "..", "temp_uploads");
 
-const createUploadDir = (dirPath) => {
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive: true });
+// Создание директорий при необходимости
+const ensureDirExists = async (dirPath) => {
+    try {
+        await fs.mkdir(dirPath, { recursive: true });
+    } catch (err) {
+        if (err.code !== "EEXIST") throw err;
     }
 };
 
+// Определение конечной директории для файлов
+const getDestination = async (req, file) => {
+    const userId = req.user?.id || "anonymous";
+    const fileType = file.mimetype.split("/")[0];
+
+    let subDir = "general";
+    if (fileType === "image") subDir = "images";
+    if (fileType === "application") subDir = "documents";
+
+    const destPath = path.join(TEMP_UPLOADS_DIR, userId, subDir);
+    await ensureDirExists(destPath);
+    return destPath;
+};
+
+// Генерация безопасного имени файла
+const generateFilename = (req, file) => {
+    const normalized = normalizeFilename(file.originalname);
+    const safeName = sanitizeFilename(normalized);
+    const uniquePrefix =
+        Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+    return `${uniquePrefix}_${safeName}`;
+};
+
+// Конфигурация хранилища
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const userId = req.user && req.user.id ? req.user.id : "anonymous";
-        const fileType = file.mimetype.split("/")[0];
-
-        let uploadPath = path.join(
-            TEMP_UPLOADS_DIR,
-            "users",
-            userId,
-            "uploads"
-        );
-
-        switch (fileType) {
-            case "image":
-                uploadPath = path.join(
-                    TEMP_UPLOADS_DIR,
-                    "users",
-                    userId,
-                    "profile"
-                );
-                break;
-            case "application":
-                uploadPath = path.join(
-                    TEMP_UPLOADS_DIR,
-                    "users",
-                    userId,
-                    "documents"
-                );
-                break;
-            default:
-                break;
-        }
-
-        createUploadDir(uploadPath);
-        cb(null, uploadPath);
-    },
-
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        let normalizedName;
-
-        try {
-            normalizedName = decodeURIComponent(file.originalname);
-        } catch (e) {
-            normalizedName = file.originalname;
-        }
-
-        normalizedName = normalizeFilename(normalizedName);
-        const safeName = sanitizeFilename(normalizedName);
-
-        cb(null, uniqueSuffix + "-" + safeName);
+    destination: getDestination,
+    filename: (req, file, cb) => {
+        cb(null, generateFilename(req, file));
     },
 });
 
+// Фильтрация файлов
 const fileFilter = (req, file, cb) => {
     const allowedTypes = [
         "image/jpeg",
         "image/png",
+        "image/gif",
         "application/pdf",
         "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
-    if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-    } else {
-        cb(new Error("Неподдерживаемый тип файла"), false);
-    }
+    cb(null, allowedTypes.includes(file.mimetype));
 };
 
-const upload = multer({
+// Экспорт настроенного экземпляра Multer
+export const upload = multer({
     storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, 
     fileFilter,
+    limits: {
+        fileSize: 25 * 1024 * 1024, // 25MB
+        files: 5, // Максимум 5 файлов за раз
+    },
 });
 
-export default upload;
+// Вспомогательные методы
+export const fileConfig = {
+    UPLOADS_BASE_DIR,
+    TEMP_UPLOADS_DIR,
+};

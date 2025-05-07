@@ -6,7 +6,7 @@ import fs from "fs";
 
 import path from "path";
 import { fileURLToPath } from "url";
-import upload from "../multer/multerConfig.js";
+import { upload } from "../multer/multerConfig.js";
 
 // Получаем текущий путь к файлу
 const __filename = fileURLToPath(import.meta.url);
