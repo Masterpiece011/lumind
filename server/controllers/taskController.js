@@ -12,7 +12,13 @@ class TaskController {
 
     async create(req, res, next) {
         try {
-            const { title, description, comment, creator_id } = req.body;
+            const {
+                title,
+                description,
+                comment,
+                creator_id,
+                files = [],
+            } = req.body;
 
             // Проверка обязательных полей
             if (!title || !creator_id) {
@@ -24,9 +30,8 @@ class TaskController {
             }
 
             const user = await Users.findByPk(creator_id);
-
             if (!user) {
-                return ApiError.badRequest("Пользователя не существует");
+                return next(ApiError.badRequest("Пользователя не существует"));
             }
 
             // Создание задания
@@ -37,11 +42,27 @@ class TaskController {
                 creator_id,
             });
 
-            return res.json({
+            // Добавление вложений задания
+            let taskFiles = [];
+            if (files.length > 0) {
+                taskFiles = await Files.bulkCreate(
+                    files.map((fileUrl) => ({
+                        entity_id: task.id,
+                        entity_type: "task",
+                        file_url: fileUrl,
+                    }))
+                );
+            }
+
+            return res.status(201).json({
                 message: "Задание успешно создано",
-                task,
+                task: {
+                    ...task.get({ plain: true }),
+                    files: taskFiles,
+                },
             });
         } catch (error) {
+            console.error("Ошибка создания задания:", error);
             next(
                 ApiError.internal(
                     "Ошибка при создании задания: " + error.message

@@ -25,59 +25,82 @@ class AssignmentController {
                 creator_id,
                 user_id,
                 task_id,
+                team_id,
                 investments = [],
                 status,
-                plan_date,
+                due_date,
             } = req.body;
 
-            if (!title || !plan_date || !creator_id) {
+            // Проверка обязательных полей
+            if (!title || !due_date || !creator_id || !user_id || !task_id) {
                 return next(
                     ApiError.badRequest(
-                        "Необходимо указать обязательные данные"
+                        "Необходимо указать: title, due_date, creator_id, user_id и task_id"
                     )
                 );
             }
 
-            const task = await Tasks.findByPk(task_id);
+            // Проверка существования задачи и ее файлов
+            const task = await Tasks.findByPk(task_id, {
+                include: [
+                    {
+                        model: Files,
+                        as: "files",
+                        where: { entity_type: "task" },
+                        required: false,
+                    },
+                ],
+            });
 
             if (!task) {
                 return next(ApiError.badRequest("Задания не существует"));
+            }
+
+            // Проверка пользователей
+            const [creator, user] = await Promise.all([
+                Users.findByPk(creator_id),
+                Users.findByPk(user_id),
+            ]);
+
+            if (!creator || !user) {
+                return next(ApiError.badRequest("Пользователь не найден"));
             }
 
             // Создание назначения
             const assignment = await Assignments.create({
                 title,
                 description,
-                plan_date,
+                plan_date: due_date,
                 comment,
                 creator_id,
                 user_id,
                 task_id,
+                team_id,
                 status: status || "assigned",
             });
 
+            // Добавление вложений ответа (если есть)
             let assignmentInvestments = [];
-
-            // Добавление вложений
             if (investments.length > 0) {
-                const investmentRecords = investments.map((fileUrl) => ({
-                    entity_id: assignment.id,
-                    entity_type: "assignment",
-                    file_url: fileUrl,
-                }));
                 assignmentInvestments = await Files.bulkCreate(
-                    investmentRecords
+                    investments.map((fileUrl) => ({
+                        entity_id: assignment.id,
+                        entity_type: "assignment",
+                        file_url: fileUrl,
+                    }))
                 );
             }
 
-            return res.json({
+            return res.status(201).json({
                 message: "Назначение успешно создано",
                 assignment: {
-                    assignment,
-                    investments: assignmentInvestments,
+                    ...assignment.get({ plain: true }),
+                    task_files: task.files || [], // Файлы из задания
+                    assignment_files: assignmentInvestments, // Файлы ответа
                 },
             });
         } catch (error) {
+            console.error("Ошибка создания назначения:", error);
             next(
                 ApiError.internal(
                     `Ошибка при создании назначения: ${error.message}`
