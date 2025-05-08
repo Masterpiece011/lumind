@@ -44,7 +44,10 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
             activeTab,
         });
 
-    const { files: teamFiles, loading: filesLoading } = useTeamFiles(id);
+    const { files: teamFiles, loading: filesLoading } = useTeamFiles(id, {
+        page: 1,
+        quantity: 10,
+    });
 
     useEffect(() => {
         if (id && user_id) {

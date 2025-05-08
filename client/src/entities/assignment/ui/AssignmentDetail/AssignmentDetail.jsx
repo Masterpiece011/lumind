@@ -1,22 +1,19 @@
 "use client";
 
 import "./AssignmentDetail.scss";
-
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-
 import {
     getAssignmentById,
     updateAssignment,
 } from "@/shared/api/assignmentsAPI";
-
 import { MyButton } from "@/shared/uikit/MyButton";
 import { FileItem } from "@/shared/ui/FileComp";
 import { SubmissionForm } from "@/features/submissions/ui/Submissions/SubmissionsForm";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
-
 import { ASSIGNMENTS_STATUSES } from "@/shared/constants/assignments";
 import Text from "@/shared/ui/Text";
+import { useDispatch, useSelector } from "react-redux";
 
 const AssignmentDetailPage = () => {
     const { id } = useParams();
@@ -24,20 +21,26 @@ const AssignmentDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showWorkForm, setShowWorkForm] = useState(false);
+    const [assessment, setAssessment] = useState("");
+    const [status, setStatus] = useState("");
     const workFormRef = useRef(null);
+    const dispatch = useDispatch();
+
+    const userRole = useSelector((state) => state.user.user?.role?.name);
+    const isInstructor = userRole === "INSTRUCTOR";
 
     const fetchAssignment = async () => {
         try {
             setLoading(true);
-            const response = await getAssignmentById({
-                assignmentId: id,
-                include: ["task", "files"], // Убедитесь, что передаете правильные параметры
+            const response = await getAssignmentById(id); 
+
+            setAssignment({
+                ...response.assignment,
+                task_files: response.assignment.task?.files || [],
+                assignment_files: response.assignment.files || [],
             });
-
-            // Проверяем структуру ответа
-            console.log("Assignment data:", response.assignment);
-
-            setAssignment(response.assignment);
+            setAssessment(response.assignment?.assessment || "");
+            setStatus(response.assignment?.status || "");
             setError(null);
         } catch (err) {
             setError(err.message || "Ошибка загрузки назначения");
@@ -92,7 +95,6 @@ const AssignmentDetailPage = () => {
     };
 
     const handleSubmitClick = async () => {
-        // Если задание уже отправлено - отменяем отправку
         if (
             assignment?.status === ASSIGNMENTS_STATUSES.SUBMITTED ||
             assignment?.status === ASSIGNMENTS_STATUSES.COMPLETED
@@ -100,14 +102,34 @@ const AssignmentDetailPage = () => {
             await handleCancelSubmission();
             return;
         }
-
-        // Просто открываем/закрываем форму без отправки
         setShowWorkForm(!showWorkForm);
+    };
+
+    const handleAssessmentSubmit = async () => {
+        try {
+            setLoading(true);
+            const response = await updateAssignment({
+                assignment_id: id,
+                assessment: assessment,
+                status: status,
+            });
+
+            setAssignment({
+                ...response.assignment,
+                task: assignment.task,
+                creator: assignment.creator,
+                assignment_files: assignment.assignment_files || [],
+                task_files: assignment.task_files || [],
+            });
+        } catch (err) {
+            setError(err.message || "Ошибка при обновлении оценки");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const getStatusText = () => {
         if (!assignment) return "";
-
         switch (assignment.status) {
             case ASSIGNMENTS_STATUSES.ASSIGNED:
                 return "Назначено";
@@ -126,7 +148,6 @@ const AssignmentDetailPage = () => {
 
     const getSubmitButtonText = () => {
         if (!assignment) return "Загрузка...";
-
         switch (assignment.status) {
             case ASSIGNMENTS_STATUSES.COMPLETED:
             case ASSIGNMENTS_STATUSES.SUBMITTED:
@@ -175,7 +196,7 @@ const AssignmentDetailPage = () => {
                         </Text>
                     )}
 
-                    {isSubmitButtonActive && (
+                    {!isInstructor && isSubmitButtonActive && (
                         <MyButton
                             className={`assignment-detail__submit-btn ${
                                 showWorkForm
@@ -196,12 +217,12 @@ const AssignmentDetailPage = () => {
                             tag="h2"
                             className="assignment-detail__info-caption"
                         >
-                            Преподаватель:
+                            {isInstructor ? "Студент:" : "Преподаватель:"}
                         </Text>
                         <Text tag="p">
-                            {assignment.creator?.last_name || ""}{" "}
-                            {assignment.creator?.first_name || ""}{" "}
-                            {assignment.creator?.middle_name || ""}
+                            {isInstructor
+                                ? `${assignment.user?.last_name || ""} ${assignment.user?.first_name || ""}`
+                                : `${assignment.creator?.last_name || ""} ${assignment.creator?.first_name || ""}`}
                         </Text>
                     </section>
 
@@ -234,8 +255,63 @@ const AssignmentDetailPage = () => {
 
                 <div className="assignment-detail__work">
                     <div className="work-header">
-                        <Text tag="h2">Моя работа</Text>
+                        <Text tag="h2">
+                            {isInstructor ? "Работа студента" : "Моя работа"}
+                        </Text>
                     </div>
+
+                    {isInstructor &&
+                        assignment.status ===
+                            ASSIGNMENTS_STATUSES.SUBMITTED && (
+                            <div className="assessment-form">
+                                <div className="assessment-form__group">
+                                    <label>Оценка:</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="10"
+                                        value={assessment}
+                                        onChange={(e) =>
+                                            setAssessment(e.target.value)
+                                        }
+                                    />
+                                </div>
+                                <div className="assessment-form__group">
+                                    <label>Статус:</label>
+                                    <select
+                                        value={status}
+                                        onChange={(e) =>
+                                            setStatus(e.target.value)
+                                        }
+                                    >
+                                        <option
+                                            value={
+                                                ASSIGNMENTS_STATUSES.SUBMITTED
+                                            }
+                                        >
+                                            На проверке
+                                        </option>
+                                        <option
+                                            value={
+                                                ASSIGNMENTS_STATUSES.COMPLETED
+                                            }
+                                        >
+                                            Завершено
+                                        </option>
+                                        <option
+                                            value={ASSIGNMENTS_STATUSES.FAILED}
+                                        >
+                                            Не принято
+                                        </option>
+                                    </select>
+                                </div>
+                                <MyButton
+                                    text="Сохранить оценку"
+                                    onClick={handleAssessmentSubmit}
+                                    className="assessment-form__submit"
+                                />
+                            </div>
+                        )}
 
                     {(showWorkForm ||
                         assignment.status ===
@@ -248,6 +324,7 @@ const AssignmentDetailPage = () => {
                                 assignment.status ===
                                 ASSIGNMENTS_STATUSES.SUBMITTED
                             }
+                            isInstructor={isInstructor}
                         />
                     )}
 
@@ -264,7 +341,7 @@ const AssignmentDetailPage = () => {
                                 ))}
                             </ul>
                         ) : (
-                            <Text tag="p">Вы ещё не прикрепили файлы</Text>
+                            <Text tag="p">Файлы не прикреплены</Text>
                         )}
                     </section>
 
