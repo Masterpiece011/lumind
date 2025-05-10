@@ -1,0 +1,30 @@
+.instructor-students {
+    .student-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+        border: 1px solid var(--card-border);
+
+        &:hover {
+            background-color: var(--hover-color);
+        }
+
+        &.active {
+            background-color: var(--primary-accent);
+            color: white;
+            border-color: var(--primary-accent);
+        }
+
+        .status {
+            font-size: 14px;
+            color: inherit;
+            opacity: 0.8;
+        }
+    }
+}

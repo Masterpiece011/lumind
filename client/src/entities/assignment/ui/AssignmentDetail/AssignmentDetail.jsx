@@ -15,6 +15,9 @@ import { ASSIGNMENTS_STATUSES } from "@/shared/constants/assignments";
 import Text from "@/shared/ui/Text";
 import { useDispatch, useSelector } from "react-redux";
 
+import { StatusSelector } from "@/features/instructor/ui/StatusSelector/StatusSelector";
+import { InstructorAssignmentFlow } from "@/features/instructor/ui/InstructorAssignmentFlow/InstructorAssignmentFlow";
+
 const AssignmentDetailPage = () => {
     const { id } = useParams();
     const [assignment, setAssignment] = useState(null);
@@ -22,39 +25,42 @@ const AssignmentDetailPage = () => {
     const [error, setError] = useState(null);
     const [showWorkForm, setShowWorkForm] = useState(false);
     const [assessment, setAssessment] = useState("");
-    const [status, setStatus] = useState("");
+    const [showInstructorView, setShowInstructorView] = useState(false);
     const workFormRef = useRef(null);
     const dispatch = useDispatch();
 
-    const userRole = useSelector((state) => state.user.user?.role?.name);
+    const userRole = useSelector((state) => state.user.user?.role);
+    const userId = useSelector((state) => state.user.user?.id);
     const isInstructor = userRole === "INSTRUCTOR";
 
-    const fetchAssignment = async () => {
-        try {
-            setLoading(true);
-            const response = await getAssignmentById(id); 
-
-            setAssignment({
-                ...response.assignment,
-                task_files: response.assignment.task?.files || [],
-                assignment_files: response.assignment.files || [],
-            });
-            setAssessment(response.assignment?.assessment || "");
-            setStatus(response.assignment?.status || "");
-            setError(null);
-        } catch (err) {
-            setError(err.message || "Ошибка загрузки назначения");
-            setAssignment(null);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        if (id) {
-            fetchAssignment();
-        }
-    }, [id]);
+        const loadData = async () => {
+            try {
+                setLoading(true);
+                const response = await getAssignmentById(id);
+
+                setAssignment({
+                    ...response.assignment,
+                    task_files: response.assignment.task?.files || [],
+                    assignment_files: response.assignment.files || [],
+                    user: response.assignment.user || null,
+                    creator: response.assignment.creator || null,
+                });
+
+                setAssessment(response.assignment?.assessment || "");
+
+                if (isInstructor && response.assignment.creator_id === userId) {
+                    setShowInstructorView(true);
+                }
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) loadData();
+    }, [id, isInstructor, userId]);
 
     const handleSubmitWork = async (updatedAssignment) => {
         try {
@@ -105,13 +111,13 @@ const AssignmentDetailPage = () => {
         setShowWorkForm(!showWorkForm);
     };
 
-    const handleAssessmentSubmit = async () => {
+    const handleStatusChange = async (newStatus) => {
         try {
             setLoading(true);
             const response = await updateAssignment({
                 assignment_id: id,
+                status: newStatus,
                 assessment: assessment,
-                status: status,
             });
 
             setAssignment({
@@ -122,7 +128,7 @@ const AssignmentDetailPage = () => {
                 task_files: assignment.task_files || [],
             });
         } catch (err) {
-            setError(err.message || "Ошибка при обновлении оценки");
+            setError(err.message || "Ошибка при обновлении статуса");
         } finally {
             setLoading(false);
         }
@@ -166,6 +172,8 @@ const AssignmentDetailPage = () => {
     if (loading) return <ClockLoader />;
     if (error) return <Text tag="p">Ошибка: {error}</Text>;
     if (!assignment) return <Text tag="p">Задание не найдено</Text>;
+    if (showInstructorView)
+        return <InstructorAssignmentFlow assignmentId={id} />;
 
     return (
         <div className="assignment-detail">
@@ -260,9 +268,8 @@ const AssignmentDetailPage = () => {
                         </Text>
                     </div>
 
-                    {isInstructor &&
-                        assignment.status ===
-                            ASSIGNMENTS_STATUSES.SUBMITTED && (
+                    {isInstructor && (
+                        <div className="assessment-section">
                             <div className="assessment-form">
                                 <div className="assessment-form__group">
                                     <label>Оценка:</label>
@@ -276,42 +283,18 @@ const AssignmentDetailPage = () => {
                                         }
                                     />
                                 </div>
-                                <div className="assessment-form__group">
-                                    <label>Статус:</label>
-                                    <select
-                                        value={status}
-                                        onChange={(e) =>
-                                            setStatus(e.target.value)
-                                        }
-                                    >
-                                        <option
-                                            value={
-                                                ASSIGNMENTS_STATUSES.SUBMITTED
-                                            }
-                                        >
-                                            На проверке
-                                        </option>
-                                        <option
-                                            value={
-                                                ASSIGNMENTS_STATUSES.COMPLETED
-                                            }
-                                        >
-                                            Завершено
-                                        </option>
-                                        <option
-                                            value={ASSIGNMENTS_STATUSES.FAILED}
-                                        >
-                                            Не принято
-                                        </option>
-                                    </select>
-                                </div>
-                                <MyButton
-                                    text="Сохранить оценку"
-                                    onClick={handleAssessmentSubmit}
-                                    className="assessment-form__submit"
-                                />
                             </div>
-                        )}
+
+                            {assignment.status ===
+                                ASSIGNMENTS_STATUSES.SUBMITTED && (
+                                <StatusSelector
+                                    currentStatus={assignment.status}
+                                    onStatusChange={handleStatusChange}
+                                    isLoading={loading}
+                                />
+                            )}
+                        </div>
+                    )}
 
                     {(showWorkForm ||
                         assignment.status ===

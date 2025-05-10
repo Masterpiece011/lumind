@@ -1,0 +1,23 @@
+.instructor-assignment-flow {
+    padding: 20px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+
+    .students-view {
+        h2 {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+    }
+
+    .back-button {
+        margin-bottom: 20px;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border: 1px solid var(--card-border);
+
+        &:hover {
+            background-color: var(--hover-color);
+        }
+    }
+}

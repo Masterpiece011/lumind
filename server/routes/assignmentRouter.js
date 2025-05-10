@@ -32,4 +32,9 @@ assignmentRouter.delete(
     assignmentController.delete
 );
 
+assignmentRouter.get(
+    "/team-students/:taskId",
+    assignmentController.getTeamStudentsWithTask
+);
+
 export default assignmentRouter;

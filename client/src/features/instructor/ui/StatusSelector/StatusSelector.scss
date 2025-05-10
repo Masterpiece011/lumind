@@ -1,0 +1,45 @@
+@use "../../../../shared/styles/variables/variables" as *;
+@use "../../../../shared/styles/mixins/mixins" as *;
+
+.status-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    &__label {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+
+    &__buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    &__button {
+        padding: 8px 12px;
+        border-radius: var(--border-radius);
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border: 1px solid var(--card-border);
+        transition: var(--transition);
+        cursor: pointer;
+        font-size: 14px;
+
+        &:hover:not(:disabled) {
+            background-color: var(--hover-color);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        &--active {
+            background-color: var(--primary-accent);
+            color: white;
+            border-color: var(--primary-accent);
+        }
+    }
+}

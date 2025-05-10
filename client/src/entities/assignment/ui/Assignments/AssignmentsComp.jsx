@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAssignments } from "@/shared/api/assignmentsAPI";
@@ -14,25 +12,27 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const { assignments, assignmentsTotal, loading, error } = useSelector(
         (state) => state.assignments,
     );
-    const userRole = useSelector((state) => state.user.user?.role?.name);
+    const userRole = useSelector((state) => state.user.user?.role);
     const isInstructor = userRole === "INSTRUCTOR";
 
     const [filter, setFilter] = useState("all");
     const [isFilterLoading, setIsFilterLoading] = useState(false);
 
     useEffect(() => {
-        const refreshAssignments = () => {
+        const fetchAssignments = () => {
             dispatch(
                 getAssignments({
-                    userId: isInstructor ? null : userId, // Для преподавателя получаем все задания
+                    userId: userId,
                     status: filter === "all" ? undefined : filter,
-                    ...(isInstructor && { creator_id: userId }), // Для преподавателя - только созданные им
+                    include: ["task", "files"],
+                    // Для преподавателя добавляем флаг creator
+                    ...(isInstructor ? { creator_id: userId } : {}),
                 }),
             );
         };
 
-        if (userId || isInstructor) {
-            refreshAssignments();
+        if (userId) {
+            fetchAssignments();
         }
     }, [dispatch, userId, filter, isInstructor]);
 
@@ -45,9 +45,9 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
             setIsFilterLoading(true);
             dispatch(
                 getAssignments({
-                    userId: isInstructor ? null : userId,
+                    userId: userId,
                     status: newFilter,
-                    ...(isInstructor && { creator_id: userId }),
+                    include: ["task", "files"],
                 }),
             ).finally(() => setIsFilterLoading(false));
         }
@@ -56,13 +56,12 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     return (
         <div className="assignments">
             <Text tag="h1" className="assignments__title">
-                {isInstructor ? "Задания студентов" : "Мои задания"}
+                Мои задания
             </Text>
 
             <Filters
                 currentFilter={filter}
                 onFilterChange={handleSetNewFilter}
-                isInstructor={isInstructor}
             />
 
             <div className="assignments__divider"></div>
@@ -78,7 +77,6 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
                     onSelect={onSelectAssignment}
                     isLoading={loading}
                     isFilterLoading={isFilterLoading}
-                    isInstructor={isInstructor}
                 />
             )}
         </div>
