@@ -2,94 +2,89 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import { normalizeFilename, sanitizeFilename } from "./encodingUtils.js";
+import { decodeFileName, safeFileName } from "./encodingUtils.js";
 
-// Получаем текущий путь к файлу
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Конфигурация путей
+const UPLOADS_BASE_DIR = path.resolve(__dirname, "..", "uploads");
 const TEMP_UPLOADS_DIR = path.resolve(__dirname, "..", "temp_uploads");
 
-const createUploadDir = (dirPath) => {
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive: true });
+// Создаем корневые директории при старте
+const ensureDirExists = (dir) => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true, mode: 0o755 });
     }
 };
+[UPLOADS_BASE_DIR, TEMP_UPLOADS_DIR].forEach(ensureDirExists);
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const userId = req.user && req.user.id ? req.user.id : "anonymous";
-        const fileType = file.mimetype.split("/")[0];
+// Генерация безопасного имени файла
+const generateFilename = (req, file) => {
+    const normalized = decodeFileName(file.originalname);
+    const safeName = safeFileName(normalized);
+    const uniquePrefix =
+        Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+    return `${uniquePrefix}_${safeName}`;
+};
 
-        let uploadPath = path.join(
-            TEMP_UPLOADS_DIR,
-            "users",
-            userId,
-            "uploads"
-        );
-
-        switch (fileType) {
-            case "image":
-                uploadPath = path.join(
-                    TEMP_UPLOADS_DIR,
-                    "users",
-                    userId,
-                    "profile"
-                );
-                break;
-            case "application":
-                uploadPath = path.join(
-                    TEMP_UPLOADS_DIR,
-                    "users",
-                    userId,
-                    "documents"
-                );
-                break;
-            default:
-                break;
-        }
-
-        createUploadDir(uploadPath);
-        cb(null, uploadPath);
-    },
-
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        let normalizedName;
-
-        try {
-            normalizedName = decodeURIComponent(file.originalname);
-        } catch (e) {
-            normalizedName = file.originalname;
-        }
-
-        normalizedName = normalizeFilename(normalizedName);
-        const safeName = sanitizeFilename(normalizedName);
-
-        cb(null, uniqueSuffix + "-" + safeName);
-    },
-});
-
+// Фильтрация файлов
 const fileFilter = (req, file, cb) => {
     const allowedTypes = [
         "image/jpeg",
         "image/png",
+        "image/gif",
         "application/pdf",
         "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
-    if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-    } else {
-        cb(new Error("Неподдерживаемый тип файла"), false);
+    if (!allowedTypes.includes(file.mimetype)) {
+        return cb(
+            new Error(`Тип файла ${file.mimetype} не поддерживается`),
+            false
+        );
     }
+    cb(null, true);
 };
 
-const upload = multer({
-    storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, 
-    fileFilter,
-});
+// Конфигурация Multer
+export const upload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            try {
+                const userId = String(req.user?.id || "anonymous");
+                const fileType = file.mimetype.split("/")[0];
+                let subDir = "general";
 
-export default upload;
+                if (fileType === "image") subDir = "images";
+                if (fileType === "application") subDir = "documents";
+
+                const destPath = path.join(TEMP_UPLOADS_DIR, userId, subDir);
+                ensureDirExists(destPath);
+                cb(null, destPath);
+            } catch (err) {
+                console.error("Directory creation error:", err);
+                cb(err);
+            }
+        },
+        filename: (req, file, cb) => {
+            try {
+                cb(null, generateFilename(req, file));
+            } catch (err) {
+                console.error("Filename generation error:", err);
+                cb(err);
+            }
+        },
+    }),
+    fileFilter,
+    limits: {
+        fileSize: 50 * 1024 * 1024, // 50MB
+        files: 5,
+    },
+}).array("files");
+
+export const fileConfig = {
+    UPLOADS_BASE_DIR,
+    TEMP_UPLOADS_DIR,
+};

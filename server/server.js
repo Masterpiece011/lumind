@@ -32,7 +32,12 @@ app.use(
         origin: "http://localhost:3000", // URL вашего фронта
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE"],
-        allowedHeaders: ["Content-Type", "Authorization"],
+        allowedHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Entity-ID",
+            "X-Entity-Type",
+        ],
     })
 );
 app.use(express.json());
@@ -49,7 +54,7 @@ app.use(ErrorHandlingMiddleware);
 // WebSocket
 app.ws("/", (ws, req) => {
     console.log("ПОДКЛЮЧЕНИЕ УСТАНОВЛЕНО");
-    ws.send("Ты успешно подключился");
+    ws.send({ data: "Ты успешно подключился" });
 
     ws.on("message", (rawMsg) => {
         try {

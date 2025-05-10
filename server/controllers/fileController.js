@@ -2,6 +2,11 @@ import { Op } from "sequelize";
 import { Files, Assignments, Tasks, Teams_Tasks } from "../models/models.js";
 import ApiError from "../error/ApiError.js";
 
+import path from "path";
+import fs from "fs/promises";
+import FileService from "../multer/fileService.js";
+import { fileConfig } from "../multer/multerConfig.js";
+
 class FileController {
     async getUserFiles(req, res, next) {
         try {
@@ -142,6 +147,114 @@ class FileController {
             });
         } catch (error) {
             next(ApiError.internal(error.message));
+        }
+    }
+
+    async upload(req, res, next) {
+        try {
+            if (!req.files?.length) {
+                throw ApiError.badRequest("No files uploaded");
+            }
+
+            const entityType = req.headers["x-entity-type"] || "general";
+            const entityId = parseInt(req.headers["x-entity-id"]);
+            const userId = req.user.id;
+
+            if (!entityId || isNaN(entityId)) {
+                throw ApiError.badRequest("Valid Entity ID is required");
+            }
+
+            const filesToCreate = [];
+            const errors = [];
+
+            for (const file of req.files) {
+                try {
+                    const result = await FileService.promoteTempFile(
+                        file.path,
+                        entityType,
+                        file.originalname
+                    );
+
+                    if (!result.success) {
+                        throw new Error(result.error);
+                    }
+
+                    filesToCreate.push({
+                        file_url: `/uploads/${result.relativePath}`,
+                        original_name: result.originalName, // Декодированное имя
+                        size: file.size,
+                        mime_type: file.mimetype,
+                        entity_type: entityType,
+                        entity_id: entityId,
+                        user_id: userId,
+                    });
+                } catch (fileError) {
+                    errors.push(fileError.message);
+                    await FileService.delete(file.path).catch(console.error);
+                }
+            }
+
+            if (filesToCreate.length === 0) {
+                throw ApiError.internal(
+                    `All files failed: ${errors.join(", ")}`
+                );
+            }
+
+            const filesRecords = await Files.bulkCreate(filesToCreate);
+
+            res.json({
+                success: true,
+                files: filesRecords.map((file) => ({
+                    id: file.id,
+                    file_url: file.file_url,
+                    original_name: file.original_name,
+                    size: file.size,
+                    mime_type: file.mime_type,
+                })),
+            });
+        } catch (error) {
+            console.error("Upload failed:", error);
+            next(error);
+        }
+    }
+
+    async download(req, res, next) {
+        try {
+            const filePath = path.join(
+                fileConfig.UPLOADS_BASE_DIR,
+                req.params.path
+            );
+
+            if (
+                !(await fs
+                    .access(filePath)
+                    .then(() => true)
+                    .catch(() => false))
+            ) {
+                throw ApiError.notFound("File not found");
+            }
+
+            res.download(filePath);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async delete(req, res, next) {
+        try {
+            const filePath = path.join(
+                fileConfig.UPLOADS_BASE_DIR,
+                req.params.path
+            );
+            const result = await FileService.delete(filePath);
+
+            if (!result.success) {
+                throw ApiError.internal("File deletion failed");
+            }
+
+            res.json({ success: true });
+        } catch (error) {
+            next(error);
         }
     }
 }

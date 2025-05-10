@@ -1,6 +1,6 @@
 import "./SubmissionsForm.scss";
 import React, { useState, forwardRef, useImperativeHandle } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { MyButton } from "@/shared/uikit/MyButton";
 import { FileItem } from "@/shared/ui/FileComp";
 import { uploadFile, uploadMultipleFiles } from "@/shared/api/uploadFileAPI";
@@ -14,7 +14,6 @@ const SubmissionForm = forwardRef(
         const [error, setError] = useState(null);
 
         const user_id = useSelector((state) => state.user.user?.id);
-        const dispatch = useDispatch();
 
         const handleFileChange = async (e) => {
             const uploadedFiles = Array.from(e.target.files);

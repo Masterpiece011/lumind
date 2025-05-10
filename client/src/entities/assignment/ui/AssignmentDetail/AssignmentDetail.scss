@@ -1,11 +1,10 @@
-@use "../../../../shared/styles/variables/variables" as *;
-@use "../../../../shared/styles/mixins/mixins" as *;
+@use "@/shared/styles/variables/variables" as *;
+@use "@/shared/styles/mixins/mixins" as *;
 
 .assignment-detail {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding: 20px;
     color: var(--text-color);
     background-color: var(--bg-color);
     overflow: hidden;
@@ -120,7 +119,7 @@
         flex: 2;
         background: var(--card-bg);
         border: 1px solid var(--primary-accent);
-        border-radius: var(--border-radius);
+        border-radius: 12px;
         padding: 20px;
         display: flex;
         flex-direction: column;
@@ -161,5 +160,124 @@
         background-color: var(--hover-color);
         border-radius: 4px;
         text-align: center;
+    }
+}
+
+.submission-form {
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+
+    &__group {
+        margin-bottom: 16px;
+        align-items: center;
+        gap: 10px;
+
+        label {
+            display: block;
+            @include fontOptions(24px, 600, 24px);
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            padding: 8px;
+            resize: vertical;
+            border-radius: 8px;
+            color: var(--text-color);
+            font-family: inherit;
+            @include fontOptions(14px, 400, 14px);
+            transition: var(--transition);
+
+            &:focus {
+                outline: none;
+                border-color: var(--primary-accent);
+            }
+
+            &:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
+        }
+
+        input[type="file"] {
+            margin-top: 8px;
+            width: 100%;
+            padding: 8px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-color);
+            font-family: inherit;
+            @include fontOptions(14px, 400, 14px);
+            transition: var(--transition);
+
+            &:focus {
+                outline: none;
+                border-color: var(--primary-accent);
+            }
+
+            &:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    &__error {
+        color: var(--error-color);
+        margin-bottom: 8px;
+        @include fontOptions(14px, 500, 1.4);
+    }
+
+    &__submit {
+        @include fontOptions(16px, 500, 24px);
+        padding: 12px 24px;
+        border-radius: var(--border-radius);
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        width: auto;
+        align-self: flex-start;
+        margin-top: 16px;
+        background-color: var(--primary-accent);
+        color: white;
+        box-shadow: 0 2px 4px var(--shadow-color);
+
+        &:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        &:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            color: var(--text-tertiary);
+        }
+
+        &:focus {
+            outline: 2px solid var(--text-accent);
+            outline-offset: 2px;
+        }
+    }
+
+    &__files {
+        margin-top: 20px;
+        gap: 12px;
+        display: flex;
+        flex-direction: column;
     }
 }

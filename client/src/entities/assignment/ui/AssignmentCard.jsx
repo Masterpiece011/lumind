@@ -10,7 +10,7 @@ export const AssignmentCard = memo(({ assignment, status, onSelect }) => {
     };
 
     return (
-        <div
+        <li
             className="assignments__card"
             onClick={() => onSelect(assignment.id)}
         >
@@ -25,6 +25,6 @@ export const AssignmentCard = memo(({ assignment, status, onSelect }) => {
                     Срок: {new Date(assignment.plan_date).toLocaleDateString()}
                 </p>
             </div>
-        </div>
+        </li>
     );
 });
