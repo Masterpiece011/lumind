@@ -1,1 +1,1 @@
-export { InstructorComp } from "./InstructorComp";
+export { InstructorAssignmentFlow } from "./ui/InstructorAssignmentFlow/InstructorAssignmentFlow";

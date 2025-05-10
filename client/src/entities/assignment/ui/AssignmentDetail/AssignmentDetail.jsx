@@ -15,6 +15,9 @@ import { ASSIGNMENTS_STATUSES } from "@/shared/constants/assignments";
 import Text from "@/shared/ui/Text";
 import { useSelector } from "react-redux";
 
+import { StatusSelector } from "@/features/instructor/ui/StatusSelector/StatusSelector";
+import { InstructorAssignmentFlow } from "@/features/instructor/ui/InstructorAssignmentFlow/InstructorAssignmentFlow";
+
 const AssignmentDetailPage = () => {
     const { id } = useParams();
     const [assignment, setAssignment] = useState(null);
@@ -26,7 +29,8 @@ const AssignmentDetailPage = () => {
     const [assessment, setAssessment] = useState("");
     const [status, setStatus] = useState("");
 
-    const userRole = useSelector((state) => state.user.user?.role?.name);
+    const userRole = useSelector((state) => state.user.user?.role);
+    const userId = useSelector((state) => state.user.user?.id);
     const isInstructor = userRole === "INSTRUCTOR";
 
     const fetchAssignment = async () => {
@@ -170,17 +174,17 @@ const AssignmentDetailPage = () => {
         await handleSubmitWork();
     };
 
-    const handleAssessmentSubmit = async () => {
+    const handleStatusChange = async (newStatus) => {
         try {
             setLoading(true);
             const response = await updateAssignment({
                 assignment_id: id,
+                status: newStatus,
                 assessment: assessment,
-                status: status,
             });
             setAssignment(response.assignment);
         } catch (err) {
-            setError(err.message || "Ошибка при обновлении оценки");
+            setError(err.message || "Ошибка при обновлении статуса");
         } finally {
             setLoading(false);
         }
@@ -218,6 +222,8 @@ const AssignmentDetailPage = () => {
     if (loading) return <ClockLoader />;
     if (error) return <Text tag="p">Ошибка: {error}</Text>;
     if (!assignment) return <Text tag="p">Задание не найдено</Text>;
+    if (showInstructorView)
+        return <InstructorAssignmentFlow assignmentId={id} />;
 
     return (
         <main className="assignment-detail">
@@ -352,42 +358,18 @@ const AssignmentDetailPage = () => {
                                         }
                                     />
                                 </div>
-                                <div className="assessment-form__group">
-                                    <label>Статус:</label>
-                                    <select
-                                        value={status}
-                                        onChange={(e) =>
-                                            setStatus(e.target.value)
-                                        }
-                                    >
-                                        <option
-                                            value={
-                                                ASSIGNMENTS_STATUSES.SUBMITTED
-                                            }
-                                        >
-                                            На проверке
-                                        </option>
-                                        <option
-                                            value={
-                                                ASSIGNMENTS_STATUSES.COMPLETED
-                                            }
-                                        >
-                                            Завершено
-                                        </option>
-                                        <option
-                                            value={ASSIGNMENTS_STATUSES.FAILED}
-                                        >
-                                            Не принято
-                                        </option>
-                                    </select>
-                                </div>
-                                <MyButton
-                                    text="Сохранить оценку"
-                                    onClick={handleAssessmentSubmit}
-                                    className="assessment-form__submit"
-                                />
                             </div>
-                        )}
+
+                            {assignment.status ===
+                                ASSIGNMENTS_STATUSES.SUBMITTED && (
+                                <StatusSelector
+                                    currentStatus={assignment.status}
+                                    onStatusChange={handleStatusChange}
+                                    isLoading={loading}
+                                />
+                            )}
+                        </div>
+                    )}
 
                     <form className="submission-form">
                         <div className="submission-form__group">

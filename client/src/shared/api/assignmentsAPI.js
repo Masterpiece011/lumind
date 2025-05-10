@@ -3,32 +3,38 @@ import { $authHost } from "./page";
 
 export const getAssignments = createAsyncThunk(
     "assignments/getAssignments",
-    async ({ userId, teamId, searchQuery, status }) => {
+    async ({ userId, teamId, searchQuery, status, creator_id, include }) => {
         try {
             const { data } = await $authHost.post("/api/assignments", {
                 user_id: userId,
                 team_id: teamId,
                 search_text: searchQuery,
                 status: status,
-                include: ["task", "files"],
+                creator_id: creator_id,
+                include: include || ["task", "files", "user", "creator"],
             });
             return data;
         } catch (error) {
-            throw new Error(error.data?.message || "Ошибка получения заданий");
+            throw new Error(
+                error.response?.data?.message || "Ошибка получения заданий",
+            );
         }
     },
 );
 
-export const getAssignmentById = async ({ assignmentId }) => {
+export const getAssignmentById = async (id) => {
     try {
-        const { data } = await $authHost.get(
-            `/api/assignments/${assignmentId}`,
-        );
-        console.log(data);
+        const { data } = await $authHost.get(`/api/assignments/${id}`);
+
+        if (!data?.assignment) {
+            throw new Error("Неверный формат ответа сервера");
+        }
 
         return data;
     } catch (error) {
-        throw new Error(error.data?.message || "Ошибка загрузки задания");
+        throw new Error(
+            error.response?.data?.message || "Ошибка загрузки назначения",
+        );
     }
 };
 
@@ -71,6 +77,23 @@ export const deleteAssignment = async (assignmentId) => {
     } catch (error) {
         throw new Error(
             error.response?.data?.message || "Ошибка удаления задания",
+        );
+    }
+};
+
+export const getUsersWithTask = async (taskId) => {
+    try {
+        console.log(`Fetching team students for task: ${taskId}`);
+        const { data } = await $authHost.get(
+            `/api/assignments/team-students/${taskId}`,
+        );
+        console.log("Team students response:", data);
+        return data;
+    } catch (error) {
+        console.error("Error fetching team students:", error);
+        throw new Error(
+            error.response?.data?.message ||
+                "Ошибка загрузки студентов команды",
         );
     }
 };

@@ -22,24 +22,27 @@ import "./TeamDetail.scss";
 
 const TeamDetailPage = ({ onSelectAssignment }) => {
     const { id } = useParams();
-
     const dispatch = useDispatch();
+
     const {
         currentTeam,
         loading: teamLoading,
         error: teamError,
     } = useSelector((state) => state.teams);
+
     const {
         assignments,
         assignmentsTotal,
         loading: assignmentsLoading,
     } = useSelector((state) => state.assignments);
-    const user_id = useSelector((state) => state.user.user?.id);
+
+    const user = useSelector((state) => state.user.user);
+    const isInstructor = user?.role?.name === "INSTRUCTOR";
 
     const [activeTab, setActiveTab] = useState("members");
     const { filter, isFilterLoading, handleSetNewFilter } =
         useAssignmentsFilter({
-            userId: user_id,
+            userId: isInstructor ? null : user?.id,
             teamId: id,
             activeTab,
         });
@@ -50,10 +53,10 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
     });
 
     useEffect(() => {
-        if (id && user_id) {
-            dispatch(getTeamById({ teamId: id, userId: user_id }));
+        if (id && user?.id) {
+            dispatch(getTeamById({ teamId: id, userId: user.id }));
         }
-    }, [id, user_id, dispatch]);
+    }, [id, user?.id, dispatch]);
 
     const tabContent = {
         members: <MembersTabContent users={currentTeam?.users} />,
@@ -63,6 +66,7 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
                 <Filters
                     currentFilter={filter}
                     onFilterChange={handleSetNewFilter}
+                    isInstructor={isInstructor}
                 />
                 <div className="assignments__divider"></div>
                 <AssignmentsList
@@ -71,6 +75,7 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
                     isLoading={assignmentsLoading}
                     isFilterLoading={isFilterLoading}
                     onSelect={onSelectAssignment}
+                    isInstructor={isInstructor}
                 />
             </div>
         ),

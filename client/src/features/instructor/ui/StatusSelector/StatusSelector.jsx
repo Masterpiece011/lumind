@@ -11,7 +11,11 @@ const statusOptions = [
     { value: ASSIGNMENTS_STATUSES.FAILED, label: "Вернуть" },
 ];
 
-const StatusSelector = ({ currentStatus, onStatusChange, isLoading }) => {
+export const StatusSelector = ({
+    currentStatus,
+    onStatusChange,
+    isLoading,
+}) => {
     return (
         <div className="status-selector">
             <p className="status-selector__label">Статус:</p>
@@ -33,5 +37,3 @@ const StatusSelector = ({ currentStatus, onStatusChange, isLoading }) => {
         </div>
     );
 };
-
-export { StatusSelector };
