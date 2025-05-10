@@ -161,8 +161,7 @@ class AssignmentController {
         try {
             const { id } = req.params;
 
-            const assignment = await Assignments.findOne({
-                where: { id },
+            const assignment = await Assignments.findByPk(id, {
                 include: [
                     {
                         model: Tasks,
@@ -198,8 +197,8 @@ class AssignmentController {
                 creator,
                 task: {
                     ...assignment.task.get({ plain: true }),
-                    files: taskFiles || [],
                 },
+                task_files: taskFiles || [],
                 assignment_files: assignment.files || [],
             };
 

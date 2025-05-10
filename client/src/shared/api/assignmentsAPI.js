@@ -19,11 +19,13 @@ export const getAssignments = createAsyncThunk(
     },
 );
 
-export const getAssignmentById = async (assignmentId) => {
+export const getAssignmentById = async ({ assignmentId }) => {
     try {
         const { data } = await $authHost.get(
             `/api/assignments/${assignmentId}`,
         );
+        console.log(data);
+
         return data;
     } catch (error) {
         throw new Error(error.data?.message || "Ошибка загрузки задания");

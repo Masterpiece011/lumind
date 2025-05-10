@@ -1,7 +1,7 @@
 "use client";
 
 import "./AssignmentDetail.scss";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { uploadFiles, downloadFile, deleteFile } from "@/shared/api/filesAPI";
 import {
@@ -13,38 +13,33 @@ import { FileItem } from "@/shared/ui/FileComp";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { ASSIGNMENTS_STATUSES } from "@/shared/constants/assignments";
 import Text from "@/shared/ui/Text";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 const AssignmentDetailPage = () => {
     const { id } = useParams();
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
     const [files, setFiles] = useState([]);
     const [comment, setComment] = useState("");
     const [uploadProgress, setUploadProgress] = useState(0);
-
     const [assessment, setAssessment] = useState("");
     const [status, setStatus] = useState("");
-    const dispatch = useDispatch();
 
     const userRole = useSelector((state) => state.user.user?.role?.name);
     const isInstructor = userRole === "INSTRUCTOR";
 
-
     const fetchAssignment = async () => {
         try {
             setLoading(true);
-
             const response = await getAssignmentById({
                 assignmentId: id,
-                include: ["task", "assignment_files"],
             });
             setAssignment(response.assignment);
+            console.log("ass", response.assignment);
+
             setComment(response.assignment.comment || "");
             setFiles(response.assignment.assignment_files || []);
-
             setError(null);
         } catch (err) {
             setError(err.message || "Ошибка загрузки назначения");
@@ -59,23 +54,20 @@ const AssignmentDetailPage = () => {
 
     const handleFileChange = async (e) => {
         const selectedFiles = Array.from(e.target.files);
-
         if (!selectedFiles.length) return;
 
-        // Проверки
         if (files.length + selectedFiles.length > 10) {
             setError("Нельзя прикрепить больше 10 файлов");
             return;
         }
 
-        const maxSize = 50 * 1024 * 1024; // 50 MB
+        const maxSize = 50 * 1024 * 1024;
         const oversizedFile = selectedFiles.find((file) => file.size > maxSize);
 
         if (oversizedFile) {
             setError(
                 `Файл "${oversizedFile.name}" слишком большой (макс. 50MB)`,
             );
-
             return;
         }
 
@@ -101,11 +93,9 @@ const AssignmentDetailPage = () => {
                     );
                 },
             });
-            console.log("response", response);
-
             setFiles((prev) => [...prev, ...response.files]);
             setUploadProgress(0);
-            e.target.value = ""; // Сброс поля выбора файлов
+            e.target.value = "";
         } catch (err) {
             setError("Ошибка загрузки файлов: " + err.message);
         }
@@ -114,6 +104,7 @@ const AssignmentDetailPage = () => {
     const handleDeleteFile = async (fileId) => {
         try {
             await deleteFile(fileId);
+
             setFiles(files.filter((file) => file.id !== fileId));
         } catch (err) {
             setError("Ошибка удаления файла: " + err.message);
@@ -131,7 +122,6 @@ const AssignmentDetailPage = () => {
     const handleSubmitWork = async () => {
         try {
             setLoading(true);
-
             const response = await updateAssignment({
                 assignmentId: assignment.id,
                 status: ASSIGNMENTS_STATUSES.SUBMITTED,
@@ -156,8 +146,6 @@ const AssignmentDetailPage = () => {
                 status: ASSIGNMENTS_STATUSES.ASSIGNED,
                 comment: "",
             });
-            console.log(response);
-
             setAssignment(response.assignment);
         } catch (err) {
             setError(
@@ -168,9 +156,7 @@ const AssignmentDetailPage = () => {
         }
     };
 
-
     const handleButtonClick = async () => {
-
         if (
             [
                 ASSIGNMENTS_STATUSES.COMPLETED,
@@ -181,7 +167,6 @@ const AssignmentDetailPage = () => {
 
             return;
         }
-      
         await handleSubmitWork();
     };
 
@@ -193,14 +178,7 @@ const AssignmentDetailPage = () => {
                 assessment: assessment,
                 status: status,
             });
-
-            setAssignment({
-                ...response.assignment,
-                task: assignment.task,
-                creator: assignment.creator,
-                assignment_files: assignment.assignment_files || [],
-                task_files: assignment.task_files || [],
-            });
+            setAssignment(response.assignment);
         } catch (err) {
             setError(err.message || "Ошибка при обновлении оценки");
         } finally {
@@ -271,11 +249,10 @@ const AssignmentDetailPage = () => {
                     )}
 
                     <MyButton
-                        className={"assignment-detail__submit-btn"}
+                        className="assignment-detail__submit-btn"
                         text={getSubmitButtonText()}
-                        onClick={() => handleButtonClick()}
+                        onClick={handleButtonClick}
                     />
-
                 </div>
             </div>
 
@@ -355,12 +332,9 @@ const AssignmentDetailPage = () => {
                         </Text>
                     </div>
 
-
-                    <form className="submission-form">
-                        {error && (
-                            <div className="submission-form__error">
-                                {error}
-                            </div>
+                    {error && (
+                        <div className="submission-form__error">{error}</div>
+                    )}
 
                     {isInstructor &&
                         assignment.status ===
@@ -415,38 +389,7 @@ const AssignmentDetailPage = () => {
                             </div>
                         )}
 
-                    {(showWorkForm ||
-                        assignment.status ===
-                            ASSIGNMENTS_STATUSES.SUBMITTED) && (
-                        <SubmissionForm
-                            ref={workFormRef}
-                            assignmentId={id}
-                            onSubmissionSuccess={handleSubmitWork}
-                            isSubmitted={
-                                assignment.status ===
-                                ASSIGNMENTS_STATUSES.SUBMITTED
-                            }
-                            isInstructor={isInstructor}
-                        />
-                    )}
-
-                    <section>
-                        <Text tag="h3" className="files-title">
-                            Прикреплённые файлы:{" "}
-                        </Text>
-                        {assignment.assignment_files?.length > 0 ? (
-                            <ul className="files-list">
-                                {assignment.assignment_files.map((file) => (
-                                    <li key={file.id}>
-                                        <FileItem fileUrl={file.file_url} />
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <Text tag="p">Файлы не прикреплены</Text>
-
-                        )}
-
+                    <form className="submission-form">
                         <div className="submission-form__group">
                             <label htmlFor="comment">Комментарий:</label>
                             <textarea
@@ -502,6 +445,20 @@ const AssignmentDetailPage = () => {
                                     />
                                 ))}
                             </div>
+                            {/* <Text tag="h3" className="files-title">
+                                Прикреплённые файлы:
+                            </Text>
+                            {assignment.assignment_files?.length > 0 ? (
+                                <ul className="files-list">
+                                    {assignment.assignment_files.map((file) => (
+                                        <li key={file.id}>
+                                            <FileItem fileUrl={file.file_url} />
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <Text tag="p">Файлы не прикреплены</Text>
+                            )} */}
                         </div>
                     </form>
                 </div>
