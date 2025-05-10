@@ -52,12 +52,14 @@ export const createAssignment = async (assignmentData) => {
     }
 };
 
-export const updateAssignment = async (assignmentData) => {
+export const updateAssignment = async ({ assignmentId, status, comment }) => {
     try {
-        const response = await $authHost.put(
-            "/api/assignments/",
-            assignmentData,
-        );
+        const response = await $authHost.put("/api/assignments/", {
+            assignment_id: assignmentId,
+            status,
+            comment,
+        });
+
         return response.data;
     } catch (error) {
         throw new Error(

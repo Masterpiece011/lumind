@@ -6,7 +6,7 @@ import fs from "fs";
 
 import path from "path";
 import { fileURLToPath } from "url";
-import upload from "../multer/multerConfig.js";
+import { upload } from "../multer/multerConfig.js";
 
 // Получаем текущий путь к файлу
 const __filename = fileURLToPath(import.meta.url);
@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 uploadRoutes.post("/file", (req, res, next) => {
     console.log("Начало загрузки файла");
 
-    upload.single("file")(req, res, function (err) {
+    upload("file")(req, res, function (err) {
         if (err) {
             console.error("Multer error:", err);
             return res.status(500).json({ error: "Ошибка загрузки файла" });
@@ -31,7 +31,7 @@ uploadRoutes.post("/file", (req, res, next) => {
     });
 });
 
-uploadRoutes.post("/files", upload.array("files", 5), (req, res) => {
+uploadRoutes.post("/files", upload, (req, res) => {
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: "Файлы не были загружены" });
     }

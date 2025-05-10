@@ -162,10 +162,7 @@ class AssignmentController {
             const { id } = req.params;
             const userId = req.user.id;
             const userRole = req.user.role;
-
-            // Основной запрос задания
-            const assignment = await Assignments.findOne({
-                where: { id },
+            const assignment = await Assignments.findByPk(id, {
                 include: [
                     {
                         model: Tasks,
@@ -214,9 +211,11 @@ class AssignmentController {
             // Формируем ответ
             const response = {
                 ...assignment.get({ plain: true }),
-                user: student || null,
-                creator: creator || null,
-                task_files: assignment.task?.files || [],
+                creator,
+                task: {
+                    ...assignment.task.get({ plain: true }),
+                },
+                task_files: taskFiles || [],
                 assignment_files: assignment.files || [],
             };
 
@@ -235,7 +234,6 @@ class AssignmentController {
                 description,
                 plan_date,
                 comment,
-                investments = [],
                 assessment,
                 status,
                 user_id,
@@ -247,45 +245,8 @@ class AssignmentController {
                 );
             }
 
-            const assignment = await Assignments.findByPk(assignment_id, {
-                include: [
-                    {
-                        model: Tasks,
-                        as: "task",
-                        include: [
-                            {
-                                model: Files,
-                                as: "files",
-                                where: { entity_type: "task" },
-                                required: false,
+            const assignment = await Assignments.findByPk(assignment_id);
 
-                                attributes: [
-                                    "id",
-                                    "file_url",
-                                    "entity_type",
-                                    "entity_id",
-                                    "created_at",
-                                    "updated_at",
-                                ],
-                            },
-                        ],
-                    },
-                    {
-                        model: Files,
-                        as: "files",
-                        where: { entity_type: "assignment" },
-                        required: false,
-                        attributes: [
-                            "id",
-                            "file_url",
-                            "entity_type",
-                            "entity_id",
-                            "created_at",
-                            "updated_at",
-                        ],
-                    },
-                ],
-            });
             if (!assignment) {
                 return next(ApiError.notFound("Назначение не найдено"));
             }
@@ -299,24 +260,6 @@ class AssignmentController {
                 plan_date: plan_date || assignment.plan_date,
                 user_id: user_id || assignment.user_id,
             });
-
-            if (investments.length > 0 || status) {
-                await Files.destroy({
-                    where: {
-                        entity_id: assignment_id,
-                        entity_type: "assignment",
-                    },
-                });
-
-                if (investments.length > 0) {
-                    const answerFiles = investments.map((fileUrl) => ({
-                        entity_id: assignment_id,
-                        entity_type: "assignment",
-                        file_url: fileUrl,
-                    }));
-                    await Files.bulkCreate(answerFiles);
-                }
-            }
 
             const updatedAssignment = await Assignments.findByPk(
                 assignment_id,
@@ -345,6 +288,7 @@ class AssignmentController {
             );
 
             const responseData = updatedAssignment.get({ plain: true });
+
             return res.json({
                 message: "Назначение успешно обновлено",
                 assignment: {

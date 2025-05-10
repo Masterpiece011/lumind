@@ -1,0 +1,106 @@
+:root {
+  --font-inter: "Inter", sans-serif;
+}
+
+[data-theme=dark] {
+  --bg-color: #202020;
+  --text-color: #f5f5f5;
+  --text-secondary: #aeaeae;
+  --text-tertiary: #dedede;
+  --card-bg: rgba(174, 174, 174, 0.1);
+  --card-border: rgba(174, 174, 174, 0.5);
+  --active-color: #7e57c2;
+  --primary-accent: #9f70fd;
+  --primary-hover: #8a5cf6;
+  --hover-color: rgba(126, 87, 194, 0.2);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --divider-color: rgba(174, 174, 174, 0.3);
+  --input-border: rgba(174, 174, 174, 0.5);
+  --input-bg: transparent;
+  --text-muted: rgba(245, 245, 245, 0.7);
+  --text-accent: #b388ff;
+  --error-color: #d9534f;
+}
+
+[data-theme=light] {
+  --bg-color: #f5f5f5;
+  --text-color: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #444444;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(0, 0, 0, 0.1);
+  --active-color: #673ab7;
+  --primary-accent: #7c4dff;
+  --primary-hover: #6a3bff;
+  --hover-color: rgba(103, 58, 183, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --divider-color: rgba(0, 0, 0, 0.1);
+  --input-border: rgba(0, 0, 0, 0.2);
+  --input-bg: #ffffff;
+  --text-muted: rgba(51, 51, 51, 0.7);
+  --text-accent: #7c4dff;
+  --error-color: #d9534f;
+}
+
+.home {
+  width: 100%;
+  background-color: transparent;
+}
+.home__item {
+  margin-bottom: 20px;
+}
+.home__item-header {
+  display: flex;
+  flex-direction: column;
+}
+.home__divider {
+  height: 1px;
+  background-color: var(--divider-color);
+  margin: 10px 0;
+}
+
+.accordion__arrow {
+  transition: transform 0.3s ease;
+}
+.accordion__arrow--expanded {
+  transform: rotate(180deg);
+}
+
+.accordion__content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+  opacity: 0;
+}
+.accordion__content--expanded {
+  max-height: 800px;
+  opacity: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+.accordion__content--collapsed {
+  display: none;
+}
+.accordion__content-text {
+  width: 364px;
+  height: 72px;
+  max-width: 500px;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.accordion__content-link {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text-accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.accordion__content-image {
+  width: 541px;
+  height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+  border-radius: 10px;
+}

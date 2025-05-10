@@ -1,5 +1,5 @@
-@use "../../../../shared/styles/variables/variables" as *;
-@use "../../../../shared/styles/mixins/mixins" as *;
+@use "@/shared/styles/variables/variables" as *;
+@use "@/shared/styles/mixins/mixins" as *;
 
 .assignments {
     border-radius: 16px;
@@ -51,9 +51,9 @@
         margin-bottom: 20px;
     }
 
-    &__card-wrapper {
+    &__cards-list {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 12px;
         opacity: 1;
         transition: opacity 0.3s ease;
