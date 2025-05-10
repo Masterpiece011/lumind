@@ -8,6 +8,8 @@ import { setUser, setIsAuth } from "@/entities/user/model/userStore";
 import { MainComp } from "@/app/layouts/MainLayout";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 
+const publicRoutes = ["/login", "/register", "/password-reset"];
+
 const AppRouter = ({ children }) => {
     const dispatch = useDispatch();
     const router = useRouter();
@@ -15,6 +17,7 @@ const AppRouter = ({ children }) => {
     const searchParams = useSearchParams();
     const { user, isAuth } = useSelector((state) => state.user);
     const [loading, setLoading] = useState(true);
+    const [verifiedAuth, setVerifiedAuth] = useState(false);
 
     const needsMainComp =
         pathname.startsWith("/teams") ||
@@ -25,66 +28,66 @@ const AppRouter = ({ children }) => {
 
     useEffect(() => {
         const verifyAuth = async () => {
+            // Пропускаем проверку для публичных маршрутов
+            if (publicRoutes.includes(pathname)) {
+                setLoading(false);
+                return;
+            }
+
             try {
                 const { user: authUser } = await check();
+                
                 console.log("authUser", authUser);
 
                 if (!authUser) {
-                    router.push("/login");
-                    return;
+                    throw new Error("Not authenticated");
                 }
 
                 const userData = await getUserById(authUser.id);
 
                 dispatch(setUser(userData));
                 dispatch(setIsAuth(true));
-            } catch {
+                setVerifiedAuth(true);
+            } catch (error) {
+                console.error("Auth verification failed:", error);
+                if (!publicRoutes.includes(pathname)) {
+                    router.replace("/login");
+                }
                 dispatch(setIsAuth(false));
             } finally {
                 setLoading(false);
             }
         };
 
-        verifyAuth();
-    }, [dispatch, isAuth]);
+        // Проверяем аутентификацию только при первом рендере
+        if (!verifiedAuth) {
+            verifyAuth();
+        }
+    }, [dispatch, pathname, router, verifiedAuth]);
 
+    // Обновляем URL без перезагрузки
     useEffect(() => {
-        if (!loading) {
+        if (!loading && isAuth) {
             const currentURL = `${pathname}${searchParams ? `?${searchParams}` : ""}`;
             window.history.replaceState({ path: currentURL }, "", currentURL);
         }
-    }, [pathname, loading]);
-
-    useEffect(() => {
-        if (!isAuth && pathname !== "/login") {
-            window.history.replaceState(null, "", "/login");
-            router.replace("/login");
-        }
-    }, [isAuth, pathname, router]);
-
-    useEffect(() => {
-        const handlePopState = (event) => {
-            if (!isAuth) {
-                window.history.pushState(null, "", "/login");
-                router.replace("/login");
-            } else if (event.state?.path) {
-                router.replace(event.state.path);
-            }
-        };
-
-        window.addEventListener("popstate", handlePopState);
-        return () => window.removeEventListener("popstate", handlePopState);
-    }, [router, isAuth]);
+    }, [pathname, searchParams, loading, isAuth]);
 
     if (loading) {
         return <ClockLoader loading={loading} />;
     }
 
-    if (needsMainComp) {
-        return <MainComp>{children}</MainComp>;
+    // Разрешаем доступ к публичным маршрутам без аутентификации
+    if (publicRoutes.includes(pathname)) {
+        return <>{children}</>;
     }
 
-    return <>{children}</>;
+    // Для защищенных маршрутов проверяем аутентификацию
+    if (!isAuth) {
+        return <ClockLoader loading={true} />;
+    }
+
+    return needsMainComp ? <MainComp>{children}</MainComp> : <>{children}</>;
 };
 
 export default AppRouter;
