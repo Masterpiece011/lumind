@@ -18,24 +18,20 @@ const TeamsPage = memo(({ userId, onSelectTeam }) => {
     const initialRender = useRef(true);
     const lastUserId = useRef(null);
 
+    const userRole = useSelector((state) => state.user.user?.role?.name);
+    const isInstructor = userRole === "INSTRUCTOR";
+
     const {
         teams = [],
         teamsTotal = 0,
         loading,
         error,
-    } = useSelector(
-        (state) => ({
-            teams: state.teams.teams,
-            teamsTotal: state.teams.teamsTotal,
-            loading: state.teams.loading,
-            error: state.teams.error,
-        }),
-        (prev, next) =>
-            prev.teams === next.teams &&
-            prev.teamsTotal === next.teamsTotal &&
-            prev.loading === next.loading &&
-            prev.error === next.error,
-    );
+    } = useSelector((state) => ({
+        teams: state.teams.teams,
+        teamsTotal: state.teams.teamsTotal,
+        loading: state.teams.loading,
+        error: state.teams.error,
+    }));
 
     useEffect(() => {
         if (initialRender.current || userId === lastUserId.current) {
@@ -46,9 +42,14 @@ const TeamsPage = memo(({ userId, onSelectTeam }) => {
         if (userId) {
             console.log("Fetching teams for userId:", userId);
             lastUserId.current = userId;
-            dispatch(getTeams({ userId }));
+            dispatch(
+                getTeams({
+                    userId: isInstructor ? null : userId, // Для преподавателя получаем все команды
+                    ...(isInstructor && { instructor_id: userId }), // Для преподавателя - только где он создатель
+                }),
+            );
         }
-    }, [userId, dispatch]);
+    }, [userId, dispatch, isInstructor]);
 
     const toggleAccordion = () => {
         setIsExpanded(!isExpanded);
@@ -73,7 +74,9 @@ const TeamsPage = memo(({ userId, onSelectTeam }) => {
                     onClick={toggleAccordion}
                 >
                     <div className={buttonStyles.accordionInfo}>
-                        <p className={buttonStyles.accordionTittle}>Команды</p>
+                        <p className={buttonStyles.accordionTittle}>
+                            {isInstructor ? "Мои команды" : "Команды"}
+                        </p>
                         <Icon
                             src={Arrow}
                             alt="arrow"
@@ -107,6 +110,11 @@ const TeamsPage = memo(({ userId, onSelectTeam }) => {
                                     {team.description && (
                                         <p className="teams__info-description">
                                             {team.description}
+                                        </p>
+                                    )}
+                                    {isInstructor && (
+                                        <p className="teams__members-count">
+                                            Участников: {team.users_count || 0}
                                         </p>
                                     )}
                                 </div>

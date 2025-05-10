@@ -6,16 +6,16 @@ import ApiError from "../error/ApiError.js";
 
 class UsersTeamsController {
     // Создание связи группы с пользователями
-
-    async create(req, res) {
+    async create(req, res, next) {
         try {
             const { team_id, user_id } = req.body;
 
             if (!team_id || !user_id) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Необходимо указать ID команды и пользователя",
-                });
+                return next(
+                    ApiError.badRequest(
+                        "Необходимо указать ID команды и пользователя"
+                    )
+                );
             }
 
             // Проверка существования пользователя и команды
@@ -25,33 +25,41 @@ class UsersTeamsController {
             ]);
 
             if (!user) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Пользователь не найден",
-                });
+                return next(ApiError.notFound("Пользователь не найден"));
             }
 
             if (!team) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Команда не найдена",
-                });
+                return next(ApiError.notFound("Команда не найдена"));
             }
 
-            // Создание связи с обработкой уникальности
-            const user_team = await Users_Teams.create(
-                { team_id, user_id },
-                { returning: true }
-            );
+            // Проверка на существующую связь
+            const existingLink = await Users_Teams.findOne({
+                where: { team_id, user_id },
+            });
+
+            if (existingLink) {
+                return next(
+                    ApiError.badRequest(
+                        "Пользователь уже состоит в этой команде"
+                    )
+                );
+            }
+
+            // Создание связи
+            const user_team = await Users_Teams.create({ team_id, user_id });
 
             return res.status(201).json({
                 success: true,
                 data: user_team,
+                message: "Пользователь успешно добавлен в команду",
             });
-        } catch (e) {
-            return res.status(500).json({
-                message: "Ошибка создания связки пользователя с командой",
-            });
+        } catch (error) {
+            console.error("Ошибка создания связки:", error);
+            return next(
+                ApiError.internal(
+                    "Ошибка создания связки пользователя с командой"
+                )
+            );
         }
     }
 
@@ -124,83 +132,128 @@ class UsersTeamsController {
         }
     }
 
-    // Одной конкретной связки пользователя с командой
-
-    async getOne(req, res) {
-        // Подумать может и не пригодится
+    // Получение одной связки
+    async getOne(req, res, next) {
         try {
             const { id } = req.params;
 
             if (!id) {
-                return ApiError.badRequest("Необходимо передать ID");
+                return next(ApiError.badRequest("Необходимо передать ID"));
             }
 
-            const user_team = await Users_Teams.findByPk(id);
-
-            return res.json({ data: user_team });
-        } catch (error) {
-            return res.status(500).json({
-                message: "Ошибка получения связки пользователя с командой",
-                error: error.message,
+            const user_team = await Users_Teams.findByPk(id, {
+                include: [
+                    {
+                        model: Users,
+                        attributes: ["id", "first_name", "last_name", "email"],
+                    },
+                    {
+                        model: Teams,
+                        attributes: ["id", "name"],
+                    },
+                ],
             });
+
+            if (!user_team) {
+                return next(ApiError.notFound("Связка не найдена"));
+            }
+
+            return res.json({
+                success: true,
+                data: user_team,
+            });
+        } catch (error) {
+            console.error("Ошибка получения связки:", error);
+            return next(
+                ApiError.internal(
+                    "Ошибка получения связки пользователя с командой"
+                )
+            );
         }
     }
 
-    // Обновление связи группы с пользователями
-
-    async update(req, res) {
+    // Обновление связи
+    async update(req, res, next) {
         try {
+            const { id } = req.params;
             const { team_id, user_id } = req.body;
 
-            if (!team_id || !user_id) {
-                return ApiError.badRequest(
-                    `Невозможно обновить связку пользователей и команд: ${error.message}`
+            if (!id) {
+                return next(
+                    ApiError.badRequest("Необходимо передать ID связки")
                 );
             }
 
-            await Users_Teams.update(
-                { where: { team_id: team_id, user_id: user_id } },
-                {
-                    title: title,
-                    description: description || "",
-                    creator_id: creator_id,
-                }
-            );
+            if (!team_id || !user_id) {
+                return next(
+                    ApiError.badRequest(
+                        "Необходимо указать ID команды и пользователя"
+                    )
+                );
+            }
+
+            const user_team = await Users_Teams.findByPk(id);
+            if (!user_team) {
+                return next(ApiError.notFound("Связка не найдена"));
+            }
+
+            // Проверка на дубликат
+            const existingLink = await Users_Teams.findOne({
+                where: {
+                    team_id,
+                    user_id,
+                    id: { [Op.ne]: id }, // Исключаем текущую запись
+                },
+            });
+
+            if (existingLink) {
+                return next(ApiError.badRequest("Такая связка уже существует"));
+            }
+
+            await user_team.update({ team_id, user_id });
 
             return res.json({
-                message: "Связка пользователя и команды успешно обновлена",
+                success: true,
+                message: "Связка успешно обновлена",
+                data: user_team,
             });
-        } catch (e) {
-            return res.status(500).json({ messgae: "Server error" });
+        } catch (error) {
+            console.error("Ошибка обновления связки:", error);
+            return next(
+                ApiError.internal(
+                    "Ошибка обновления связки пользователя с командой"
+                )
+            );
         }
     }
 
-    // Удаление связи группы с пользователями
-
-    async delete(req, res) {
+    // Удаление связи
+    async delete(req, res, next) {
         try {
             const { id } = req.params;
 
             if (!id) {
-                return ApiError.badRequest("Необходимо передать ID");
+                return next(ApiError.badRequest("Необходимо передать ID"));
             }
 
             const user_team = await Users_Teams.findByPk(id);
-
             if (!user_team) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Связка пользователя и команды не найдена",
-                });
+                return next(ApiError.notFound("Связка не найдена"));
             }
 
             await user_team.destroy();
 
             return res.json({
-                message: "Связка пользователя и команды успешно удалена",
+                success: true,
+                message: "Связка успешно удалена",
             });
-        } catch (e) {
-            return res.status(500).json({ messgae: "Server error" });
+        } catch (error) {
+            console.error("Ошибка удаления связки:", error);
+            return next(
+                ApiError.internal(
+                    "Ошибка удаления связки пользователя с командой"
+                )
+            );
         }
     }
 }

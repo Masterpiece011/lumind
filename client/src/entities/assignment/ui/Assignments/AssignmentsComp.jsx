@@ -6,9 +6,7 @@ import { getAssignments } from "@/shared/api/assignmentsAPI";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { Filters } from "../Filters";
 import { AssignmentsList } from "../AssignmentsList";
-
 import "./AssignmentsComp.scss";
-
 import Text from "@/shared/ui/Text";
 
 const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
@@ -16,6 +14,8 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const { assignments, assignmentsTotal, loading, error } = useSelector(
         (state) => state.assignments,
     );
+    const userRole = useSelector((state) => state.user.user?.role?.name);
+    const isInstructor = userRole === "INSTRUCTOR";
 
     const [filter, setFilter] = useState("all");
     const [isFilterLoading, setIsFilterLoading] = useState(false);
@@ -24,16 +24,17 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
         const refreshAssignments = () => {
             dispatch(
                 getAssignments({
-                    userId,
+                    userId: isInstructor ? null : userId, // Для преподавателя получаем все задания
                     status: filter === "all" ? undefined : filter,
+                    ...(isInstructor && { creator_id: userId }), // Для преподавателя - только созданные им
                 }),
             );
         };
 
-        if (userId) {
+        if (userId || isInstructor) {
             refreshAssignments();
         }
-    }, [dispatch, userId, filter]);
+    }, [dispatch, userId, filter, isInstructor]);
 
     if (loading) return <ClockLoader className="assignments__loading" />;
     if (error) return <div className="assignments__error">Ошибка: {error}</div>;
@@ -42,23 +43,26 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
         if (newFilter !== filter) {
             setFilter(newFilter);
             setIsFilterLoading(true);
-            dispatch(getAssignments({ userId, status: newFilter })).finally(
-                () => setIsFilterLoading(false),
-            );
+            dispatch(
+                getAssignments({
+                    userId: isInstructor ? null : userId,
+                    status: newFilter,
+                    ...(isInstructor && { creator_id: userId }),
+                }),
+            ).finally(() => setIsFilterLoading(false));
         }
     };
-
-    if (error) return <div className="assignments__error">Ошибка: {error}</div>;
 
     return (
         <div className="assignments">
             <Text tag="h1" className="assignments__title">
-                Задания
+                {isInstructor ? "Задания студентов" : "Мои задания"}
             </Text>
 
             <Filters
                 currentFilter={filter}
                 onFilterChange={handleSetNewFilter}
+                isInstructor={isInstructor}
             />
 
             <div className="assignments__divider"></div>
@@ -74,6 +78,7 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
                     onSelect={onSelectAssignment}
                     isLoading={loading}
                     isFilterLoading={isFilterLoading}
+                    isInstructor={isInstructor}
                 />
             )}
         </div>

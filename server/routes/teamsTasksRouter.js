@@ -2,7 +2,7 @@ import { Router } from "express";
 
 const teamsTasksRouter = Router();
 
-import usersTeamsController from "../controllers/usersTeamsController.js";
+import TeamsTasksController from "../controllers/teamsTasksController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 
@@ -10,21 +10,21 @@ teamsTasksRouter.post(
     "/create",
     authMiddleware,
     roleMiddleware(),
-    usersTeamsController.create
+    TeamsTasksController.create
 );
-teamsTasksRouter.post("/", authMiddleware, usersTeamsController.getAll);
-teamsTasksRouter.get("/:id", authMiddleware, usersTeamsController.getOne);
+teamsTasksRouter.post("/", authMiddleware, TeamsTasksController.getAll);
+teamsTasksRouter.get("/:id", authMiddleware, TeamsTasksController.getOne);
 teamsTasksRouter.put(
     "/",
     authMiddleware,
     roleMiddleware(),
-    usersTeamsController.update
+    TeamsTasksController.update
 );
 teamsTasksRouter.delete(
     "/:id",
     authMiddleware,
     roleMiddleware(),
-    usersTeamsController.delete
+    TeamsTasksController.delete
 );
 
 export default teamsTasksRouter;
