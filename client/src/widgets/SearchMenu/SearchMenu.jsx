@@ -7,7 +7,7 @@ import { getTeams } from "@/shared/api/teamAPI";
 import { getUsers } from "@/shared/api/userAPI";
 
 import { Icon } from "@/shared/uikit/icons";
-import nonAvatar from "@/app/assets/img/non-avatar.png";
+import nonAvatar from "@/shared/assets/icons/user-profile.svg";
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import TeamsIcon from "@/app/assets/icons/teams-icon-search.svg";
 import FilesIcon from "@/app/assets/icons/file-icon.svg";

@@ -359,16 +359,14 @@ const AssignmentDetailPage = () => {
                                     />
                                 </div>
                             </div>
+                        )}
 
-                            {assignment.status ===
-                                ASSIGNMENTS_STATUSES.SUBMITTED && (
-                                <StatusSelector
-                                    currentStatus={assignment.status}
-                                    onStatusChange={handleStatusChange}
-                                    isLoading={loading}
-                                />
-                            )}
-                        </div>
+                    {assignment.status === ASSIGNMENTS_STATUSES.SUBMITTED && (
+                        <StatusSelector
+                            currentStatus={assignment.status}
+                            onStatusChange={handleStatusChange}
+                            isLoading={loading}
+                        />
                     )}
 
                     <form className="submission-form">

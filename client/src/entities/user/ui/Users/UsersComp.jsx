@@ -8,7 +8,7 @@ import { useUserModal } from "@/shared/lib/hooks/useUserModal";
 import { useFilteredUsers } from "@/entities/user/model/useFilteredUsers";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { Icon } from "@/shared/uikit/icons";
-import nonAvatar from "@/app/assets/img/non-avatar.png";
+import nonAvatar from "@/shared/assets/icons/user-profile.svg";
 
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 import "./UsersComp.scss";

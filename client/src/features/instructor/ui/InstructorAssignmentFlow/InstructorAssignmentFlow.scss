@@ -1,16 +1,19 @@
+@use "../../../../shared/styles/variables/variables" as *;
+@use "../../../../shared/styles/mixins/mixins" as *;
+
 .instructor-assignment-flow {
     padding: 20px;
     background-color: var(--bg-color);
     color: var(--text-color);
 
-    .students-view {
+    &__students-view {
         h2 {
             margin-bottom: 20px;
             color: var(--text-secondary);
         }
     }
 
-    .back-button {
+    &__back-button {
         margin-bottom: 20px;
         background-color: var(--card-bg);
         color: var(--text-color);
@@ -19,5 +22,13 @@
         &:hover {
             background-color: var(--hover-color);
         }
+    }
+
+    &__no-task-message {
+        margin-bottom: 20px;
+    }
+
+    &__view-assignment-button {
+        margin-top: 10px;
     }
 }

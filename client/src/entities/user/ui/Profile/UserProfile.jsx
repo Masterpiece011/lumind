@@ -1,12 +1,11 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import "./UserProfile.scss";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 
 import { Icon } from "@/shared/uikit/icons";
-import nonAvatar from "@/app/assets/img/non-avatar.png";
+import nonAvatar from "@/shared/assets/icons/user-profile.svg";
 import CloseIcon from "@/app/assets/icons/close-icon.svg";
 
 import { MyButton } from "@/shared/uikit/MyButton";
@@ -55,11 +54,9 @@ const UserModal = ({ user, onClose }) => {
             <UiModal.Body>
                 <div className="user-profile">
                     <div className="user-profile__header">
-                        <Image
-                            src={nonAvatar}
-                            alt="User Avatar"
-                            className="user-profile__avatar"
-                        />
+                        <div className="user-profile__avatar">
+                            <Icon src={nonAvatar} alt="avatar" />
+                        </div>
                         <div className="user-profile__info">
                             <Text tag="h2" className="user-profile__name">
                                 {user.last_name} {user.first_name}{" "}
