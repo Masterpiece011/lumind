@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, memo } from "react";
 import "./FileComp.scss";
 
 import { MyButton } from "@/shared/uikit/MyButton";
@@ -80,127 +80,132 @@ const decodeFileName = (fileName) => {
     }
 };
 
-export const FileItem = ({
-    fileUrl,
-    onDelete,
-    additionalInfo,
-    simpleView = false,
-    compact = false,
-}) => {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const menuRef = useRef(null);
-    const buttonRef = useRef(null);
+export const FileItem = memo(
+    ({
+        fileUrl,
+        onDelete,
+        additionalInfo,
+        simpleView = false,
+        compact = false,
+    }) => {
+        const [isMenuOpen, setIsMenuOpen] = useState(false);
+        const menuRef = useRef(null);
+        const buttonRef = useRef(null);
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (
-                menuRef.current &&
-                !menuRef.current.contains(event.target) &&
-                buttonRef.current &&
-                !buttonRef.current.contains(event.target)
-            ) {
+        useEffect(() => {
+            const handleClickOutside = (event) => {
+                if (
+                    menuRef.current &&
+                    !menuRef.current.contains(event.target) &&
+                    buttonRef.current &&
+                    !buttonRef.current.contains(event.target)
+                ) {
+                    setIsMenuOpen(false);
+                }
+            };
+
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }, []);
+
+        if (!fileUrl) {
+            return null;
+        }
+
+        const fileType = getFileType(fileUrl);
+        const fullFileName = decodeFileName(
+            fileUrl.replace(/\\/g, "/").split("/").pop(),
+        );
+        const fileName = fullFileName.split("-").pop();
+
+        const handleDownload = async () => {
+            try {
+                const normalizedPath = fileUrl.replace(/\\/g, "/");
+                const downloadPath = normalizedPath.includes("uploads/")
+                    ? normalizedPath.split("uploads/")[1]
+                    : normalizedPath;
+                // await downloadFile(downloadPath);
+            } catch (error) {
+                console.error("Download failed:", error);
+                alert(`Не удалось скачать файл: ${error.message}`);
+            } finally {
                 setIsMenuOpen(false);
             }
         };
 
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
-
-    if (!fileUrl) {
-        return null;
-    }
-
-    const fileType = getFileType(fileUrl);
-    const fullFileName = decodeFileName(
-        fileUrl.replace(/\\/g, "/").split("/").pop(),
-    );
-    const fileName = fullFileName.split("-").pop();
-
-    const handleDownload = async () => {
-        try {
-            const normalizedPath = fileUrl.replace(/\\/g, "/");
-            const downloadPath = normalizedPath.includes("uploads/")
-                ? normalizedPath.split("uploads/")[1]
-                : normalizedPath;
-            await downloadFile(downloadPath);
-        } catch (error) {
-            console.error("Download failed:", error);
-            alert(`Не удалось скачать файл: ${error.message}`);
-        } finally {
-            setIsMenuOpen(false);
-        }
-    };
-
-    return (
-        <div className={`file-item ${compact ? "file-item--compact" : ""}`}>
-            <div className="file-icon">{getFileIcon(fileType)}</div>
-            <div className="file-info">
-                <span className="file-name" title={fullFileName}>
-                    {compact
-                        ? fileName.length > 20
-                            ? `${fileName.substring(0, 17)}...`
-                            : fileName
-                        : fileName}
-                </span>
-                {!compact && additionalInfo && (
-                    <span className="file-additional-info">
-                        {additionalInfo}
+        return (
+            <div className={`file-item ${compact ? "file-item--compact" : ""}`}>
+                <div className="file-icon">{getFileIcon(fileType)}</div>
+                <div className="file-info">
+                    <span className="file-name" title={fullFileName}>
+                        {compact
+                            ? fileName.length > 20
+                                ? `${fileName.substring(0, 17)}...`
+                                : fileName
+                            : fileName}
                     </span>
-                )}
-            </div>
-
-            {compact ? (
-                <MyButton
-                    className="file-download-compact"
-                    onClick={handleDownload}
-                    style={{
-                        minWidth: "20px",
-                        width: "20px",
-                        height: "20px",
-                        padding: "2px",
-                    }}
-                >
-                    <Icon
-                        src={CloudDowloadArrow}
-                        alt="download"
-                        style={{
-                            width: "12px",
-                            height: "12px",
-                        }}
-                    />
-                </MyButton>
-            ) : (
-                <div className="file-actions" ref={buttonRef}>
-                    <MyButton
-                        className="file-item-menu"
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    >
-                        <Icon src={EllipsisVertical} alt="menu" />
-                    </MyButton>
-                    {isMenuOpen && (
-                        <div className="file-menu" ref={menuRef}>
-                            <MyButton
-                                className="file-menu-item"
-                                onClick={handleDownload}
-                            >
-                                <Icon src={CloudDowloadArrow} alt="download" />
-                                <p>Скачать</p>
-                            </MyButton>
-                            {onDelete && (
-                                <MyButton
-                                    className="file-menu-item"
-                                    onClick={onDelete}
-                                >
-                                    Удалить
-                                </MyButton>
-                            )}
-                        </div>
+                    {!compact && additionalInfo && (
+                        <span className="file-additional-info">
+                            {additionalInfo}
+                        </span>
                     )}
                 </div>
-            )}
-        </div>
-    );
-};
+
+                {compact ? (
+                    <MyButton
+                        className="file-download-compact"
+                        onClick={handleDownload}
+                        style={{
+                            minWidth: "20px",
+                            width: "20px",
+                            height: "20px",
+                            padding: "2px",
+                        }}
+                    >
+                        <Icon
+                            src={CloudDowloadArrow}
+                            alt="download"
+                            style={{
+                                width: "12px",
+                                height: "12px",
+                            }}
+                        />
+                    </MyButton>
+                ) : (
+                    <div className="file-actions" ref={buttonRef}>
+                        <MyButton
+                            className="file-item-menu"
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        >
+                            <Icon src={EllipsisVertical} alt="menu" />
+                        </MyButton>
+                        {isMenuOpen && (
+                            <div className="file-menu" ref={menuRef}>
+                                <MyButton
+                                    className="file-menu-item"
+                                    onClick={() => handleDownload()}
+                                >
+                                    <Icon
+                                        src={CloudDowloadArrow}
+                                        alt="download"
+                                    />
+                                    <p>Скачать</p>
+                                </MyButton>
+                                {onDelete && (
+                                    <MyButton
+                                        className="file-menu-item"
+                                        onClick={onDelete}
+                                    >
+                                        Удалить
+                                    </MyButton>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    },
+);

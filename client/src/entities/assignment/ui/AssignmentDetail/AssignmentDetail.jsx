@@ -19,11 +19,9 @@ const AssignmentDetailPage = () => {
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [showWorkForm, setShowWorkForm] = useState(false);
     const [files, setFiles] = useState([]);
     const [comment, setComment] = useState("");
     const [uploadProgress, setUploadProgress] = useState(0);
-    const workFormRef = useRef(null);
 
     const fetchAssignment = async () => {
         try {
@@ -49,25 +47,53 @@ const AssignmentDetailPage = () => {
 
     const handleFileChange = async (e) => {
         const selectedFiles = Array.from(e.target.files);
+
         if (!selectedFiles.length) return;
 
-        try {
-            const formData = new FormData();
-            selectedFiles.forEach((file) => formData.append("files", file));
+        // Проверки
+        if (files.length + selectedFiles.length > 10) {
+            setError("Нельзя прикрепить больше 10 файлов");
+            return;
+        }
 
+        const maxSize = 50 * 1024 * 1024; // 50 MB
+        const oversizedFile = selectedFiles.find((file) => file.size > maxSize);
+
+        if (oversizedFile) {
+            setError(
+                `Файл "${oversizedFile.name}" слишком большой (макс. 50MB)`,
+            );
+
+            return;
+        }
+
+        const duplicateFiles = selectedFiles.filter((newFile) =>
+            files.some(
+                (existingFile) => existingFile.original_name === newFile.name,
+            ),
+        );
+
+        if (duplicateFiles.length) {
+            setError(`Файл "${duplicateFiles[0].name}" уже прикреплен`);
+            return;
+        }
+
+        try {
             const response = await uploadFiles({
+                files: selectedFiles,
                 entityId: id,
                 entityType: "assignment",
-                formData,
                 onUploadProgress: (progress) => {
                     setUploadProgress(
                         Math.round((progress.loaded * 100) / progress.total),
                     );
                 },
             });
+            console.log("response", response);
 
             setFiles((prev) => [...prev, ...response.files]);
             setUploadProgress(0);
+            e.target.value = ""; // Сброс поля выбора файлов
         } catch (err) {
             setError("Ошибка загрузки файлов: " + err.message);
         }
@@ -90,18 +116,17 @@ const AssignmentDetailPage = () => {
         }
     };
 
-    const handleSubmitWork = async (e) => {
-        e.preventDefault();
+    const handleSubmitWork = async () => {
         try {
             setLoading(true);
+
             const response = await updateAssignment({
-                assignment_id: id,
+                assignmentId: assignment.id,
                 status: ASSIGNMENTS_STATUSES.SUBMITTED,
-                comment,
-                files: files.map((f) => f.id),
+                comment: comment,
             });
+
             setAssignment(response.assignment);
-            setShowWorkForm(false);
         } catch (err) {
             setError(
                 err.response?.data?.message || "Ошибка при отправке работы",
@@ -115,15 +140,13 @@ const AssignmentDetailPage = () => {
         try {
             setLoading(true);
             const response = await updateAssignment({
-                assignment_id: id,
+                assignmentId: id,
                 status: ASSIGNMENTS_STATUSES.ASSIGNED,
                 comment: "",
-                files: [],
             });
+            console.log(response);
+
             setAssignment(response.assignment);
-            setFiles([]);
-            setComment("");
-            setShowWorkForm(false);
         } catch (err) {
             setError(
                 err.response?.data?.message || "Ошибка при отмене отправки",
@@ -133,17 +156,19 @@ const AssignmentDetailPage = () => {
         }
     };
 
-    const handleSubmitClick = async () => {
+    const handleButtonClick = async () => {
         if (
             [
-                ASSIGNMENTS_STATUSES.SUBMITTED,
                 ASSIGNMENTS_STATUSES.COMPLETED,
-            ].includes(assignment?.status)
+                ASSIGNMENTS_STATUSES.SUBMITTED,
+            ].includes(assignment.status)
         ) {
             await handleCancelSubmission();
+
             return;
         }
-        setShowWorkForm(!showWorkForm);
+
+        await handleSubmitWork();
     };
 
     const getStatusText = () => {
@@ -171,7 +196,7 @@ const AssignmentDetailPage = () => {
             case ASSIGNMENTS_STATUSES.SUBMITTED:
                 return "Отменить сдачу";
             default:
-                return showWorkForm ? "Закрыть форму" : "Сдать работу";
+                return "Сдать работу";
         }
     };
 
@@ -180,7 +205,7 @@ const AssignmentDetailPage = () => {
     if (!assignment) return <Text tag="p">Задание не найдено</Text>;
 
     return (
-        <div className="assignment-detail">
+        <main className="assignment-detail">
             <div className="assignment-detail__header">
                 <div className="assignment-detail__header-left">
                     <Text
@@ -209,9 +234,9 @@ const AssignmentDetailPage = () => {
                     )}
 
                     <MyButton
-                        className={`assignment-detail__submit-btn ${showWorkForm ? "assignment-detail__submit-btn--active" : ""}`}
+                        className={"assignment-detail__submit-btn"}
                         text={getSubmitButtonText()}
-                        onClick={handleSubmitClick}
+                        onClick={() => handleButtonClick()}
                     />
                 </div>
             </div>
@@ -290,11 +315,7 @@ const AssignmentDetailPage = () => {
                         <Text tag="h2">Моя работа</Text>
                     </div>
 
-                    <form
-                        className="submission-form"
-                        onSubmit={handleSubmitWork}
-                        ref={workFormRef}
-                    >
+                    <form className="submission-form">
                         {error && (
                             <div className="submission-form__error">
                                 {error}
@@ -339,7 +360,7 @@ const AssignmentDetailPage = () => {
                                 {files.map((file) => (
                                     <FileItem
                                         key={file.id}
-                                        file={file}
+                                        fileUrl={file.original_name}
                                         onDownload={() =>
                                             handleDownloadFile(
                                                 file.id,
@@ -357,21 +378,10 @@ const AssignmentDetailPage = () => {
                                 ))}
                             </div>
                         </div>
-
-                        {assignment.status !==
-                            ASSIGNMENTS_STATUSES.SUBMITTED && (
-                            <MyButton
-                                type="submit"
-                                disabled={loading}
-                                className="submission-form__submit"
-                            >
-                                {loading ? "Отправка..." : "Отправить работу"}
-                            </MyButton>
-                        )}
                     </form>
                 </div>
             </div>
-        </div>
+        </main>
     );
 };
 

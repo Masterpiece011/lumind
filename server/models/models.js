@@ -388,6 +388,10 @@ export const Files = sequelize.define(
         file_url: { type: DataTypes.STRING, allowNull: false },
         entity_type: { type: DataTypes.STRING, allowNull: false },
         entity_id: { type: DataTypes.INTEGER, allowNull: false },
+        original_name: { type: DataTypes.STRING }, // Добавьте это поле
+        size: { type: DataTypes.INTEGER }, // Размер файла в байтах
+        mime_type: { type: DataTypes.STRING }, // MIME-тип
+        user_id: { type: DataTypes.INTEGER }, // Кто загрузил
     },
     {
         timestamps: true,

@@ -32,7 +32,12 @@ app.use(
         origin: "http://localhost:3000", // URL вашего фронта
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE"],
-        allowedHeaders: ["Content-Type", "Authorization"],
+        allowedHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Entity-ID",
+            "X-Entity-Type",
+        ],
     })
 );
 app.use(express.json());

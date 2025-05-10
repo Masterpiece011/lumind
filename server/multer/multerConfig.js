@@ -1,8 +1,8 @@
 import multer from "multer";
 import path from "path";
-import fs from "fs/promises";
+import fs from "fs";
 import { fileURLToPath } from "url";
-import { normalizeFilename, sanitizeFilename } from "./encodingUtils.js";
+import { decodeFileName, safeFileName } from "./encodingUtils.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,45 +11,22 @@ const __dirname = path.dirname(__filename);
 const UPLOADS_BASE_DIR = path.resolve(__dirname, "..", "uploads");
 const TEMP_UPLOADS_DIR = path.resolve(__dirname, "..", "temp_uploads");
 
-// Создание директорий при необходимости
-const ensureDirExists = async (dirPath) => {
-    try {
-        await fs.mkdir(dirPath, { recursive: true });
-    } catch (err) {
-        if (err.code !== "EEXIST") throw err;
+// Создаем корневые директории при старте
+const ensureDirExists = (dir) => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true, mode: 0o755 });
     }
 };
-
-// Определение конечной директории для файлов
-const getDestination = async (req, file) => {
-    const userId = req.user?.id || "anonymous";
-    const fileType = file.mimetype.split("/")[0];
-
-    let subDir = "general";
-    if (fileType === "image") subDir = "images";
-    if (fileType === "application") subDir = "documents";
-
-    const destPath = path.join(TEMP_UPLOADS_DIR, userId, subDir);
-    await ensureDirExists(destPath);
-    return destPath;
-};
+[UPLOADS_BASE_DIR, TEMP_UPLOADS_DIR].forEach(ensureDirExists);
 
 // Генерация безопасного имени файла
 const generateFilename = (req, file) => {
-    const normalized = normalizeFilename(file.originalname);
-    const safeName = sanitizeFilename(normalized);
+    const normalized = decodeFileName(file.originalname);
+    const safeName = safeFileName(normalized);
     const uniquePrefix =
         Date.now() + "-" + Math.random().toString(36).slice(2, 8);
     return `${uniquePrefix}_${safeName}`;
 };
-
-// Конфигурация хранилища
-const storage = multer.diskStorage({
-    destination: getDestination,
-    filename: (req, file, cb) => {
-        cb(null, generateFilename(req, file));
-    },
-});
 
 // Фильтрация файлов
 const fileFilter = (req, file, cb) => {
@@ -62,20 +39,51 @@ const fileFilter = (req, file, cb) => {
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
-    cb(null, allowedTypes.includes(file.mimetype));
+    if (!allowedTypes.includes(file.mimetype)) {
+        return cb(
+            new Error(`Тип файла ${file.mimetype} не поддерживается`),
+            false
+        );
+    }
+    cb(null, true);
 };
 
-// Экспорт настроенного экземпляра Multer
+// Конфигурация Multer
 export const upload = multer({
-    storage,
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            try {
+                const userId = String(req.user?.id || "anonymous");
+                const fileType = file.mimetype.split("/")[0];
+                let subDir = "general";
+
+                if (fileType === "image") subDir = "images";
+                if (fileType === "application") subDir = "documents";
+
+                const destPath = path.join(TEMP_UPLOADS_DIR, userId, subDir);
+                ensureDirExists(destPath);
+                cb(null, destPath);
+            } catch (err) {
+                console.error("Directory creation error:", err);
+                cb(err);
+            }
+        },
+        filename: (req, file, cb) => {
+            try {
+                cb(null, generateFilename(req, file));
+            } catch (err) {
+                console.error("Filename generation error:", err);
+                cb(err);
+            }
+        },
+    }),
     fileFilter,
     limits: {
-        fileSize: 25 * 1024 * 1024, // 25MB
-        files: 5, // Максимум 5 файлов за раз
+        fileSize: 50 * 1024 * 1024, // 50MB
+        files: 5,
     },
-});
+}).array("files");
 
-// Вспомогательные методы
 export const fileConfig = {
     UPLOADS_BASE_DIR,
     TEMP_UPLOADS_DIR,

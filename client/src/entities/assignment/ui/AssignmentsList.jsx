@@ -10,7 +10,7 @@ export const AssignmentsList = memo(
         isFilterLoading,
         onSelect,
     }) => (
-        <div className="assignments__card-wrapper">
+        <ul className="assignments__cards-list">
             {isLoading || isFilterLoading ? (
                 <div className="assignments__loading">
                     <ClockLoader loading={true} />
@@ -27,6 +27,6 @@ export const AssignmentsList = memo(
             ) : (
                 <p className="assignments__empty"></p>
             )}
-        </div>
+        </ul>
     ),
 );

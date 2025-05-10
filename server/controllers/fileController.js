@@ -4,8 +4,6 @@ import ApiError from "../error/ApiError.js";
 
 import path from "path";
 import fs from "fs/promises";
-import { v4 as uuidv4 } from "uuid";
-
 import FileService from "../multer/fileService.js";
 import { fileConfig } from "../multer/multerConfig.js";
 
@@ -154,26 +152,68 @@ class FileController {
 
     async upload(req, res, next) {
         try {
-            if (!req.file) {
-                throw ApiError.badRequest("No file uploaded");
+            if (!req.files?.length) {
+                throw ApiError.badRequest("No files uploaded");
             }
 
-            const result = await FileService.promoteTempFile(
-                req.file.path,
-                req.body.entityType || "general"
-            );
+            const entityType = req.headers["x-entity-type"] || "general";
+            const entityId = parseInt(req.headers["x-entity-id"]);
+            const userId = req.user.id;
 
-            if (!result.success) {
-                throw ApiError.internal("File processing failed");
+            if (!entityId || isNaN(entityId)) {
+                throw ApiError.badRequest("Valid Entity ID is required");
             }
+
+            const filesToCreate = [];
+            const errors = [];
+
+            for (const file of req.files) {
+                try {
+                    const result = await FileService.promoteTempFile(
+                        file.path,
+                        entityType,
+                        file.originalname
+                    );
+
+                    if (!result.success) {
+                        throw new Error(result.error);
+                    }
+
+                    filesToCreate.push({
+                        file_url: `/uploads/${result.relativePath}`,
+                        original_name: result.originalName, // Декодированное имя
+                        size: file.size,
+                        mime_type: file.mimetype,
+                        entity_type: entityType,
+                        entity_id: entityId,
+                        user_id: userId,
+                    });
+                } catch (fileError) {
+                    errors.push(fileError.message);
+                    await FileService.delete(file.path).catch(console.error);
+                }
+            }
+
+            if (filesToCreate.length === 0) {
+                throw ApiError.internal(
+                    `All files failed: ${errors.join(", ")}`
+                );
+            }
+
+            const filesRecords = await Files.bulkCreate(filesToCreate);
 
             res.json({
-                url: `/uploads/${result.relativePath}`,
-                originalName: req.file.originalname,
-                size: req.file.size,
+                success: true,
+                files: filesRecords.map((file) => ({
+                    id: file.id,
+                    file_url: file.file_url,
+                    original_name: file.original_name,
+                    size: file.size,
+                    mime_type: file.mime_type,
+                })),
             });
         } catch (error) {
-            await FileService.delete(req.file?.path);
+            console.error("Upload failed:", error);
             next(error);
         }
     }

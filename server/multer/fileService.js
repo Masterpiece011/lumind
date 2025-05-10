@@ -1,37 +1,51 @@
 import fs from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
 import { fileConfig } from "./multerConfig.js";
-import { sanitizeFilename } from "./encodingUtils.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { decodeFileName, safeFileName } from "./encodingUtils.js";
 
 class FileService {
     /**
      * Перемещает файл из временной директории в постоянную
      */
-    static async promoteTempFile(tempPath, targetDir, newFilename = null) {
+    static async promoteTempFile(tempPath, targetDir, originalName) {
         try {
-            const filename = newFilename || path.basename(tempPath);
-            const safeFilename = sanitizeFilename(filename);
-            const destination = path.join(
-                fileConfig.UPLOADS_BASE_DIR,
-                targetDir,
-                safeFilename
-            );
+            // Декодируем имя и создаем безопасную версию
+            const decodedName = decodeFileName(originalName);
+            const safeName = safeFileName(decodedName);
 
-            await fs.mkdir(path.dirname(destination), { recursive: true });
-            await fs.rename(tempPath, destination);
+            // Добавляем уникальный префикс
+            const uniquePrefix =
+                Date.now() + "-" + Math.random().toString(36).slice(2, 6);
+            const finalName = `${uniquePrefix}_${safeName}`;
 
+            // Создаем нормализованные пути (используем path.join для правильных слешей)
+            const destDir = path.join(fileConfig.UPLOADS_BASE_DIR, targetDir);
+            const destPath = path.join(destDir, finalName);
+
+            // Создаем директорию и перемещаем файл
+            await fs.mkdir(destDir, { recursive: true });
+            await fs.rename(tempPath, destPath);
+
+            // Возвращаем пути с нормализованными слешами
             return {
                 success: true,
-                path: destination,
-                relativePath: path.join(targetDir, safeFilename),
+                path: destPath,
+                relativePath: path
+                    .join(targetDir, finalName)
+                    .replace(/\\/g, "/"), // Заменяем \ на /
+                originalName: decodedName,
             };
         } catch (error) {
-            console.error(`File promotion failed: ${error.message}`);
-            return { success: false, error };
+            console.error("File processing error:", error);
+            try {
+                await fs.unlink(tempPath);
+            } catch (cleanupError) {
+                console.error("Cleanup failed:", cleanupError);
+            }
+            return {
+                success: false,
+                error: error.message,
+            };
         }
     }
 

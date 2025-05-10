@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+import { $authHost } from "./page";
 
 // Функция для получения токена (проверяет и куки, и localStorage)
 const getAuthToken = () => {
@@ -18,35 +16,38 @@ const getAuthToken = () => {
     return typeof window !== "undefined" ? localStorage.getItem("token") : null;
 };
 
-export const uploadFiles = async ({ file, entityId, entityType }) => {
-    const token = getAuthToken();
+export const uploadFiles = async ({
+    files,
+    entityId,
+    entityType,
+    onUploadProgress,
+}) => {
+    const token = localStorage.getItem("token"); // Или из кук
+
     const formData = new FormData();
-    formData.append("file", file);
+    files.forEach((file) => formData.append("files", file));
 
     const config = {
         headers: {
             "Content-Type": "multipart/form-data",
             "X-Entity-ID": entityId,
             "X-Entity-Type": entityType,
-            ...(token && { Authorization: `Bearer ${token}` }),
+            Authorization: `Bearer ${token}`, // Токен уже содержит userId
         },
-        withCredentials: true, // Важно для работы с HTTP-only куками
+        withCredentials: true,
+        onUploadProgress,
     };
 
     try {
-        const response = await axios.post(
-            `${API_BASE_URL}/api/files`,
-            formData,
-            config,
-        );
-        return { files: [response.data] };
+        const response = await $authHost.post("/api/files", formData, config);
+
+        return response.data;
     } catch (error) {
-        console.error("Ошибка загрузки:", error);
-        throw error;
+        throw new Error(error.response?.data?.message || "Upload failed");
     }
 };
 
-export const downloadFile = async ({ fileId, fileName }) => {
+export const downloadFile = async ({ fileId }) => {
     const token = getAuthToken();
     const config = {
         responseType: "blob",
@@ -55,10 +56,7 @@ export const downloadFile = async ({ fileId, fileName }) => {
     };
 
     try {
-        const response = await axios.get(
-            `${API_BASE_URL}/api/files/${fileId}`,
-            config,
-        );
+        const response = await $authHost.get(`/api/files/${fileId}`, config);
 
         // Получаем имя файла из заголовков или используем переданное
         const contentDisposition = response.headers["content-disposition"];
@@ -81,7 +79,7 @@ export const downloadFile = async ({ fileId, fileName }) => {
     }
 };
 
-export const deleteFile = async (fileId) => {
+export const deleteFile = async ({ fileId }) => {
     const token = getAuthToken();
     const config = {
         withCredentials: true,
@@ -89,7 +87,8 @@ export const deleteFile = async (fileId) => {
     };
 
     try {
-        await axios.delete(`${API_BASE_URL}/api/files/${fileId}`, config);
+        await $authHost.delete(`${API_BASE_URL}/api/files/${fileId}`, config);
+
         return true;
     } catch (error) {
         console.error(`Ошибка при удалении файла ${fileId}:`, error);
@@ -106,11 +105,7 @@ export const getUserFiles = async () => {
     };
 
     try {
-        const response = await axios.post(
-            `${API_BASE_URL}/api/files/user`,
-            {},
-            config,
-        );
+        const response = await $authHost.post("/api/files/user", {}, config);
         return response.data;
     } catch (error) {
         console.error("Ошибка получения файлов пользователя:", error);
@@ -126,12 +121,12 @@ export const getTeamFiles = async (teamId) => {
     };
 
     try {
-        const response = await axios.post(
-            `${API_BASE_URL}/api/files/team/${teamId}`,
+        const { data } = await $authHost.post(
+            `/api/files/team/${teamId}`,
             {},
             config,
         );
-        return response.data;
+        return data;
     } catch (error) {
         console.error("Ошибка получения файлов команды:", error);
         throw error;
