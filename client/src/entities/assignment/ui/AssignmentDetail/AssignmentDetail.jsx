@@ -310,7 +310,7 @@ const AssignmentDetailPage = () => {
                                 {assignment.task_files.map((file) => (
                                     <li key={file.id}>
                                         <FileItem
-                                            file={file}
+                                            fileUrl={file.file_url}
                                             onDownload={() =>
                                                 handleDownloadFile(
                                                     file.id,
