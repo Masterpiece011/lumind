@@ -288,8 +288,6 @@ export const Assignments = sequelize.define(
     "assignments",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        title: { type: DataTypes.STRING, allowNull: false },
-        description: { type: DataTypes.STRING, allowNull: true },
         comment: { type: DataTypes.STRING, allowNull: true },
         user_id: { type: DataTypes.INTEGER, allowNull: false },
         creator_id: { type: DataTypes.INTEGER, allowNull: false },

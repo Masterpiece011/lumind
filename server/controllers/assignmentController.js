@@ -19,28 +19,23 @@ class AssignmentController {
     async create(req, res, next) {
         try {
             const {
-                title,
-                description,
-                comment,
                 creator_id,
                 user_id,
                 task_id,
-                team_id,
-                investments = [],
                 status,
-                due_date,
+                plan_date,
             } = req.body;
 
             // Проверка обязательных полей
-            if (!title || !due_date || !creator_id || !user_id || !task_id) {
+            if (!creator_id || !user_id || !task_id) {
                 return next(
                     ApiError.badRequest(
-                        "Необходимо указать: title, due_date, creator_id, user_id и task_id"
+                        "Необходимо указать:  creator_id, user_id и task_id"
                     )
                 );
             }
 
-            // Проверка существования задачи и ее файлов
+            // Проверка существования задания
             const task = await Tasks.findByPk(task_id, {
                 include: [
                     {
@@ -68,35 +63,18 @@ class AssignmentController {
 
             // Создание назначения
             const assignment = await Assignments.create({
-                title,
-                description,
-                plan_date: due_date,
-                comment,
+                plan_date: plan_date || null,
                 creator_id,
                 user_id,
                 task_id,
-                team_id,
                 status: status || "assigned",
             });
-
-            // Добавление вложений ответа (если есть)
-            let assignmentInvestments = [];
-            if (investments.length > 0) {
-                assignmentInvestments = await Files.bulkCreate(
-                    investments.map((fileUrl) => ({
-                        entity_id: assignment.id,
-                        entity_type: "assignment",
-                        file_url: fileUrl,
-                    }))
-                );
-            }
 
             return res.status(201).json({
                 message: "Назначение успешно создано",
                 assignment: {
                     ...assignment.get({ plain: true }),
                     task_files: task.files || [], // Файлы из задания
-                    assignment_files: assignmentInvestments, // Файлы ответа
                 },
             });
         } catch (error) {
@@ -144,6 +122,12 @@ class AssignmentController {
             const { count, rows: assignments } =
                 await Assignments.findAndCountAll({
                     where: whereCondition,
+                    include: [
+                        {
+                            model: Tasks,
+                            as: "task"
+                        }
+                    ]
                 });
 
             return res.json({ assignments: assignments, total: count });

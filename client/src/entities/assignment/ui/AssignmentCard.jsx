@@ -1,4 +1,5 @@
 import React, { memo } from "react";
+import Text from "@/shared/ui/Text";
 
 export const AssignmentCard = memo(({ assignment, status, onSelect }) => {
     const labels = {
@@ -8,6 +9,7 @@ export const AssignmentCard = memo(({ assignment, status, onSelect }) => {
         failed: "Провалено",
         in_progress: "В работе",
     };
+    console.log(assignment);
 
     return (
         <li
@@ -15,15 +17,17 @@ export const AssignmentCard = memo(({ assignment, status, onSelect }) => {
             onClick={() => onSelect(assignment.id)}
         >
             <div className="assignments__header">
-                <span className="assignments__status">
+                <Text tag="span" className="assignments__status">
                     {labels[status] || status}
-                </span>
+                </Text>
             </div>
-            <h2 className="assignments__name">{assignment.title}</h2>
+            <Text tag="h2" className="assignments__name">
+                {assignment.task.title}
+            </Text>
             <div className="assignments__deadline">
-                <p>
+                <Text tag="p">
                     Срок: {new Date(assignment.plan_date).toLocaleDateString()}
-                </p>
+                </Text>
             </div>
         </li>
     );
