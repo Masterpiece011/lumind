@@ -31,9 +31,8 @@
         transition: all 0.2s;
 
         &:hover {
-            background: var(--hover-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px var(--shadow-color);
+            background-color: var(--hover-color);
+            border-color: transparent;
         }
     }
 
