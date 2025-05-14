@@ -1,18 +1,19 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAssignments } from "@/shared/api/assignmentsAPI";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { AssignmentsList } from "../AssignmentsList";
 import Text from "@/shared/ui/Text";
 import { InstructorStudentsList } from "./InstructorStudentsList";
+import { MyButton } from "@/shared/uikit/MyButton";
+import { ASSIGNMENTS_STATUSES } from "@/shared/constants";
 import "./InstructorAssignmentsView.scss";
+import { getUserAssignments } from "@/shared/api/assignmentsAPI";
 
-export const InstructorAssignmentsView = ({ userId }) => {
+export const InstructorAssignmentsView = ({ userId, taskId }) => {
     const dispatch = useDispatch();
     const { assignments, loading, error } = useSelector(
-        (state) => state.assignments,
+        (state) => state.assignments.userAssignments,
     );
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [filter, setFilter] = useState("all");
@@ -20,15 +21,14 @@ export const InstructorAssignmentsView = ({ userId }) => {
     useEffect(() => {
         if (selectedUserId) {
             dispatch(
-                getAssignments({
-                    user_id: selectedUserId,
-                    creator_id: userId,
+                getUserAssignments({
+                    userId: selectedUserId,
                     status: filter === "all" ? undefined : filter,
                     include: ["task", "files"],
                 }),
             );
         }
-    }, [dispatch, userId, selectedUserId, filter]);
+    }, [dispatch, selectedUserId, filter]);
 
     const handleFilterChange = (newFilter) => {
         setFilter(newFilter);
@@ -39,7 +39,10 @@ export const InstructorAssignmentsView = ({ userId }) => {
 
     return (
         <div className="instructor-assignments">
-            <InstructorStudentsList onSelectUser={setSelectedUserId} />
+            <InstructorStudentsList
+                taskId={taskId}
+                onSelectUser={setSelectedUserId}
+            />
 
             {selectedUserId && (
                 <div className="assignments-section">

@@ -1,55 +1,70 @@
+import {
+    getUserAssignments,
+    getUserTeamAssignments,
+} from "@/shared/api/assignmentsAPI";
 import { createSlice } from "@reduxjs/toolkit";
-import { getAssignments } from "@/shared/api/assignmentsAPI";
 
 const initialState = {
-    assignments: [],
-    assignmentsTotal: 0,
-    loading: false,
-    error: null,
+    userAssignments: {
+        data: [],
+        total: 0,
+        loading: false,
+        error: null,
+        lastUpdated: null,
+    },
+    teamAssignments: {
+        data: [],
+        total: 0,
+        loading: false,
+        error: null,
+        lastUpdated: null,
+    },
 };
 
 const assignmentSlice = createSlice({
     name: "assignments",
     initialState,
     reducers: {
-        setLoading: (state) => {
-            state.loading = true;
-        },
-        setAssignment: (state, { payload }) => {
-            state.assignments = payload.assignments;
-            state.assignmentsTotal = payload.total || payload.length || 0;
-            state.loading = false;
-        },
-        setError: (state, { payload }) => {
-            state.error = payload;
-            state.loading = false;
+        clearAssignments: (state) => {
+            state.userAssignments = initialState.userAssignments;
+            state.teamAssignments = initialState.teamAssignments;
         },
     },
-
     extraReducers: (builder) => {
         builder
-            .addCase(getAssignments.pending, (state) => {
-                state.loading = true;
+            // Обработка общих назначений
+            .addCase(getUserAssignments.pending, (state) => {
+                state.userAssignments.loading = true;
+                state.userAssignments.error = null;
             })
-            .addCase(getAssignments.fulfilled, (state, { payload, meta }) => {
-                console.log("Assignments loaded for userId:", meta.arg?.userId);
+            .addCase(getUserAssignments.fulfilled, (state, { payload }) => {
+                state.userAssignments.data = payload.assignments;
+                state.userAssignments.total = payload.total;
+                state.userAssignments.loading = false;
+                state.userAssignments.lastUpdated = Date.now();
+            })
+            .addCase(getUserAssignments.rejected, (state, { payload }) => {
+                state.userAssignments.error = payload;
+                state.userAssignments.loading = false;
+            })
 
-                state.assignments = payload.assignments;
-                state.assignmentsTotal = payload.total || payload.length || 0;
-                state.loading = false;
+            // Обработка командных назначений
+            .addCase(getUserTeamAssignments.pending, (state) => {
+                state.teamAssignments.loading = true;
+                state.teamAssignments.error = null;
             })
-            .addCase(getAssignments.rejected, (state, { error, meta }) => {
-                console.error(
-                    "Error loading teams for userId:",
-                    meta.arg?.userId,
-                    error,
-                );
-                state.error = error.message;
-                state.loading = false;
+            .addCase(getUserTeamAssignments.fulfilled, (state, { payload }) => {
+                state.teamAssignments.data = payload.assignments;
+                state.teamAssignments.total = payload.total;
+                state.teamAssignments.loading = false;
+                state.teamAssignments.lastUpdated = Date.now();
+            })
+            .addCase(getUserTeamAssignments.rejected, (state, { payload }) => {
+                state.teamAssignments.error = payload;
+                state.teamAssignments.loading = false;
             });
     },
 });
 
-export const { setLoading, setAssignment, setError } = assignmentSlice.actions;
-
+export const { clearAssignments } = assignmentSlice.actions;
 export default assignmentSlice.reducer;

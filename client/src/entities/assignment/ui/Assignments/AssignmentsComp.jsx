@@ -1,57 +1,52 @@
 import React, { useEffect, useState, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAssignments } from "@/shared/api/assignmentsAPI";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { Filters } from "../Filters";
 import { AssignmentsList } from "../AssignmentsList";
 import "./AssignmentsComp.scss";
 import Text from "@/shared/ui/Text";
+import { getUserAssignments } from "@/shared/api/assignmentsAPI";
 
 const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const dispatch = useDispatch();
-    const { assignments, assignmentsTotal, loading, error } = useSelector(
-        (state) => state.assignments,
-    );
-    const userRole = useSelector((state) => state.user.user?.role);
-    const isInstructor = userRole === "INSTRUCTOR";
+    const {
+        data: allAssignments,
+        total: assignmentsTotal,
+        loading,
+        error,
+    } = useSelector((state) => state.assignments.userAssignments);
 
     const [filter, setFilter] = useState("all");
     const [isFilterLoading, setIsFilterLoading] = useState(false);
+    const [filteredAssignments, setFilteredAssignments] = useState([]);
 
     useEffect(() => {
-        const fetchAssignments = () => {
-            dispatch(
-                getAssignments({
-                    userId: userId,
-                    status: filter === "all" ? undefined : filter,
-                    include: ["task", "files"],
-                    // Для преподавателя добавляем флаг creator
-                    ...(isInstructor ? { creator_id: userId } : {}),
-                }),
-            );
-        };
-
-        if (userId) {
-            fetchAssignments();
+        if (allAssignments) {
+            if (filter === "all") {
+                setFilteredAssignments(allAssignments);
+            } else {
+                setFilteredAssignments(
+                    allAssignments.filter((a) => a.status === filter),
+                );
+            }
         }
-    }, [dispatch, userId, filter, isInstructor]);
+    }, [allAssignments, filter]);
+
+    useEffect(() => {
+        if (userId) {
+            setIsFilterLoading(true);
+            dispatch(getUserAssignments({ userId })).finally(() =>
+                setIsFilterLoading(false),
+            );
+        }
+    }, [dispatch, userId]);
+
+    const handleSetNewFilter = (newFilter) => {
+        setFilter(newFilter);
+    };
 
     if (loading) return <ClockLoader className="assignments__loading" />;
     if (error) return <div className="assignments__error">Ошибка: {error}</div>;
-
-    const handleSetNewFilter = (newFilter) => {
-        if (newFilter !== filter) {
-            setFilter(newFilter);
-            setIsFilterLoading(true);
-            dispatch(
-                getAssignments({
-                    userId: userId,
-                    status: newFilter,
-                    include: ["task", "files"],
-                }),
-            ).finally(() => setIsFilterLoading(false));
-        }
-    };
 
     return (
         <div className="assignments">
@@ -66,14 +61,18 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
 
             <div className="assignments__divider"></div>
 
-            {loading || isFilterLoading ? (
+            {isFilterLoading ? (
                 <div className="assignments__loader">
                     <ClockLoader loading={true} />
                 </div>
             ) : (
                 <AssignmentsList
-                    assignments={assignments}
-                    assignmentsTotal={assignmentsTotal}
+                    assignments={filteredAssignments}
+                    assignmentsTotal={
+                        filter === "all"
+                            ? assignmentsTotal
+                            : filteredAssignments.length
+                    }
                     onSelect={onSelectAssignment}
                     isLoading={loading}
                     isFilterLoading={isFilterLoading}

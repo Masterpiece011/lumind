@@ -19,6 +19,18 @@ assignmentRouter.post(
     roleMiddleware(),
     assignmentController.getAll
 );
+assignmentRouter.post(
+    "/get-self",
+    authMiddleware,
+    roleMiddleware(),
+    assignmentController.getAllSelfAssignments
+);
+assignmentRouter.post(
+    "/get-team-assignments",
+    authMiddleware,
+    roleMiddleware(),
+    assignmentController.getAllSelfTeamAssignments
+);
 assignmentRouter.put(
     "/",
     authMiddleware,
