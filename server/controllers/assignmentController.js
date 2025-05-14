@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+import { Op } from "sequelize";
 
 import {
     Assignments,
@@ -18,13 +19,8 @@ class AssignmentController {
     // Создание назаначения
     async create(req, res, next) {
         try {
-            const {
-                creator_id,
-                user_id,
-                task_id,
-                status,
-                plan_date,
-            } = req.body;
+            const { creator_id, user_id, task_id, status, plan_date } =
+                req.body;
 
             // Проверка обязательных полей
             if (!creator_id || !user_id || !task_id) {
@@ -90,7 +86,91 @@ class AssignmentController {
     // Получение всех назначений пользователя
     async getAll(req, res, next) {
         try {
-            const { user_id, status } = req.body;
+            const { user_id, status, team_id } = req.body;
+            const currentUserId = req.user.id;
+            const userRole = req.user.role;
+
+            if (!user_id && !team_id) {
+                return next(
+                    ApiError.badRequest(
+                        "Необходимо указать ID пользователя или команды"
+                    )
+                );
+            }
+
+            // Для преподавателей - получаем все задания, которые они создали
+            if (userRole === "INSTRUCTOR") {
+                const whereCondition = { creator_id: user_id };
+                if (status && status !== "all") {
+                    whereCondition.status = status;
+                }
+
+                const { count, rows: assignments } =
+                    await Assignments.findAndCountAll({
+                        where: whereCondition,
+                        include: [{ model: Tasks, as: "task" }],
+                    });
+
+                return res.json({ assignments, total: count });
+            }
+
+            // Для обычных пользователей
+            const whereCondition = {};
+
+            // Если запрашивают задания команды
+            if (team_id) {
+                // Проверяем, состоит ли пользователь в этой команде
+                const isMember = await Users_Teams.findOne({
+                    where: { user_id: currentUserId, team_id },
+                });
+
+                if (!isMember) {
+                    return next(
+                        ApiError.forbidden(
+                            "Пользователь не состоит в этой команде"
+                        )
+                    );
+                }
+
+                // Получаем задания, связанные с этой командой
+                const teamTasks = await Teams_Tasks.findAll({
+                    where: { team_id },
+                    attributes: ["task_id"],
+                });
+
+                const taskIds = teamTasks.map((t) => t.task_id);
+
+                // Добавляем условие для заданий команды
+                whereCondition.task_id = { [Op.in]: taskIds };
+            }
+
+            if (status && status !== "all") {
+                whereCondition.status = status;
+            }
+
+            // Получаем назначения
+            const { count, rows: assignments } =
+                await Assignments.findAndCountAll({
+                    where: whereCondition,
+                    include: [{ model: Tasks, as: "task" }],
+                    distinct: true,
+                });
+
+            return res.json({ assignments, total: count });
+        } catch (error) {
+            next(
+                ApiError.internal(
+                    `Ошибка при получении заданий: ${error.message}`
+                )
+            );
+        }
+    }
+
+    // Получение собственных назначений, ОБЩИЙ ВАРИАНТ В  ASSIGNMENTS-АХ
+
+    async getAllSelfAssignments(req, res, next) {
+        try {
+            const { user_id } = req.body;
 
             if (!user_id) {
                 return next(
@@ -98,39 +178,185 @@ class AssignmentController {
                 );
             }
 
-            // Проверяем команды пользователя
-            const userTeams = await Users_Teams.findAll({
-                where: { user_id: user_id },
-                attributes: ["team_id"],
-            });
-
-            const teamIds = userTeams.map((team) => team.team_id);
-
-            if (teamIds.length === 0) {
-                return res.json({
-                    message: "Пользователь не состоит ни в одной команде",
-                    assignments: [],
-                });
-            }
-
-            const whereCondition = { user_id };
-            if (status && status !== "all") {
-                whereCondition.status = status;
-            }
-
-            // Получаем назначения пользователя
             const { count, rows: assignments } =
                 await Assignments.findAndCountAll({
-                    where: whereCondition,
+                    where: { user_id: user_id },
+                    attributes: {
+                        exclude: [
+                            "task_id",
+                            "comment",
+                            "created_at",
+                            "updated_at",
+                            "creator_id",
+                        ],
+                    },
                     include: [
                         {
                             model: Tasks,
-                            as: "task"
-                        }
-                    ]
+                            as: "task",
+                            include: [
+                                // Включаем команды, связанные с задачей
+                                {
+                                    model: Teams,
+                                    as: "teams", // Убедитесь, что это правильное название ассоциации
+                                    through: { attributes: [] }, // Исключаем промежуточную таблицу
+                                    attributes: {
+                                        exclude: [
+                                            "created_at",
+                                            "updated_at",
+                                            "creator_id",
+                                        ],
+                                    },
+                                    required: false, // Если связь не обязательная
+                                },
+                            ],
+                            attributes: {
+                                exclude: [
+                                    "created_at",
+                                    "updated_at",
+                                    "creator_id",
+                                ],
+                            },
+                        },
+                    ],
                 });
 
-            return res.json({ assignments: assignments, total: count });
+            if (!count === 0) {
+                return ApiError.badRequest("Юзер лох у него нет ничего!");
+            }
+
+            const response = assignments.map((assignment) => {
+                const team =
+                    assignment.task.teams?.[0]?.get({ plain: true }) || null;
+
+                const taskData = assignment.task.get({ plain: true });
+
+                // Удаляем teams из task, если не хотим дублирования
+                if (taskData.teams) {
+                    delete taskData.teams;
+                }
+
+                return {
+                    id: assignment.id,
+                    status: assignment.status,
+                    plan_date: assignment.plan_date,
+                    user_id: assignment.user_id,
+                    task: { ...taskData }, // Разворачиваем поля задачи
+                    team: team, // Добавляем команду отдельно
+                };
+            });
+
+            return res.json({
+                assignments: response, // Массив заданий в одном уровне
+                total: count,
+            });
+        } catch (error) {
+            next(
+                ApiError.internal(
+                    `Ошибка при получении заданий: ${error.message}`
+                )
+            );
+        }
+    }
+
+    // Получение собственных назначений, В РАМКАХ ОДНОЙ КОМАНДЫ
+
+    async getAllSelfTeamAssignments(req, res, next) {
+        try {
+            const { user_id, team_id } = req.body;
+
+            if (!user_id || !team_id) {
+                return next(
+                    ApiError.badRequest(
+                        "Необходимо указать ID пользователя и ID команды"
+                    )
+                );
+            }
+
+            // 1. Получаем все task_id для данной команды
+            const teamTasks = await Teams_Tasks.findAll({
+                where: { team_id },
+                attributes: ["task_id"],
+                raw: true,
+            });
+
+            if (!teamTasks.length) {
+                return res.json({ assignments: [], total: 0 });
+            }
+
+            const taskIds = teamTasks.map((t) => t.task_id);
+
+            // 2. Ищем assignments пользователя с этими task_id
+            const { count, rows: assignments } =
+                await Assignments.findAndCountAll({
+                    where: {
+                        user_id,
+                        task_id: taskIds, // Фильтр по task_id из teams_tasks
+                    },
+                    attributes: {
+                        exclude: [
+                            "comment",
+                            "created_at",
+                            "updated_at",
+                            "creator_id",
+                        ],
+                    },
+                    include: [
+                        {
+                            model: Tasks,
+                            as: "task",
+                            attributes: {
+                                exclude: [
+                                    "created_at",
+                                    "updated_at",
+                                    "creator_id",
+                                ],
+                            },
+                            include: [
+                                {
+                                    model: Teams,
+                                    as: "teams",
+                                    through: { attributes: [] },
+                                    where: { id: team_id },
+                                    attributes: [
+                                        "id",
+                                        "name",
+                                        "description",
+                                        "avatar_color",
+                                    ],
+                                    required: true,
+                                },
+                            ],
+                        },
+                    ],
+                });
+
+            if (count === 0) {
+                return res.json({ assignments: [], total: 0 });
+            }
+
+            const response = assignments.map((assignment) => {
+                const team =
+                    assignment.task.teams?.[0]?.get({ plain: true }) || null;
+
+                const taskData = assignment.task.get({ plain: true });
+
+                // Удаляем teams из task, если не хотим дублирования
+                if (taskData.teams) {
+                    delete taskData.teams;
+                }
+
+                return {
+                    id: assignment.id,
+                    status: assignment.status,
+                    plan_date: assignment.plan_date,
+                    user_id: assignment.user_id,
+                    task: { ...taskData }, // Разворачиваем поля задачи
+                    team: team, // Добавляем команду отдельно
+                };
+            });
+
+            return res.json({ assignments: response, total: count });
         } catch (error) {
             next(
                 ApiError.internal(
@@ -182,7 +408,7 @@ class AssignmentController {
                 return next(ApiError.forbidden("Нет доступа к этому заданию"));
             }
 
-            // Дополнительные данные
+            // Получаем данные пользователей
             const [student, creator] = await Promise.all([
                 Users.findByPk(assignment.user_id, {
                     attributes: ["id", "first_name", "last_name", "email"],
@@ -197,10 +423,10 @@ class AssignmentController {
                 ...assignment.get({ plain: true }),
                 creator,
                 task: {
-                    ...assignment.task.get({ plain: true }),
+                    ...(assignment.task?.get({ plain: true }) || {}),
+                    files: assignment.task?.files || [],
                 },
-                task_files: taskFiles || [],
-                assignment_files: assignment.files || [],
+                files: assignment.files || [],
             };
 
             return res.json({ assignment: response });
@@ -331,56 +557,56 @@ class AssignmentController {
     async getTeamStudentsWithTask(req, res, next) {
         try {
             const { taskId } = req.params;
-            console.log(`Fetching team students for task ID: ${taskId}`);
+            const userId = req.user.id;
 
-            // 1. Находим все связи команды с заданием через Teams_Tasks
-            const teamTasks = await Teams_Tasks.findAll({
-                where: { task_id: taskId },
+            // 1. Проверяем, что задание существует и принадлежит текущему пользователю
+            const task = await Tasks.findOne({
+                where: {
+                    id: taskId,
+                    creator_id: userId,
+                },
                 include: [
                     {
                         model: Teams,
-                        include: [
-                            {
-                                model: Users_Teams,
-                                include: [
-                                    {
-                                        model: Users,
-                                        attributes: [
-                                            "id",
-                                            "first_name",
-                                            "last_name",
-                                        ],
-                                    },
-                                ],
-                            },
-                        ],
+                        through: { attributes: [] },
+                        required: false,
                     },
                 ],
             });
 
-            if (!teamTasks || teamTasks.length === 0) {
-                return res.json({ students: [] });
+            if (!task) {
+                return next(
+                    ApiError.forbidden(
+                        "Задание не найдено или у вас нет доступа"
+                    )
+                );
             }
 
-            // 2. Собираем всех пользователей из всех команд
-            const users = [];
-            teamTasks.forEach((teamTask) => {
-                if (teamTask.team && teamTask.team.users_teams) {
-                    teamTask.team.users_teams.forEach((userTeam) => {
-                        if (userTeam.user) {
-                            users.push(userTeam.user);
-                        }
-                    });
-                }
-            });
+            // 2. Получаем ID всех команд, связанных с заданием
+            const teamIds = task.teams?.map((team) => team.id) || [];
 
-            // 3. Находим все назначения для этого задания
+            // 3. Получаем всех пользователей этих команд
+            let users = [];
+            if (teamIds.length > 0) {
+                users = await Users.findAll({
+                    include: [
+                        {
+                            model: Teams,
+                            through: { attributes: [] },
+                            where: { id: teamIds },
+                        },
+                    ],
+                    attributes: ["id", "first_name", "last_name", "email"],
+                });
+            }
+
+            // 4. Получаем все назначения для этого задания
             const assignments = await Assignments.findAll({
                 where: { task_id: taskId },
                 attributes: ["id", "user_id", "status"],
             });
 
-            // 4. Формируем ответ
+            // 5. Формируем ответ
             const students = users.map((user) => {
                 const assignment = assignments.find(
                     (a) => a.user_id === user.id
@@ -389,15 +615,16 @@ class AssignmentController {
                     id: user.id,
                     first_name: user.first_name || "",
                     last_name: user.last_name || "",
+                    email: user.email || "",
                     status: assignment?.status || "not_assigned",
-                    assignment_id: assignment?.id,
+                    assignment_id: assignment?.id || null,
                 };
             });
 
             return res.json({ students });
         } catch (error) {
             console.error("Error in getTeamStudentsWithTask:", error);
-            next(ApiError.internal(error.message));
+            next(ApiError.internal("Ошибка при получении списка студентов"));
         }
     }
 }

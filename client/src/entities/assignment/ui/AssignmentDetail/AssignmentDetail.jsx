@@ -36,9 +36,7 @@ const AssignmentDetailPage = () => {
     const fetchAssignment = async () => {
         try {
             setLoading(true);
-            const response = await getAssignmentById({
-                assignmentId: id,
-            });
+            const response = await getAssignmentById(id);
             setAssignment(response.assignment);
             console.log("ass", response.assignment);
 
@@ -222,8 +220,9 @@ const AssignmentDetailPage = () => {
     if (loading) return <ClockLoader />;
     if (error) return <Text tag="p">Ошибка: {error}</Text>;
     if (!assignment) return <Text tag="p">Задание не найдено</Text>;
-    if (showInstructorView)
+    if (isInstructor) {
         return <InstructorAssignmentFlow assignmentId={id} />;
+    }
 
     return (
         <main className="assignment-detail">

@@ -87,9 +87,40 @@ const roleRequirements = {
     "DELETE /api/tasks/:id": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
 
     // Назначения
-    "POST /api/assignments/create": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
-    "POST /api/assignments/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
-    "PUT /api/assignments/": [ROLES.ADMIN, ROLES.MODERATOR, ROLES.INSTRUCTOR],
+    "POST /api/assignments/create": [
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    "POST /api/assignments/": [
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+        ROLES.USER,
+    ],
+    "POST /api/assignments/get-self": [
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+        ROLES.USER,
+    ],
+    "POST /api/assignments/get-team-assignments": [
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+        ROLES.USER,
+    ],
+    "GET /api/assignments/team-students/:taskId": [
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    "PUT /api/assignments/": [
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+        ROLES.USER,
+    ],
     "DELETE /api/assignments/:id": [
         ROLES.ADMIN,
         ROLES.MODERATOR,

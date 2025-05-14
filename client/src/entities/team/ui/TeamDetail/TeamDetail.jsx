@@ -31,18 +31,20 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
     } = useSelector((state) => state.teams);
 
     const {
-        assignments,
-        assignmentsTotal,
+        data: allAssignments,
+        total: assignmentsTotal,
         loading: assignmentsLoading,
-    } = useSelector((state) => state.assignments);
+        error: assignmentsError,
+    } = useSelector((state) => state.assignments.teamAssignments);
 
     const user = useSelector((state) => state.user.user);
     const isInstructor = user?.role?.name === "INSTRUCTOR";
 
     const [activeTab, setActiveTab] = useState("members");
+    const [filteredAssignments, setFilteredAssignments] = useState([]);
     const { filter, isFilterLoading, handleSetNewFilter } =
         useAssignmentsFilter({
-            userId: isInstructor ? null : user?.id,
+            userId: user?.id,
             teamId: id,
             activeTab,
         });
@@ -51,6 +53,18 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
         page: 1,
         quantity: 10,
     });
+
+    useEffect(() => {
+        if (allAssignments) {
+            if (filter === "all") {
+                setFilteredAssignments(allAssignments);
+            } else {
+                setFilteredAssignments(
+                    allAssignments.filter((a) => a.status === filter),
+                );
+            }
+        }
+    }, [allAssignments, filter]);
 
     useEffect(() => {
         if (id && user?.id) {
@@ -66,17 +80,23 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
                 <Filters
                     currentFilter={filter}
                     onFilterChange={handleSetNewFilter}
-                    isInstructor={isInstructor}
                 />
                 <div className="assignments__divider"></div>
-                <AssignmentsList
-                    assignments={assignments}
-                    assignmentsTotal={assignmentsTotal}
-                    isLoading={assignmentsLoading}
-                    isFilterLoading={isFilterLoading}
-                    onSelect={onSelectAssignment}
-                    isInstructor={isInstructor}
-                />
+                {assignmentsError ? (
+                    <div className="error-message">{assignmentsError}</div>
+                ) : (
+                    <AssignmentsList
+                        assignments={filteredAssignments}
+                        assignmentsTotal={
+                            filter === "all"
+                                ? assignmentsTotal
+                                : filteredAssignments.length
+                        }
+                        isLoading={assignmentsLoading}
+                        isFilterLoading={isFilterLoading}
+                        onSelect={onSelectAssignment}
+                    />
+                )}
             </div>
         ),
         files: (

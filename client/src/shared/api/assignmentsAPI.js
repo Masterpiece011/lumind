@@ -22,9 +22,50 @@ export const getAssignments = createAsyncThunk(
     },
 );
 
-export const getAssignmentById = async (id) => {
+export const getUserAssignments = createAsyncThunk(
+    "assignments/getUserAssignments",
+    async ({ userId, status }, { rejectWithValue }) => {
+        try {
+            const { data } = await $authHost.post("/api/assignments/get-self", {
+                user_id: userId,
+                status: status === "all" ? undefined : status,
+            });
+            return data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Ошибка получения назначений",
+            );
+        }
+    },
+);
+
+export const getUserTeamAssignments = createAsyncThunk(
+    "assignments/getUserTeamAssignments",
+    async ({ userId, teamId, status }, { rejectWithValue }) => {
+        try {
+            const { data } = await $authHost.post(
+                "/api/assignments/get-team-assignments",
+                {
+                    user_id: userId,
+                    team_id: teamId,
+                    status: status === "all" ? undefined : status,
+                },
+            );
+            return data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                    "Ошибка получения командных назначений",
+            );
+        }
+    },
+);
+
+export const getAssignmentById = async (assignmentId) => {
     try {
-        const { data } = await $authHost.get(`/api/assignments/${id}`);
+        const { data } = await $authHost.get(
+            `/api/assignments/${assignmentId}`,
+        );
 
         if (!data?.assignment) {
             throw new Error("Неверный формат ответа сервера");
@@ -83,17 +124,11 @@ export const deleteAssignment = async (assignmentId) => {
 
 export const getUsersWithTask = async (taskId) => {
     try {
-        console.log(`Fetching team students for task: ${taskId}`);
-        const { data } = await $authHost.get(
+        const response = await $authHost.get(
             `/api/assignments/team-students/${taskId}`,
         );
-        console.log("Team students response:", data);
-        return data;
+        return response.data;
     } catch (error) {
-        console.error("Error fetching team students:", error);
-        throw new Error(
-            error.response?.data?.message ||
-                "Ошибка загрузки студентов команды",
-        );
+        throw new Error(error.response?.data?.message || error.message);
     }
 };
