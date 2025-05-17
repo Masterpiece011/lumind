@@ -1,9 +1,11 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import Text from "@/shared/ui/Text";
 import "./InstructorStudentsList.scss";
-import { getUsersWithTask } from "@/shared/api/assignmentsAPI";
+import { getStudentsWithAssignments } from "@/shared/api/assignmentsAPI";
+import { formatUserName } from "@/shared/lib/utils/formatUserName";
 
 export const InstructorStudentsList = ({ taskId, onSelectUser }) => {
     const [students, setStudents] = useState([]);
@@ -12,26 +14,20 @@ export const InstructorStudentsList = ({ taskId, onSelectUser }) => {
     const [selectedUserId, setSelectedUserId] = useState(null);
 
     useEffect(() => {
-        if (!taskId) {
-            setError("ID задания не указан");
-            setLoading(false);
-            return;
-        }
-
         const fetchStudents = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await getUsersWithTask(taskId);
+                const response = await getStudentsWithAssignments(taskId);
 
-                if (!response || !response.students) {
-                    throw new Error("Неверный формат данных студентов");
+                if (!response?.students) {
+                    throw new Error("Неверный формат данных");
                 }
 
                 setStudents(response.students);
             } catch (err) {
-                console.error("Fetch students error:", err);
-                setError(err.message || "Ошибка загрузки студентов");
+                console.error("Fetch error:", err);
+                setError(err.message || "Ошибка загрузки данных");
                 setStudents([]);
             } finally {
                 setLoading(false);
@@ -41,77 +37,89 @@ export const InstructorStudentsList = ({ taskId, onSelectUser }) => {
         fetchStudents();
     }, [taskId]);
 
-    const handleSelectUser = (userId, assignmentId) => {
-        console.log("User selected:", userId, "assignment:", assignmentId);
+    const handleSelectUser = (userId) => {
         setSelectedUserId(userId);
-        if (onSelectUser) {
-            onSelectUser(userId, assignmentId);
-        }
+        if (onSelectUser) onSelectUser(userId);
     };
 
-    console.log("Rendering InstructorStudentsList", {
-        loading,
-        error,
-        studentsCount: students.length,
-        selectedUserId,
-    });
+    const getStatusBadge = (status) => {
+        const statusClasses = {
+            assigned: "status--assigned",
+            submitted: "status--submitted",
+            completed: "status--completed",
+            failed: "status--failed",
+            in_progress: "status--in-progress",
+            not_assigned: "status--not-assigned",
+        };
 
-    if (loading) {
-        console.log("Rendering loader");
-        return <ClockLoader />;
-    }
-
-    if (error) {
-        console.log("Rendering error:", error);
         return (
-            <Text tag="p" className="error-message">
-                Ошибка: {error}
-            </Text>
+            <span className={`status-badge ${statusClasses[status] || ""}`}>
+                {getStatusText(status)}
+            </span>
         );
-    }
+    };
+
+    if (loading) return <ClockLoader />;
+    if (error) return <Text className="error-message">{error}</Text>;
 
     return (
         <div className="instructor-students">
-            <Text tag="h2">Студенты команды с этим заданием</Text>
-            <div className="students-list">
+            <Text tag="h2" className="instructor-students__title">
+                {taskId
+                    ? "Студенты с этим заданием"
+                    : "Студенты с назначениями"}
+            </Text>
+
+            <div className="instructor-students__students-list">
                 {students.length > 0 ? (
                     students.map((student) => {
-                        console.log("Rendering student:", student.id);
+                        const firstAssignment = student.assignments[0];
+                        const status =
+                            firstAssignment?.status || "not_assigned";
+
+                        const firstTeam = student.teams?.[0];
+                        const teamName = firstTeam?.name || "Без команды";
+                        const groupName = student.group?.title || "Без группы";
+
                         return (
                             <div
                                 key={student.id}
-                                className={`student-item ${
+                                className={`instructor-students__student-item ${
                                     selectedUserId === student.id
-                                        ? "active"
+                                        ? "instructor-students__student-item--active"
                                         : ""
-                                } ${student.status}`}
-                                onClick={() =>
-                                    handleSelectUser(
-                                        student.id,
-                                        student.assignment_id,
-                                    )
-                                }
+                                }`}
+                                onClick={() => handleSelectUser(student.id)}
                             >
-                                <Text tag="p">
-                                    {student.first_name} {student.last_name}
-                                    {student.email && (
-                                        <span className="email">
-                                            {" "}
-                                            ({student.email})
-                                        </span>
-                                    )}
-                                </Text>
-                                <Text
-                                    tag="span"
-                                    className={`status ${student.status}`}
-                                >
-                                    {getStatusText(student.status)}
-                                </Text>
+                                <div className="student-info">
+                                    <Text tag="p" className="student-name">
+                                        {formatUserName(student)}
+                                    </Text>
+                                    <div className="student-meta">
+                                        <Text
+                                            tag="span"
+                                            className="student-group"
+                                        >
+                                            {groupName}
+                                        </Text>
+                                        <Text
+                                            tag="span"
+                                            className="student-team"
+                                        >
+                                            {teamName}
+                                        </Text>
+                                    </div>
+                                </div>
+                                {getStatusBadge(status)}
                             </div>
                         );
                     })
                 ) : (
-                    <Text tag="p">Нет студентов в команде с этим заданием</Text>
+                    <Text tag="p" className="instructor-students__empty">
+                        {taskId
+                            ? "Нет студентов с этим заданием"
+                            : "Нет студентов с назначениями"}
+                    </Text>
                 )}
             </div>
         </div>

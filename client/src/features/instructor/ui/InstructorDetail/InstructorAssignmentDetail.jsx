@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import {
-    getAssignmentById,
+    getStudentAssignment,
     updateAssignment,
 } from "@/shared/api/assignmentsAPI";
 import { FileItem } from "@/shared/ui/FileComp";
@@ -9,61 +9,43 @@ import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import Text from "@/shared/ui/Text";
 import "./InstructorAssignmentDetail.scss";
 import { StatusSelector } from "../StatusSelector/StatusSelector";
+import { ASSIGNMENTS_STATUSES } from "@/shared/constants/assignments";
+import { downloadFile } from "@/shared/api/filesAPI";
 
-export const InstructorAssignmentDetail = ({ assignmentId }) => {
+export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [assessment, setAssessment] = useState("");
-
-    const safeGetAssignmentData = (response) => {
-        if (!response || !response.assignment) {
-            throw new Error("Неверный формат ответа сервера");
-        }
-
-        const assignment = response.assignment;
-
-        return {
-            id: assignment.id,
-            title: assignment.title || "Без названия",
-            description: assignment.description || "Нет описания",
-            comment: assignment.comment || "",
-            status: assignment.status || "unknown",
-            plan_date: assignment.plan_date || new Date(),
-            assessment: assignment.assessment || "",
-
-            // Данные задачи
-            task_title:
-                assignment.task?.title || assignment.title || "Без названия",
-            task_description: assignment.task?.description || "Нет описания",
-
-            // Файлы
-            task_files: assignment.task_files || assignment.task?.files || [],
-            assignment_files:
-                assignment.assignment_files || assignment.files || [],
-
-            // Пользователи
-            user_name:
-                [assignment.user?.first_name, assignment.user?.last_name]
-                    .filter(Boolean)
-                    .join(" ") || "Неизвестный студент",
-
-            creator_name:
-                [assignment.creator?.first_name, assignment.creator?.last_name]
-                    .filter(Boolean)
-                    .join(" ") || "Неизвестный создатель",
-        };
-    };
+    const [comment, setComment] = useState("");
 
     const fetchAssignment = async () => {
         try {
             setLoading(true);
-            const response = await getAssignmentById(assignmentId);
-            const safeData = safeGetAssignmentData(response);
-            setAssignment(safeData);
-            setAssessment(safeData.assessment);
+            const response = await getStudentAssignment(assignmentId);
+
+            console.log("Полученные данные:", {
+                assignment: response.assignment,
+                student: response.student,
+            });
+
+            // Проверяем, что user_id и creator_id разные
+            if (
+                response.assignment.user_id === response.assignment.creator_id
+            ) {
+                console.error("Ошибка: назначение самому себе!");
+            }
+
+            setAssignment({
+                ...response.assignment,
+                user: response.student,
+                creator: {
+                    id: response.assignment.creator_id,
+                    // Добавьте другие поля creator по необходимости
+                },
+            });
         } catch (err) {
-            console.error("Failed to fetch assignment:", err);
+            console.error("Ошибка загрузки:", err);
             setError(err.message || "Ошибка загрузки задания");
         } finally {
             setLoading(false);
@@ -77,22 +59,52 @@ export const InstructorAssignmentDetail = ({ assignmentId }) => {
     const handleStatusChange = async (newStatus) => {
         try {
             setLoading(true);
-            await updateAssignment({
+            const response = await updateAssignment({
                 assignment_id: assignmentId,
                 status: newStatus,
                 assessment: assessment,
+                comment: comment,
             });
-
-            // Обновляем только необходимые поля
-            setAssignment((prev) => ({
-                ...prev,
-                status: newStatus,
-                assessment: assessment,
-            }));
+            setAssignment(response.assignment);
         } catch (err) {
             setError(err.message || "Ошибка при обновлении статуса");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDownloadFile = async (fileId, fileName) => {
+        try {
+            await downloadFile({ fileId, fileName });
+        } catch (err) {
+            setError("Ошибка скачивания файла: " + err.message);
+        }
+    };
+
+    const getStatusText = () => {
+        if (!assignment) return "";
+        switch (assignment.status) {
+            case ASSIGNMENTS_STATUSES.ASSIGNED:
+                return "Назначено";
+            case ASSIGNMENTS_STATUSES.SUBMITTED:
+                return "Сдано на проверку";
+            case ASSIGNMENTS_STATUSES.IN_PROGRES:
+                return "В работе";
+            case ASSIGNMENTS_STATUSES.COMPLETED:
+                return "Выполнено";
+            case ASSIGNMENTS_STATUSES.FAILED:
+                return "Провалено";
+            default:
+                return assignment.status;
+        }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "Не указан";
+        try {
+            return new Date(dateString).toLocaleDateString();
+        } catch {
+            return "Неверная дата";
         }
     };
 
@@ -103,24 +115,63 @@ export const InstructorAssignmentDetail = ({ assignmentId }) => {
     return (
         <div className="instructor-assignment-detail">
             <div className="header">
-                <Text tag="h1">{assignment.task_title}</Text>
+                <Text tag="h1">{assignment.task?.title || "Без названия"}</Text>
                 <div className="meta">
-                    <Text tag="p">Студент: {assignment.user_name}</Text>
                     <Text tag="p">
-                        Срок:{" "}
-                        {new Date(assignment.plan_date).toLocaleDateString()}
+                        Студент:{" "}
+                        {assignment.user
+                            ? `${assignment.user.last_name || ""} ${assignment.user.first_name || ""}`
+                            : "Неизвестный студент"}
                     </Text>
-                    <Text tag="p">Статус: {assignment.status}</Text>
+                    <Text tag="p">
+                        Срок: {formatDate(assignment.plan_date)}
+                    </Text>
+                    <Text tag="p">Статус: {getStatusText()}</Text>
+                    {assignment.assessment && (
+                        <Text tag="p">Оценка: {assignment.assessment}</Text>
+                    )}
                 </div>
             </div>
 
             <div className="content">
-                <div className="description">
+                <div className="section">
                     <Text tag="h2">Описание задания</Text>
-                    <Text tag="p">{assignment.task_description}</Text>
+                    <Text tag="p">
+                        {assignment.task?.description || "Нет описания"}
+                    </Text>
                 </div>
 
-                <div className="assessment">
+                {assignment.task?.comment && (
+                    <div className="section">
+                        <Text tag="h2">Комментарий к заданию</Text>
+                        <Text tag="p">{assignment.task.comment}</Text>
+                    </div>
+                )}
+
+                {assignment.task?.files?.length > 0 && (
+                    <div className="section">
+                        <Text tag="h2">Файлы задания</Text>
+                        <div className="files-list">
+                            {assignment.task.files.map((file) => (
+                                <FileItem
+                                    key={file.id}
+                                    fileUrl={file.file_url}
+                                    fileName={file.original_name}
+                                    onDownload={() =>
+                                        handleDownloadFile(
+                                            file.id,
+                                            file.original_name,
+                                        )
+                                    }
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <div className="section">
+                    <Text tag="h2">Работа студента</Text>
+
                     <div className="assessment-form">
                         <label>Оценка:</label>
                         <input
@@ -131,21 +182,34 @@ export const InstructorAssignmentDetail = ({ assignmentId }) => {
                             onChange={(e) => setAssessment(e.target.value)}
                         />
                     </div>
+
+                    <div className="comment-section">
+                        <label>Комментарий:</label>
+                        <textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                        />
+                    </div>
+
                     <StatusSelector
                         currentStatus={assignment.status}
                         onStatusChange={handleStatusChange}
                         isLoading={loading}
                     />
-                </div>
 
-                <div className="files">
-                    <Text tag="h2">Работа студента</Text>
-                    {assignment.assignment_files.length > 0 ? (
+                    {assignment.files?.length > 0 ? (
                         <div className="files-list">
-                            {assignment.assignment_files.map((file) => (
+                            {assignment.files.map((file) => (
                                 <FileItem
-                                    key={file.id || file.file_url}
+                                    key={file.id}
                                     fileUrl={file.file_url}
+                                    fileName={file.original_name}
+                                    onDownload={() =>
+                                        handleDownloadFile(
+                                            file.id,
+                                            file.original_name,
+                                        )
+                                    }
                                 />
                             ))}
                         </div>

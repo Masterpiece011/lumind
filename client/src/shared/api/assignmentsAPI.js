@@ -62,10 +62,26 @@ export const getUserTeamAssignments = createAsyncThunk(
 );
 
 export const getAssignmentById = async (assignmentId) => {
+    console.log("Fetching assignment with ID:", assignmentId); // <-- Добавьте это
     try {
         const { data } = await $authHost.get(
             `/api/assignments/${assignmentId}`,
         );
+        console.log("Received data:", data); // <-- И это
+        return data;
+    } catch (error) {
+        console.error("Error fetching assignment:", error); // <-- И это
+        throw new Error("Ошибка загрузки назначения");
+    }
+};
+
+export const getStudentAssignment = async (assignmentId) => {
+    try {
+        const { data } = await $authHost.get(
+            `/api/assignments/instructor/assignment/${assignmentId}`,
+        );
+
+        console.log("Raw API response:", data); // Логируем сырой ответ
 
         if (!data?.assignment) {
             throw new Error("Неверный формат ответа сервера");
@@ -73,6 +89,7 @@ export const getAssignmentById = async (assignmentId) => {
 
         return data;
     } catch (error) {
+        console.error("Full API error:", error.response || error);
         throw new Error(
             error.response?.data?.message || "Ошибка загрузки назначения",
         );
@@ -122,10 +139,14 @@ export const deleteAssignment = async (assignmentId) => {
     }
 };
 
-export const getUsersWithTask = async (taskId) => {
+export const getStudentsWithAssignments = async (taskId = null) => {
     try {
+        const params = {};
+        if (taskId) params.taskId = taskId;
+
         const response = await $authHost.get(
-            `/api/assignments/team-students/${taskId}`,
+            "/api/assignments/instructor/students",
+            { params },
         );
         return response.data;
     } catch (error) {

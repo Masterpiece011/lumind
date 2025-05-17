@@ -45,8 +45,17 @@ assignmentRouter.delete(
 );
 
 assignmentRouter.get(
-    "/team-students/:taskId",
-    assignmentController.getTeamStudentsWithTask
+    "/instructor/students",
+    authMiddleware,
+    roleMiddleware(),
+    assignmentController.getStudentsWithAssignments
+);
+
+assignmentRouter.get(
+    "/instructor/assignment/:id",
+    authMiddleware,
+    roleMiddleware(),
+    assignmentController.getStudentAssignment
 );
 
 export default assignmentRouter;

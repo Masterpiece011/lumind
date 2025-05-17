@@ -2,21 +2,34 @@
 @use "../../../../shared/styles/mixins/mixins" as *;
 
 .instructor-students {
+    padding: 20px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 2px 4px var(--shadow-color);
+
+    &__title {
+        @include fontOptions(18px, 600, 22px);
+        margin-bottom: 20px;
+        color: var(--text-color);
+    }
+
     &__students-list {
-        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
 
     &__student-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 15px;
-        margin-bottom: 8px;
+        padding: 12px 16px;
         background-color: var(--card-bg);
-        border-radius: var(--border-radius);
+        border-radius: 8px;
+        border: 1px solid var(--card-border);
         cursor: pointer;
         transition: var(--transition);
-        border: 1px solid var(--card-border);
 
         &:hover {
             background-color: var(--hover-color);
@@ -24,14 +37,85 @@
 
         &--active {
             background-color: var(--primary-accent);
-            color: white;
             border-color: var(--primary-accent);
+            
+            .student-name,
+            .student-meta span,
+            .status-badge {
+                color: white !important;
+            }
         }
     }
 
-    &__status {
-        font-size: 14px;
-        color: inherit;
-        opacity: 0.8;
+    .student-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .student-name {
+        @include fontOptions(16px, 500, 20px);
+        color: var(--text-color);
+    }
+
+    .student-meta {
+        display: flex;
+        gap: 12px;
+        
+        span {
+            @include fontOptions(13px, 400, 16px);
+            color: var(--text-muted);
+            
+            &:before {
+                content: "•";
+                margin-right: 4px;
+            }
+            
+            &:first-child:before {
+                content: none;
+            }
+        }
+    }
+
+    .status-badge {
+        @include fontOptions(13px, 600, 16px);
+        padding: 4px 8px;
+        border-radius: 12px;
+        color: white;
+
+        &--assigned {
+            background-color: #2196f3;
+        }
+
+        &--submitted {
+            background-color: #ff9800;
+        }
+
+        &--completed {
+            background-color: #4caf50;
+        }
+
+        &--failed {
+            background-color: #f44336;
+        }
+
+        &--in-progress {
+            background-color: #9c27b0;
+        }
+
+        &--not-assigned {
+            background-color: #9e9e9e;
+        }
+    }
+
+    &__empty {
+        @include fontOptions(14px, 400, 18px);
+        color: var(--text-muted);
+        text-align: center;
+        padding: 20px 0;
+    }
+
+    .error-message {
+        color: var(--error-color);
     }
 }
