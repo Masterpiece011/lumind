@@ -10,6 +10,7 @@ import {
     Teams_Tasks,
     Users,
     Tasks,
+    Groups,
 } from "../models/models.js";
 
 import ApiError from "../error/ApiError.js";
@@ -436,6 +437,138 @@ class AssignmentController {
         }
     }
 
+    async getStudentAssignment(req, res, next) {
+        try {
+            const { assignmentId, userId } = req.params;
+            const currentUserId = req.user.id;
+            const userRole = req.user.role;
+
+            // 1. Get the assignment with task and files
+            const assignment = await Assignments.findOne({
+                where: { id: assignmentId, user_id: userId },
+                include: [
+                    {
+                        model: Tasks,
+                        as: "task",
+                        include: [
+                            {
+                                model: Files,
+                                as: "files",
+                                where: { entity_type: "task" },
+                                required: false,
+                            },
+                        ],
+                    },
+                    {
+                        model: Files,
+                        as: "files",
+                        where: { entity_type: "assignment" },
+                        required: false,
+                    },
+                ],
+            });
+
+            if (!assignment) {
+                return next(ApiError.notFound("Назначение не найдено"));
+            }
+
+            // 2. Check permissions
+            // Allow if current user is the creator, the assigned user, or an instructor
+            if (
+                userRole !== "INSTRUCTOR" &&
+                assignment.creator_id !== currentUserId &&
+                assignment.user_id !== currentUserId
+            ) {
+                return next(ApiError.forbidden("Нет доступа к этому заданию"));
+            }
+
+            // 3. Get user details (both student and creator)
+            const [student, creator] = await Promise.all([
+                Users.findByPk(assignment.user_id, {
+                    attributes: [
+                        "id",
+                        "first_name",
+                        "last_name",
+                        "email",
+                        "middle_name",
+                    ],
+                }),
+                Users.findByPk(assignment.creator_id, {
+                    attributes: ["id", "first_name", "last_name", "email"],
+                }),
+            ]);
+
+            // 4. Get student's group and teams
+            const studentWithGroups = await Users.findByPk(assignment.user_id, {
+                attributes: [
+                    "id",
+                    "first_name",
+                    "last_name",
+                    "middle_name",
+                    "email",
+                ],
+                include: [
+                    {
+                        model: Groups,
+                        as: "group",
+                        attributes: ["id", "title"],
+                    },
+                    {
+                        model: Teams,
+                        as: "teams",
+                        through: { attributes: [] },
+                        attributes: ["id", "name"],
+                        where: {
+                            id: {
+                                [Op.in]: sequelize.literal(`(
+                                SELECT team_id FROM teams_tasks 
+                                WHERE task_id = '${assignment.task_id}'
+                            )`),
+                            },
+                        },
+                        required: false,
+                    },
+                ],
+            });
+
+            // 5. Format the response
+            const response = {
+                student: {
+                    ...studentWithGroups.get({ plain: true }),
+                    assignments: [
+                        {
+                            id: assignment.id,
+                            status: assignment.status,
+                            assessment: assignment.assessment,
+                            comment: assignment.comment,
+                            plan_date: assignment.plan_date,
+                            created_at: assignment.created_at,
+                            updated_at: assignment.updated_at,
+                            task: {
+                                id: assignment.task.id,
+                                title: assignment.task.title,
+                                description: assignment.task.description,
+                                comment: assignment.task.comment,
+                                files: assignment.task.files || [],
+                            },
+                            files: assignment.files || [],
+                        },
+                    ],
+                },
+                creator: creator || null,
+            };
+
+            return res.json(response);
+        } catch (error) {
+            console.error("Error in getStudentWithAssignment:", error);
+            next(
+                ApiError.internal(
+                    "Ошибка при получении данных студента и задания"
+                )
+            );
+        }
+    }
+
     async update(req, res, next) {
         try {
             const {
@@ -554,76 +687,110 @@ class AssignmentController {
         }
     }
 
-    async getTeamStudentsWithTask(req, res, next) {
+    async getStudentsWithAssignments(req, res, next) {
         try {
-            const { taskId } = req.params;
             const userId = req.user.id;
+            const { taskId } = req.query;
 
-            // 1. Проверяем, что задание существует и принадлежит текущему пользователю
-            const task = await Tasks.findOne({
-                where: {
-                    id: taskId,
-                    creator_id: userId,
-                },
+            // 1. Формируем условия запроса
+            const where = { creator_id: userId };
+            if (taskId) where.task_id = taskId;
+
+            // 2. Получаем все назначения
+            const assignments = await Assignments.findAll({
+                where,
                 include: [
                     {
-                        model: Teams,
-                        through: { attributes: [] },
+                        model: Tasks,
+                        attributes: ["id", "title", "description"],
+                        include: [
+                            {
+                                model: Files,
+                                where: { entity_type: "task" },
+                                required: false,
+                                attributes: ["id", "file_url", "original_name"],
+                            },
+                        ],
+                    },
+                    {
+                        model: Files,
+                        where: { entity_type: "assignment" },
                         required: false,
+                        attributes: ["id", "file_url", "original_name"],
+                    },
+                ],
+                order: [["created_at", "DESC"]],
+            });
+
+            // 3. Получаем ID всех студентов (исключая самого преподавателя)
+            const studentIds = [
+                ...new Set(assignments.map((a) => a.user_id)),
+            ].filter((id) => id !== userId); // Исключаем преподавателя
+
+            if (studentIds.length === 0) {
+                return res.json({ students: [] });
+            }
+
+            // 4. Получаем информацию о студентах с группами и командами
+            const students = await Users.findAll({
+                where: { id: studentIds },
+                attributes: [
+                    "id",
+                    "first_name",
+                    "last_name",
+                    "middle_name",
+                    "email",
+                ],
+                include: [
+                    {
+                        model: Groups,
+                        as: "group",
+                        attributes: ["id", "title"],
+                    },
+                    {
+                        model: Teams,
+                        as: "teams",
+                        through: { attributes: [] },
+                        attributes: ["id", "name"],
                     },
                 ],
             });
 
-            if (!task) {
-                return next(
-                    ApiError.forbidden(
-                        "Задание не найдено или у вас нет доступа"
-                    )
-                );
-            }
-
-            // 2. Получаем ID всех команд, связанных с заданием
-            const teamIds = task.teams?.map((team) => team.id) || [];
-
-            // 3. Получаем всех пользователей этих команд
-            let users = [];
-            if (teamIds.length > 0) {
-                users = await Users.findAll({
-                    include: [
-                        {
-                            model: Teams,
-                            through: { attributes: [] },
-                            where: { id: teamIds },
-                        },
-                    ],
-                    attributes: ["id", "first_name", "last_name", "email"],
+            // 5. Создаем и заполняем маппинг студентов
+            const studentsMap = new Map();
+            students.forEach((student) => {
+                studentsMap.set(student.id, {
+                    ...student.get({ plain: true }),
+                    assignments: [],
                 });
-            }
-
-            // 4. Получаем все назначения для этого задания
-            const assignments = await Assignments.findAll({
-                where: { task_id: taskId },
-                attributes: ["id", "user_id", "status"],
             });
 
-            // 5. Формируем ответ
-            const students = users.map((user) => {
-                const assignment = assignments.find(
-                    (a) => a.user_id === user.id
-                );
-                return {
-                    id: user.id,
-                    first_name: user.first_name || "",
-                    last_name: user.last_name || "",
-                    email: user.email || "",
-                    status: assignment?.status || "not_assigned",
-                    assignment_id: assignment?.id || null,
-                };
+            assignments.forEach((assignment) => {
+                if (studentsMap.has(assignment.user_id)) {
+                    studentsMap.get(assignment.user_id).assignments.push({
+                        id: assignment.id,
+                        status: assignment.status,
+                        assessment: assignment.assessment,
+                        comment: assignment.comment,
+                        plan_date: assignment.plan_date,
+                        created_at: assignment.created_at,
+                        task: {
+                            id: assignment.task.id,
+                            title: assignment.task.title,
+                            description: assignment.task.description,
+                            files: assignment.task.files || [],
+                        },
+                        files: assignment.files || [],
+                    });
+                }
             });
 
-            return res.json({ students });
+            return res.json({
+                students: Array.from(studentsMap.values()),
+                taskId: taskId || null,
+            });
         } catch (error) {
-            console.error("Error in getTeamStudentsWithTask:", error);
+            console.error("Error in getStudentsWithAssignments:", error);
             next(ApiError.internal("Ошибка при получении списка студентов"));
         }
     }

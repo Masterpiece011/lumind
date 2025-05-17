@@ -39,10 +39,12 @@ export const InstructorAssignmentsView = ({ userId, taskId }) => {
 
     return (
         <div className="instructor-assignments">
-            <InstructorStudentsList
-                taskId={taskId}
-                onSelectUser={setSelectedUserId}
-            />
+            <div className="students-container">
+                <InstructorStudentsList
+                    taskId={taskId}
+                    onSelectUser={setSelectedUserId}
+                />
+            </div>
 
             {selectedUserId && (
                 <div className="assignments-section">
