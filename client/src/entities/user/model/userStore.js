@@ -18,7 +18,7 @@ export const userStore = createSlice({
         },
         logout: (state) => {
             state.isAuth = false;
-            state.user = null;
+            state.user = {};
             Cookies.remove("token");
         },
     },

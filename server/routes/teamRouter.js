@@ -2,7 +2,7 @@ import { Router } from "express";
 
 const teamRouter = new Router();
 
-import teamController from "../controllers/teamController.js";
+import teamController from "../controllers/teams/teamController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { getTeamById } from "@/shared/api/teamAPI";
@@ -20,6 +20,13 @@ import Publication from "@/app/assets/icons/publication-icon.svg";
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 import "./TeamDetail.scss";
 
+const sidebarButtonsItems = [
+    { id: 1, icon: Publication, label: "Публикации", tabLink: "publications" },
+    { id: 2, icon: UserIcon, label: "Участники", tabLink: "members" },
+    { id: 3, icon: Assignment, label: "Задания", tabLink: "assignments" },
+    { id: 4, icon: File, label: "Файлы", tabLink: "files" },
+];
+
 const TeamDetailPage = ({ onSelectAssignment }) => {
     const { id } = useParams();
     const dispatch = useDispatch();
@@ -40,7 +47,7 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
     const user = useSelector((state) => state.user.user);
     const isInstructor = user?.role?.name === "INSTRUCTOR";
 
-    const [activeTab, setActiveTab] = useState("members");
+    const [activeTab, setActiveTab] = useState(sidebarButtonsItems[0].tabLink);
     const [filteredAssignments, setFilteredAssignments] = useState([]);
     const { filter, isFilterLoading, handleSetNewFilter } =
         useAssignmentsFilter({
@@ -73,6 +80,7 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
     }, [id, user?.id, dispatch]);
 
     const tabContent = {
+        publications: <PublicationsTabContent />,
         members: <MembersTabContent users={currentTeam?.users} />,
         assignments: (
             <div className="team__tab-content">
@@ -106,7 +114,6 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
                 onSelectAssignment={onSelectAssignment}
             />
         ),
-        posts: <PostsTabContent />,
     };
 
     if (teamLoading) return <ClockLoader loading={true} />;
@@ -172,7 +179,7 @@ const FilesTabContent = ({ files, loading, onSelectAssignment }) => (
     </div>
 );
 
-const PostsTabContent = () => (
+const PublicationsTabContent = () => (
     <div className="team-posts">
         <p>Публикации команды</p>
     </div>
@@ -188,30 +195,14 @@ const TeamSidebar = ({ currentTeam, setActiveTab, buttonStyles }) => (
         <h2>{currentTeam.name}</h2>
 
         <ul className="team__sidebar-content">
-            <SidebarButton
-                icon={UserIcon}
-                label="Участники"
-                onClick={() => setActiveTab("members")}
-                buttonStyles={buttonStyles}
-            />
-            <SidebarButton
-                icon={Assignment}
-                label="Задания"
-                onClick={() => setActiveTab("assignments")}
-                buttonStyles={buttonStyles}
-            />
-            <SidebarButton
-                icon={File}
-                label="Файлы"
-                onClick={() => setActiveTab("files")}
-                buttonStyles={buttonStyles}
-            />
-            <SidebarButton
-                icon={Publication}
-                label="Публикации"
-                onClick={() => setActiveTab("posts")}
-                buttonStyles={buttonStyles}
-            />
+            {sidebarButtonsItems.map((sidebar) => (
+                <SidebarButton
+                    icon={sidebar.icon}
+                    label={sidebar.label}
+                    onClick={() => setActiveTab(sidebar.tabLink)}
+                    buttonStyles={buttonStyles}
+                />
+            ))}
         </ul>
     </aside>
 );

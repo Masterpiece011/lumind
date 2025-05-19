@@ -31,12 +31,13 @@ const AppRouter = ({ children }) => {
             // Пропускаем проверку для публичных маршрутов
             if (publicRoutes.includes(pathname)) {
                 setLoading(false);
+
                 return;
             }
 
             try {
                 const { user: authUser } = await check();
-                
+
                 console.log("authUser", authUser);
 
                 if (!authUser) {
@@ -44,6 +45,7 @@ const AppRouter = ({ children }) => {
                 }
 
                 const userData = await getUserById(authUser.id);
+                console.log(userData);
 
                 dispatch(setUser(userData));
                 dispatch(setIsAuth(true));
@@ -67,11 +69,11 @@ const AppRouter = ({ children }) => {
 
     // Обновляем URL без перезагрузки
     useEffect(() => {
-        if (!loading && isAuth) {
+        if (!loading && !isAuth) {
             const currentURL = `${pathname}${searchParams ? `?${searchParams}` : ""}`;
             window.history.replaceState({ path: currentURL }, "", currentURL);
         }
-    }, [pathname, searchParams, loading, isAuth]);
+    }, [isAuth]);
 
     if (loading) {
         return <ClockLoader loading={loading} />;
@@ -83,9 +85,9 @@ const AppRouter = ({ children }) => {
     }
 
     // Для защищенных маршрутов проверяем аутентификацию
-    if (!isAuth) {
-        return <ClockLoader loading={true} />;
-    }
+    // if (!isAuth) {
+    //     return <ClockLoader loading={true} />;
+    // }
 
     return needsMainComp ? <MainComp>{children}</MainComp> : <>{children}</>;
 };

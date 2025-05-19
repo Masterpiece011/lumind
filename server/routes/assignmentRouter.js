@@ -2,7 +2,10 @@ import { Router } from "express";
 
 const assignmentRouter = Router();
 
-import assignmentController from "../controllers/assignmentController.js";
+// import assignmentController from "../controllers/assignmentController.js";
+
+import assignmentController from "../controllers/assignments/assignmentController.js";
+
 import authMiddleware from "../middleware/authMiddleware.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 
