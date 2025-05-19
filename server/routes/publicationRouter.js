@@ -2,7 +2,7 @@ import { Router } from "express";
 
 const publicationRouter = Router();
 
-import publicationController from "../controllers/publicationController.js";
+import publicationController from "../controllers/publications/publicationController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
 publicationRouter.post("/", authMiddleware, publicationController.create);

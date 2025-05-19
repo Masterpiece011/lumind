@@ -1,7 +1,7 @@
 import { Router } from "express";
 const router = Router();
 
-import fileController from "../controllers/fileController.js";
+import fileController from "../controllers/files/fileController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import FileService from "../multer/fileService.js";
 import { upload } from "../multer/multerConfig.js";

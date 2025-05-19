@@ -382,63 +382,67 @@ const AssignmentDetailPage = () => {
                             />
                         </div>
 
-                        <div className="submission-form__group">
-                            <label htmlFor="files">Прикрепить файлы:</label>
-                            <input
-                                type="file"
-                                id="files"
-                                multiple
-                                onChange={handleFileChange}
-                                disabled={
-                                    assignment.status ===
-                                    ASSIGNMENTS_STATUSES.SUBMITTED
-                                }
-                            />
-                            {uploadProgress > 0 && (
-                                <div className="upload-progress">
-                                    <progress
-                                        value={uploadProgress}
-                                        max="100"
-                                    />
-                                    <span>{uploadProgress}%</span>
-                                </div>
-                            )}
-                            <div className="submission-form__files">
-                                {files.map((file) => (
-                                    <FileItem
-                                        key={file.id}
-                                        fileUrl={file.original_name}
-                                        onDownload={() =>
-                                            handleDownloadFile(
-                                                file.id,
-                                                file.original_name,
-                                            )
-                                        }
-                                        onDelete={() =>
-                                            handleDeleteFile(file.id)
-                                        }
-                                        disabled={
-                                            assignment.status ===
-                                            ASSIGNMENTS_STATUSES.SUBMITTED
-                                        }
-                                    />
-                                ))}
-                            </div>
-                            {/* <Text tag="h3" className="files-title">
-                                Прикреплённые файлы:
-                            </Text>
-                            {assignment.assignment_files?.length > 0 ? (
-                                <ul className="files-list">
-                                    {assignment.assignment_files.map((file) => (
-                                        <li key={file.id}>
-                                            <FileItem fileUrl={file.file_url} />
-                                        </li>
+                        {assignment.status !==
+                            ASSIGNMENTS_STATUSES.SUBMITTED && (
+                            <div className="submission-form__group">
+                                <label htmlFor="files">Прикрепить файлы:</label>
+                                <input
+                                    type="file"
+                                    id="files"
+                                    multiple
+                                    onChange={handleFileChange}
+                                    disabled={
+                                        assignment.status ===
+                                        ASSIGNMENTS_STATUSES.SUBMITTED
+                                    }
+                                />
+                                {uploadProgress > 0 && (
+                                    <div className="upload-progress">
+                                        <progress
+                                            value={uploadProgress}
+                                            max="100"
+                                        />
+                                        <span>{uploadProgress}%</span>
+                                    </div>
+                                )}
+                                <div className="submission-form__files">
+                                    {files.map((file) => (
+                                        <FileItem
+                                            key={file.id}
+                                            fileUrl={file.file_url}
+                                            onDownload={() =>
+                                                handleDownloadFile(
+                                                    file.id,
+                                                    file.original_name,
+                                                )
+                                            }
+                                            onDelete={() =>
+                                                handleDeleteFile(file.id)
+                                            }
+                                            disabled={
+                                                assignment.status ===
+                                                ASSIGNMENTS_STATUSES.SUBMITTED
+                                            }
+                                        />
                                     ))}
-                                </ul>
-                            ) : (
-                                <Text tag="p">Файлы не прикреплены</Text>
-                            )} */}
-                        </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <Text tag="h3" className="files-title">
+                            Прикреплённые файлы:
+                        </Text>
+                        {assignment.assignment_files?.length > 0 ? (
+                            <ul className="files-list">
+                                {assignment.assignment_files.map((file) => (
+                                    <li key={file.id}>
+                                        <FileItem fileUrl={file.file_url} />
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <Text tag="p">Файлы не прикреплены</Text>
+                        )}
                     </form>
                 </div>
             </div>

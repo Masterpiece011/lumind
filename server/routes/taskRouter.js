@@ -2,7 +2,7 @@ import { Router } from "express";
 
 const taskRouter = new Router();
 
-import taskController from "../controllers/taskController.js";
+import taskController from "../controllers/tasks/taskController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 

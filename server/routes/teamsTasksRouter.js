@@ -2,7 +2,7 @@ import { Router } from "express";
 
 const teamsTasksRouter = Router();
 
-import TeamsTasksController from "../controllers/teamsTasksController.js";
+import TeamsTasksController from "../controllers/teams-tasks/teamsTasksController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
 
