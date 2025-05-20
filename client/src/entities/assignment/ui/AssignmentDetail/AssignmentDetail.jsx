@@ -18,7 +18,6 @@ import { useSelector } from "react-redux";
 const AssignmentDetailPage = () => {
     const { id } = useParams();
     const router = useRouter();
-    const router = useRouter();
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -29,7 +28,6 @@ const AssignmentDetailPage = () => {
     const [status, setStatus] = useState("");
 
     const userRole = useSelector((state) => state.user.user?.role);
-
 
     const isInstructor = userRole === "INSTRUCTOR";
 
@@ -309,7 +307,6 @@ const AssignmentDetailPage = () => {
                     )}
 
                     {assignment.task?.files?.length > 0 && (
-                    {assignment.task?.files?.length > 0 && (
                         <section>
                             <Text
                                 tag="h2"
@@ -319,11 +316,9 @@ const AssignmentDetailPage = () => {
                             </Text>
                             <ul className="files-list">
                                 {assignment.task.files.map((file) => (
-                                {assignment.task.files.map((file) => (
                                     <li key={file.id}>
                                         <FileItem
                                             fileUrl={file.file_url}
-                                            fileName={file.original_name}
                                             fileName={file.original_name}
                                             onDownload={() =>
                                                 handleDownloadFile(
@@ -367,7 +362,6 @@ const AssignmentDetailPage = () => {
                                     />
                                 </div>
                             </div>
-                        )}
                         )}
 
                     <form className="submission-form">
