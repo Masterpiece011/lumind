@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter, usePathname } from "next/navigation";
 import { MyButton } from "@/shared/uikit/MyButton";
 import "./InstructorAssignmentFlow.scss";
 import Text from "@/shared/ui/Text";
@@ -10,55 +10,62 @@ import { InstructorStudentsList } from "../InstructorList/InstructorStudentsList
 import { InstructorAssignmentDetail } from "../InstructorDetail/InstructorAssignmentDetail";
 
 export const InstructorAssignmentFlow = () => {
-    const { id: assignmentId } = useParams();
-    const [selectedUserId, setSelectedUserId] = useState(null);
-    const [taskId, setTaskId] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+    const params = useParams();
+    const pathname = usePathname();
+
+    const [assignment, setAssignment] = useState(null);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    const assignmentId = params?.id;
+    const isDetailView = !!assignmentId;
+
     useEffect(() => {
-        const fetchAssignmentData = async () => {
-            try {
-                setLoading(true);
-                const response = await getAssignmentById(assignmentId);
-
-                if (!response?.assignment) {
-                    throw new Error("Неверный формат ответа сервера");
+        if (isDetailView && assignmentId) {
+            const loadAssignment = async () => {
+                try {
+                    setLoading(true);
+                    const data = await getAssignmentById(assignmentId);
+                    setAssignment(data);
+                } catch (err) {
+                    setError(err.message || "Ошибка загрузки задания");
+                    router.push("/assignments/students-assignments");
+                } finally {
+                    setLoading(false);
                 }
+            };
+            loadAssignment();
+        }
+    }, [assignmentId, isDetailView, router]);
 
-                setTaskId(response.assignment.task_id);
-                setError(null);
-            } catch (error) {
-                console.error("Error fetching assignment:", error);
-                setError(error.message || "Ошибка загрузки назначения");
-            } finally {
-                setLoading(false);
-            }
-        };
+    const handleSelectAssignment = (assignment) => {
+        router.push(`/assignments/students-assignments/${assignment.id}`);
+    };
 
-        if (assignmentId) fetchAssignmentData();
-    }, [assignmentId]);
+    const handleBackToList = () => {
+        router.push("/assignments/students-assignments");
+    };
 
     if (loading) return <ClockLoader />;
     if (error) return <Text color="danger">{error}</Text>;
 
     return (
         <div className="instructor-assignment-flow">
-            {!selectedUserId ? (
+            {!isDetailView ? (
                 <InstructorStudentsList
-                    taskId={taskId}
-                    onSelectUser={setSelectedUserId}
+                    onSelectAssignment={handleSelectAssignment}
                 />
             ) : (
                 <>
                     <MyButton
                         text="Назад к списку"
-                        onClick={() => setSelectedUserId(null)}
+                        onClick={handleBackToList}
                         className="back-button"
                     />
                     <InstructorAssignmentDetail
                         assignmentId={assignmentId}
-                        userId={selectedUserId}
+                        userId={assignment?.user_id}
                     />
                 </>
             )}

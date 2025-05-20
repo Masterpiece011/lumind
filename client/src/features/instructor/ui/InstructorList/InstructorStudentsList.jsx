@@ -1,13 +1,26 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import Text from "@/shared/ui/Text";
 import "./InstructorStudentsList.scss";
 import { getStudentsWithAssignments } from "@/shared/api/assignmentsAPI";
 import { formatUserName } from "@/shared/lib/utils/formatUserName";
+import { useRouter } from "next/navigation";
 
-export const InstructorStudentsList = ({ taskId, onSelectUser }) => {
+const getStatusText = (status) => {
+    const statusMap = {
+        assigned: "Назначено",
+        submitted: "На проверке",
+        completed: "Завершено",
+        failed: "Возвращено",
+        not_assigned: "Не назначено",
+        in_progress: "В работе",
+    };
+    return statusMap[status] || status;
+};
+
+export const InstructorStudentsList = ({ onSelectAssignment }) => {
+    const router = useRouter();
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,7 +31,7 @@ export const InstructorStudentsList = ({ taskId, onSelectUser }) => {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await getStudentsWithAssignments(taskId);
+                const response = await getStudentsWithAssignments();
 
                 if (!response?.students) {
                     throw new Error("Неверный формат данных");
@@ -35,11 +48,12 @@ export const InstructorStudentsList = ({ taskId, onSelectUser }) => {
         };
 
         fetchStudents();
-    }, [taskId]);
+    }, []);
 
-    const handleSelectUser = (userId) => {
-        setSelectedUserId(userId);
-        if (onSelectUser) onSelectUser(userId);
+    const handleSelectUser = (userId, assignment) => {
+        if (assignment && assignment.id) {
+            router.push(`/assignments/students-assignments/${assignment.id}`);
+        }
     };
 
     const getStatusBadge = (status) => {
@@ -65,9 +79,7 @@ export const InstructorStudentsList = ({ taskId, onSelectUser }) => {
     return (
         <div className="instructor-students">
             <Text tag="h2" className="instructor-students__title">
-                {taskId
-                    ? "Студенты с этим заданием"
-                    : "Студенты с назначениями"}
+                Студенты с назначениями
             </Text>
 
             <div className="instructor-students__students-list">
@@ -89,7 +101,12 @@ export const InstructorStudentsList = ({ taskId, onSelectUser }) => {
                                         ? "instructor-students__student-item--active"
                                         : ""
                                 }`}
-                                onClick={() => handleSelectUser(student.id)}
+                                onClick={() =>
+                                    handleSelectUser(
+                                        student.id,
+                                        student.assignments[0],
+                                    )
+                                }
                             >
                                 <div className="student-info">
                                     <Text tag="p" className="student-name">
@@ -116,24 +133,10 @@ export const InstructorStudentsList = ({ taskId, onSelectUser }) => {
                     })
                 ) : (
                     <Text tag="p" className="instructor-students__empty">
-                        {taskId
-                            ? "Нет студентов с этим заданием"
-                            : "Нет студентов с назначениями"}
+                        Нет студентов с назначениями
                     </Text>
                 )}
             </div>
         </div>
     );
-};
-
-const getStatusText = (status) => {
-    const statusMap = {
-        assigned: "Назначено",
-        submitted: "На проверке",
-        completed: "Завершено",
-        failed: "Возвращено",
-        not_assigned: "Не назначено",
-        in_progress: "В работе",
-    };
-    return statusMap[status] || status;
 };

@@ -53,7 +53,6 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
     const [errorPublications, setErrorPublications] = useState(null);
 
     const user = useSelector((state) => state.user.user);
-    const isInstructor = user?.role?.name === "INSTRUCTOR";
 
     const [activeTab, setActiveTab] = useState(sidebarButtonsItems[0].tabLink);
     const [filteredAssignments, setFilteredAssignments] = useState([]);

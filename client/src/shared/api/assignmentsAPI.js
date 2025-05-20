@@ -62,15 +62,15 @@ export const getUserTeamAssignments = createAsyncThunk(
 );
 
 export const getAssignmentById = async (assignmentId) => {
-    console.log("Fetching assignment with ID:", assignmentId); // <-- Добавьте это
+    console.log("Fetching assignment with ID:", assignmentId);
     try {
         const { data } = await $authHost.get(
             `/api/assignments/${assignmentId}`,
         );
-        console.log("Received data:", data); // <-- И это
+        console.log("Received data:", data);
         return data;
     } catch (error) {
-        console.error("Error fetching assignment:", error); // <-- И это
+        console.error("Error fetching assignment:", error);
         throw new Error("Ошибка загрузки назначения");
     }
 };
@@ -110,15 +110,28 @@ export const createAssignment = async (assignmentData) => {
     }
 };
 
-export const updateAssignment = async ({ assignmentId, status, comment }) => {
+export const updateAssignment = async ({
+    assignment_id,
+    status,
+    assessment,
+    comment,
+}) => {
     try {
         const response = await $authHost.put("/api/assignments/", {
-            assignment_id: assignmentId,
+            assignment_id,
             status,
+            assessment,
             comment,
         });
 
-        return response.data;
+        // Убедитесь, что ответ содержит актуальные файлы
+        return {
+            ...response.data,
+            assignment: {
+                ...response.data.assignment,
+                files: response.data.assignment.assignment_files || [],
+            },
+        };
     } catch (error) {
         throw new Error(
             error.response?.data?.message || "Ошибка обновления задания",

@@ -1,18 +1,26 @@
 "use client";
 import React, { useState, useEffect } from "react";
+
 import {
-    getStudentAssignment,
+    getAssignmentById,
     updateAssignment,
 } from "@/shared/api/assignmentsAPI";
+
 import { FileItem } from "@/shared/ui/FileComp";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import Text from "@/shared/ui/Text";
+
 import "./InstructorAssignmentDetail.scss";
+
 import { StatusSelector } from "../StatusSelector/StatusSelector";
 import { ASSIGNMENTS_STATUSES } from "@/shared/constants/assignments";
 import { downloadFile } from "@/shared/api/filesAPI";
+import { useParams } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
+    // const {id: assignment.id} = useParams()
+    const router = useRouter();
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -22,7 +30,7 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
     const fetchAssignment = async () => {
         try {
             setLoading(true);
-            const response = await getStudentAssignment(assignmentId);
+            const response = await getAssignmentById(assignmentId);
 
             console.log("Полученные данные:", {
                 assignment: response.assignment,
@@ -41,7 +49,6 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
                 user: response.student,
                 creator: {
                     id: response.assignment.creator_id,
-                    // Добавьте другие поля creator по необходимости
                 },
             });
         } catch (err) {
@@ -53,14 +60,17 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
     };
 
     useEffect(() => {
-        fetchAssignment();
+        if (assignmentId) {
+            // Добавляем проверку на наличие assignmentId
+            fetchAssignment();
+        }
     }, [assignmentId]);
 
     const handleStatusChange = async (newStatus) => {
         try {
             setLoading(true);
             const response = await updateAssignment({
-                assignment_id: assignmentId,
+                assignment_id: assignmentId, 
                 status: newStatus,
                 assessment: assessment,
                 comment: comment,

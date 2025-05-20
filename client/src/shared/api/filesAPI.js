@@ -47,7 +47,7 @@ export const uploadFiles = async ({
     }
 };
 
-export const downloadFile = async ({ fileId }) => {
+export const downloadFile = async ({ fileId, fileName }) => {
     const token = getAuthToken();
     const config = {
         responseType: "blob",
@@ -58,21 +58,28 @@ export const downloadFile = async ({ fileId }) => {
     try {
         const response = await $authHost.get(`/api/files/${fileId}`, config);
 
-        // Получаем имя файла из заголовков или используем переданное
         const contentDisposition = response.headers["content-disposition"];
-        const finalFileName =
-            contentDisposition?.match(/filename="?(.+)"?/)?.[1] ||
-            fileName ||
-            "file";
+        let finalFileName = fileName || "file";
 
-        // Создаем ссылку для скачивания
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+            if (filenameMatch && filenameMatch[1]) {
+                finalFileName = filenameMatch[1];
+            }
+        }
+
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = url;
         link.setAttribute("download", finalFileName);
         document.body.appendChild(link);
         link.click();
-        link.remove();
+
+        // Очистка
+        setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        }, 100);
     } catch (error) {
         console.error("Download error:", error);
         throw error;
@@ -87,8 +94,7 @@ export const deleteFile = async ({ fileId }) => {
     };
 
     try {
-        await $authHost.delete(`${API_BASE_URL}/api/files/${fileId}`, config);
-
+        await $authHost.delete(`/api/files/${fileId}`, config);
         return true;
     } catch (error) {
         console.error(`Ошибка при удалении файла ${fileId}:`, error);
