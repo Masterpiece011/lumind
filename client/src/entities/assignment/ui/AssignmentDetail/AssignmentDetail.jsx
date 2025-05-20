@@ -2,6 +2,7 @@
 import "./AssignmentDetail.scss";
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { uploadFiles, downloadFile, deleteFile } from "@/shared/api/filesAPI";
 import {
     getAssignmentById,
@@ -17,6 +18,7 @@ import { useSelector } from "react-redux";
 const AssignmentDetailPage = () => {
     const { id } = useParams();
     const router = useRouter();
+    const router = useRouter();
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -28,6 +30,7 @@ const AssignmentDetailPage = () => {
 
     const userRole = useSelector((state) => state.user.user?.role);
 
+
     const isInstructor = userRole === "INSTRUCTOR";
 
     const fetchAssignment = async () => {
@@ -38,6 +41,7 @@ const AssignmentDetailPage = () => {
             console.log("ass", response.assignment);
 
             setComment(response.assignment.comment || "");
+            setFiles(response.assignment.files || []);
             setFiles(response.assignment.files || []);
             setError(null);
         } catch (err) {
@@ -102,6 +106,7 @@ const AssignmentDetailPage = () => {
     const handleDeleteFile = async (fileId) => {
         try {
             await deleteFile({ fileId });
+            await deleteFile({ fileId });
             setFiles(files.filter((file) => file.id !== fileId));
         } catch (err) {
             setError("Ошибка удаления файла: " + err.message);
@@ -121,10 +126,12 @@ const AssignmentDetailPage = () => {
             setLoading(true);
             const response = await updateAssignment({
                 assignment_id: assignment.id,
+                assignment_id: assignment.id,
                 status: ASSIGNMENTS_STATUSES.SUBMITTED,
                 comment: comment,
             });
 
+            setFiles(response.assignment.assignment_files || []);
             setFiles(response.assignment.assignment_files || []);
             setAssignment(response.assignment);
         } catch (err) {
@@ -141,9 +148,12 @@ const AssignmentDetailPage = () => {
             setLoading(true);
             const response = await updateAssignment({
                 assignment_id: id,
+                assignment_id: id,
                 status: ASSIGNMENTS_STATUSES.ASSIGNED,
                 comment: "",
             });
+
+            setFiles(response.assignment.assignment_files || []);
 
             setFiles(response.assignment.assignment_files || []);
             setAssignment(response.assignment);
@@ -299,6 +309,7 @@ const AssignmentDetailPage = () => {
                     )}
 
                     {assignment.task?.files?.length > 0 && (
+                    {assignment.task?.files?.length > 0 && (
                         <section>
                             <Text
                                 tag="h2"
@@ -308,9 +319,11 @@ const AssignmentDetailPage = () => {
                             </Text>
                             <ul className="files-list">
                                 {assignment.task.files.map((file) => (
+                                {assignment.task.files.map((file) => (
                                     <li key={file.id}>
                                         <FileItem
                                             fileUrl={file.file_url}
+                                            fileName={file.original_name}
                                             fileName={file.original_name}
                                             onDownload={() =>
                                                 handleDownloadFile(
@@ -354,6 +367,7 @@ const AssignmentDetailPage = () => {
                                     />
                                 </div>
                             </div>
+                        )}
                         )}
 
                     <form className="submission-form">
