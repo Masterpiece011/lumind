@@ -144,13 +144,13 @@
         color: var(--text-secondary);
     }
 
-    &__files-list {
+    .files-list {
         list-style: none;
         padding: 0;
         margin: 0;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
     }
 
     &__status-notice {
