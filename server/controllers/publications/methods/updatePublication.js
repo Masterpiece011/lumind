@@ -6,18 +6,30 @@ export default async function updatePublication(req, res, next) {
     try {
         const { publication_id, title, content, description } = req.body;
 
-        const publication = await Publications.findOne({
-            where: { id: publication_id },
-        });
+        if (!publication_id) {
+            return next(
+                ApiError.badRequest("Необходимо передать ID публикации")
+            );
+        }
+
+        const publication = await Publications.findByPk(publication_id);
+
+        if (!publication) {
+            return next(ApiError.badRequest("Публикация не найдена"));
+        }
+
         if (publication) {
             await publication.update({
-                title: title,
-                content: content,
-                description: description,
+                title: title || publication.title,
+                content: content || publication.content,
+                description: description || publication.description,
             });
         }
-        return res.json({ message: "Publication successfuly updated" });
+        return res.json({
+            message: "Публикация успешно обновлена",
+            publication,
+        });
     } catch (error) {
-        return ApiError.badRequest("Not available to update publication");
+        return ApiError.badRequest("Невозможно обновить публикацию");
     }
 }

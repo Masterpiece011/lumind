@@ -3,9 +3,9 @@ dotenv.config();
 
 import { Roles, Users } from "../../../models/models.js";
 
+import bcrypt from "bcrypt";
 import ApiError from "../../../error/ApiError.js";
 import { generateJwt } from "../utils/generateJwt.js";
-
 
 export default async function login(req, res, next) {
     try {

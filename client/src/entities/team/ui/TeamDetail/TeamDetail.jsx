@@ -16,9 +16,11 @@ import UserIcon from "@/app/assets/icons/user-icon.png";
 import Assignment from "@/app/assets/icons/assignments-icon.svg";
 import File from "@/app/assets/icons/file-icon.svg";
 import Publication from "@/app/assets/icons/publication-icon.svg";
+import Text from "@/shared/ui/Text";
 
 import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 import "./TeamDetail.scss";
+import { getAllTeamPublications } from "@/shared/api/publicationsAPI";
 
 const sidebarButtonsItems = [
     { id: 1, icon: Publication, label: "Публикации", tabLink: "publications" },
@@ -43,6 +45,12 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
         loading: assignmentsLoading,
         error: assignmentsError,
     } = useSelector((state) => state.assignments.teamAssignments);
+
+    const [publications, setPublications] = useState([]);
+    const [publicationsTotal, setPublicationsTotal] = useState(0);
+
+    const [loadingPublications, setLoadingPublications] = useState(false);
+    const [errorPublications, setErrorPublications] = useState(null);
 
     const user = useSelector((state) => state.user.user);
     const isInstructor = user?.role?.name === "INSTRUCTOR";
@@ -74,13 +82,37 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
     }, [allAssignments, filter]);
 
     useEffect(() => {
+        const fetchPublications = async () => {
+            setLoadingPublications(true);
+            try {
+                const { data } = await getAllTeamPublications({ teamId: id });
+                setPublications(data.publications || []);
+                setPublicationsTotal(data.total || 0);
+            } catch (error) {
+                setErrorPublications(error.message);
+            } finally {
+                setLoadingPublications(false);
+            }
+        };
+
+        fetchPublications();
+    }, [id]);
+
+    useEffect(() => {
         if (id && user?.id) {
             dispatch(getTeamById({ teamId: id, userId: user.id }));
         }
     }, [id, user?.id, dispatch]);
 
     const tabContent = {
-        publications: <PublicationsTabContent />,
+        publications: (
+            <PublicationsTabContent
+                publications={publications}
+                publicationsTotal={publicationsTotal}
+                loading={loadingPublications}
+                error={errorPublications}
+            />
+        ),
         members: <MembersTabContent users={currentTeam?.users} />,
         assignments: (
             <div className="team__tab-content">
@@ -179,12 +211,71 @@ const FilesTabContent = ({ files, loading, onSelectAssignment }) => (
     </div>
 );
 
-const PublicationsTabContent = () => (
-    <div className="team-posts">
-        <p>Публикации команды</p>
-    </div>
-);
+const PublicationsTabContent = ({
+    publications,
+    publicationsTotal,
+    loading,
+    error,
+}) => {
+    if (loading) return <div>Загрузка публикаций...</div>;
+    if (error) return <div>Ошибка: {error}</div>;
+    if (!publications?.length) return <p>Нет публикаций</p>;
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+
+        // Получаем часы и минуты
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+
+        // Получаем день, месяц и год
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
+        const year = date.getFullYear();
+
+        return `${hours}:${minutes} ${day}.${month}.${year}`;
+    };
+
+    return (
+        <div className="team-publications">
+            <div className="e-top">
+                <Text tag="h2">Публикации команды</Text>
+
+                <MyButton>Создать публикацию</MyButton>
+            </div>
+            {publicationsTotal && (
+                <ul className="team-publications-list">
+                    {publications.map((publication) => (
+                        <li
+                            key={publication.id}
+                            className="team-publication-item"
+                        >
+                            <div className="e-header">
+                                <Text className="title" tag="h3">
+                                    {publication.title}
+                                </Text>
+                                <Text className="create-date" tag="p">
+                                    {formatDate(publication.created_at)}
+                                </Text>
+                            </div>
+
+                            <Text className="description" tag="p">
+                                {publication.creator_id}
+                            </Text>
+
+                            <Text className="description" tag="p">
+                                {publication.description}
+                            </Text>
+                            <Text className="content" tag="p">
+                                {publication.content}
+                            </Text>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
 const TeamSidebar = ({ currentTeam, setActiveTab, buttonStyles }) => (
     <aside className="team__sidebar">
         <div
@@ -197,6 +288,7 @@ const TeamSidebar = ({ currentTeam, setActiveTab, buttonStyles }) => (
         <ul className="team__sidebar-content">
             {sidebarButtonsItems.map((sidebar) => (
                 <SidebarButton
+                    key={sidebar.id}
                     icon={sidebar.icon}
                     label={sidebar.label}
                     onClick={() => setActiveTab(sidebar.tabLink)}

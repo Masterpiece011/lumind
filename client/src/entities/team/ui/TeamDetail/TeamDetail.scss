@@ -6,7 +6,6 @@
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        margin-top: 40px;
         color: var(--text-color);
         background-color: var(--bg-color);
     }
@@ -19,6 +18,7 @@
         border-radius: 16px;
         padding: 20px;
         border: 1px solid var(--card-border);
+        min-height: 400px;
     }
 
     &__content {
@@ -125,6 +125,52 @@
         color: var(--text-muted);
         text-align: center;
         padding: 20px;
+    }
+}
+
+.team-publications {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .e-top {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .team-publications-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+
+        .team-publication-item {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            width: 100%;
+            border: 1px solid #aeaeae50;
+            border-radius: 12px;
+            min-height: 200px;
+
+            .e-header {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .description {
+                margin-top: 12px;
+            }
+
+            .content {
+                margin-top: 12px;
+            }
+
+            .create-date {
+                margin-top: 8px;
+                align-self: flex-end;
+            }
+        }
     }
 }
 

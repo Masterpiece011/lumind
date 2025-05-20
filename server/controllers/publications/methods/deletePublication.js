@@ -4,10 +4,12 @@ import ApiError from "../../../error/ApiError.js";
 
 export default async function deletePublication(req, res, next) {
     try {
-        const { publication_id } = req.body;
+        const { id } = req.params;
+
+        console.log(id);
 
         await Publications.destroy({
-            where: { publication_id },
+            where: { id },
         });
 
         return res.json({ message: "Публикация успешно удалена" });
