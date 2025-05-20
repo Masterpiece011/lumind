@@ -38,7 +38,6 @@ const TeamDetailPage = ({ onSelectAssignment }) => {
     } = useSelector((state) => state.assignments.teamAssignments);
 
     const user = useSelector((state) => state.user.user);
-    const isInstructor = user?.role?.name === "INSTRUCTOR";
 
     const [activeTab, setActiveTab] = useState("members");
     const [filteredAssignments, setFilteredAssignments] = useState([]);

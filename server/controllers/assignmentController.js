@@ -439,13 +439,12 @@ class AssignmentController {
 
     async getStudentAssignment(req, res, next) {
         try {
-            const { assignmentId, userId } = req.params;
-            const currentUserId = req.user.id;
-            const userRole = req.user.role;
+            const { id } = req.params;
+            const userId = req.user.id; // ID текущего пользователя
 
-            // 1. Get the assignment with task and files
+            // 1. Получаем назначение БЕЗ проверки creator_id в WHERE
             const assignment = await Assignments.findOne({
-                where: { id: assignmentId, user_id: userId },
+                where: { id },
                 include: [
                     {
                         model: Tasks,
@@ -466,106 +465,63 @@ class AssignmentController {
                         required: false,
                     },
                 ],
+                raw: false, // Важно: не преобразовывать в plain object
             });
 
             if (!assignment) {
                 return next(ApiError.notFound("Назначение не найдено"));
             }
 
-            // 2. Check permissions
-            // Allow if current user is the creator, the assigned user, or an instructor
-            if (
-                userRole !== "INSTRUCTOR" &&
-                assignment.creator_id !== currentUserId &&
-                assignment.user_id !== currentUserId
-            ) {
+            // 2. Проверяем права доступа
+            if (assignment.creator_id !== userId) {
                 return next(ApiError.forbidden("Нет доступа к этому заданию"));
             }
 
-            // 3. Get user details (both student and creator)
-            const [student, creator] = await Promise.all([
-                Users.findByPk(assignment.user_id, {
-                    attributes: [
-                        "id",
-                        "first_name",
-                        "last_name",
-                        "email",
-                        "middle_name",
-                    ],
-                }),
-                Users.findByPk(assignment.creator_id, {
-                    attributes: ["id", "first_name", "last_name", "email"],
-                }),
-            ]);
-
-            // 4. Get student's group and teams
-            const studentWithGroups = await Users.findByPk(assignment.user_id, {
-                attributes: [
-                    "id",
-                    "first_name",
-                    "last_name",
-                    "middle_name",
-                    "email",
-                ],
-                include: [
-                    {
-                        model: Groups,
-                        as: "group",
-                        attributes: ["id", "title"],
-                    },
-                    {
-                        model: Teams,
-                        as: "teams",
-                        through: { attributes: [] },
-                        attributes: ["id", "name"],
-                        where: {
-                            id: {
-                                [Op.in]: sequelize.literal(`(
-                                SELECT team_id FROM teams_tasks 
-                                WHERE task_id = '${assignment.task_id}'
-                            )`),
-                            },
-                        },
-                        required: false,
-                    },
-                ],
+            // 3. Получаем данные пользователей ОТДЕЛЬНЫМИ запросами
+            const student = await Users.findByPk(assignment.user_id, {
+                attributes: ["id", "first_name", "last_name", "email"],
+                raw: true,
             });
 
-            // 5. Format the response
+            const creator = await Users.findByPk(assignment.creator_id, {
+                attributes: ["id", "first_name", "last_name", "email"],
+                raw: true,
+            });
+
+            // 4. Формируем ответ вручную
             const response = {
-                student: {
-                    ...studentWithGroups.get({ plain: true }),
-                    assignments: [
-                        {
-                            id: assignment.id,
-                            status: assignment.status,
-                            assessment: assignment.assessment,
-                            comment: assignment.comment,
-                            plan_date: assignment.plan_date,
-                            created_at: assignment.created_at,
-                            updated_at: assignment.updated_at,
-                            task: {
-                                id: assignment.task.id,
-                                title: assignment.task.title,
-                                description: assignment.task.description,
-                                comment: assignment.task.comment,
-                                files: assignment.task.files || [],
-                            },
-                            files: assignment.files || [],
-                        },
-                    ],
-                },
+                id: assignment.id,
+                comment: assignment.comment,
+                user_id: assignment.user_id, // Должно быть из БД
+                creator_id: assignment.creator_id, // Должно быть из БД
+                assessment: assignment.assessment,
+                status: assignment.status,
+                plan_date: assignment.plan_date,
+                created_at: assignment.created_at,
+                updated_at: assignment.updated_at,
+                task_id: assignment.task_id,
+                task: assignment.task
+                    ? {
+                          ...assignment.task.get({ plain: true }),
+                          files: assignment.task.files || [],
+                      }
+                    : null,
+                files: assignment.files || [],
+                user: student || null,
                 creator: creator || null,
             };
 
-            return res.json(response);
+            console.log("Отправляемые данные:", {
+                user_id_from_db: assignment.user_id,
+                creator_id_from_db: assignment.creator_id,
+                response_user_id: response.user_id,
+                response_creator_id: response.creator_id,
+            });
+
+            return res.json({ assignment: response });
         } catch (error) {
-            console.error("Error in getStudentWithAssignment:", error);
-            next(
-                ApiError.internal(
-                    "Ошибка при получении данных студента и задания"
-                )
-            );
+            console.error("Ошибка получения задания:", error);
+            next(ApiError.internal(error.message));
         }
     }
 
@@ -592,6 +548,16 @@ class AssignmentController {
 
             if (!assignment) {
                 return next(ApiError.notFound("Назначение не найдено"));
+            }
+
+            // Удаляем старые файлы задания, если статус меняется на "assigned"
+            if (status === "assigned") {
+                await Files.destroy({
+                    where: {
+                        entity_type: "assignment",
+                        entity_id: assignment_id,
+                    },
+                });
             }
 
             await assignment.update({
