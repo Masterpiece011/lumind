@@ -2,6 +2,7 @@
 @use "../../../shared/styles/mixins/mixins" as *;
 
 .loginButton {
+    width: 200px;
     padding: 8px 12px;
     border-radius: 8px;
     border: 1px solid #aeaeae80;

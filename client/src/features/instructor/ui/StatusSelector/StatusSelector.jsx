@@ -11,11 +11,29 @@ const statusOptions = [
     { value: ASSIGNMENTS_STATUSES.FAILED, label: "Вернуть" },
 ];
 
+const statusTextMap = {
+    [ASSIGNMENTS_STATUSES.ASSIGNED]: "Назначено",
+    [ASSIGNMENTS_STATUSES.SUBMITTED]: "Сдано на проверку",
+    [ASSIGNMENTS_STATUSES.IN_PROGRES]: "В работе",
+    [ASSIGNMENTS_STATUSES.COMPLETED]: "Выполнено",
+    [ASSIGNMENTS_STATUSES.FAILED]: "Провалено",
+};
+
 export const StatusSelector = ({
     currentStatus,
     onStatusChange,
     isLoading,
+    viewOnly = false,
 }) => {
+    if (viewOnly) {
+        return (
+            <div className="status-selector">
+                <p className="status-selector__label">Статус:</p>
+                <p>{statusTextMap[currentStatus] || currentStatus}</p>
+            </div>
+        );
+    }
+
     return (
         <div className="status-selector">
             <p className="status-selector__label">Статус:</p>

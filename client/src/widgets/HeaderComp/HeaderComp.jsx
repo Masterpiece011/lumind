@@ -20,7 +20,7 @@ import { MyButton } from "@/shared/uikit/MyButton";
 import { getUsers } from "@/shared/api/userAPI";
 import { getTeams } from "@/shared/api/teamAPI";
 import { logout } from "@/entities/user/model/userStore";
-import Logo from "@/app/assets/img/logo.svg";
+import Logo from "@/shared/assets/icons/logo.svg";
 import Logout from "@/app/assets/icons/logout-icon.svg";
 
 function HeaderComp({ onSearchFocus, onSearchChange }) {

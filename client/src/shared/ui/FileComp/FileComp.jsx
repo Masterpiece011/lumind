@@ -11,8 +11,6 @@ import FileIcon from "@/app/assets/icons/file-icon.svg";
 import EllipsisVertical from "@/app/assets/icons/ellipsis-vertical.svg";
 import CloudDowloadArrow from "@/app/assets/icons/cloud-arrow-down-solid.svg";
 
-import { downloadFile } from "@/shared/api/uploadFileAPI";
-
 const getFileType = (fileUrl) => {
     if (!fileUrl) {
         return "file";
@@ -83,7 +81,10 @@ const decodeFileName = (fileName) => {
 export const FileItem = memo(
     ({
         fileUrl,
+        fileName,
+        onDownload,
         onDelete,
+        disabled = false,
         additionalInfo,
         simpleView = false,
         compact = false,
@@ -116,17 +117,20 @@ export const FileItem = memo(
 
         const fileType = getFileType(fileUrl);
         const fullFileName = decodeFileName(
-            fileUrl.replace(/\\/g, "/").split("/").pop(),
+            fileName || fileUrl.replace(/\\/g, "/").split("/").pop(),
         );
-        const fileName = fullFileName.split("-").pop();
+        const displayFileName = fullFileName.split("-").pop();
 
-        const handleDownload = async () => {
+        const handleDownloadClick = async (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+
             try {
-                const normalizedPath = fileUrl.replace(/\\/g, "/");
-                const downloadPath = normalizedPath.includes("uploads/")
-                    ? normalizedPath.split("uploads/")[1]
-                    : normalizedPath;
-                // await downloadFile(downloadPath);
+                if (onDownload) {
+                    await onDownload();
+                } else {
+                    console.warn("No download handler provided");
+                }
             } catch (error) {
                 console.error("Download failed:", error);
                 alert(`Не удалось скачать файл: ${error.message}`);
@@ -135,16 +139,31 @@ export const FileItem = memo(
             }
         };
 
+        const handleDeleteClick = (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            if (onDelete) {
+                onDelete();
+            }
+            setIsMenuOpen(false);
+        };
+
+        const handleMenuToggle = (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setIsMenuOpen(!isMenuOpen);
+        };
+
         return (
             <div className={`file-item ${compact ? "file-item--compact" : ""}`}>
                 <div className="file-icon">{getFileIcon(fileType)}</div>
                 <div className="file-info">
                     <span className="file-name" title={fullFileName}>
                         {compact
-                            ? fileName.length > 20
-                                ? `${fileName.substring(0, 17)}...`
-                                : fileName
-                            : fileName}
+                            ? displayFileName.length > 20
+                                ? `${displayFileName.substring(0, 17)}...`
+                                : displayFileName
+                            : displayFileName}
                     </span>
                     {!compact && additionalInfo && (
                         <span className="file-additional-info">
@@ -156,7 +175,8 @@ export const FileItem = memo(
                 {compact ? (
                     <MyButton
                         className="file-download-compact"
-                        onClick={handleDownload}
+                        onClick={handleDownloadClick}
+                        disabled={disabled}
                         style={{
                             minWidth: "20px",
                             width: "20px",
@@ -177,7 +197,8 @@ export const FileItem = memo(
                     <div className="file-actions" ref={buttonRef}>
                         <MyButton
                             className="file-item-menu"
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            onClick={handleMenuToggle}
+                            disabled={disabled}
                         >
                             <Icon src={EllipsisVertical} alt="menu" />
                         </MyButton>
@@ -185,7 +206,8 @@ export const FileItem = memo(
                             <div className="file-menu" ref={menuRef}>
                                 <MyButton
                                     className="file-menu-item"
-                                    onClick={() => handleDownload()}
+                                    onClick={handleDownloadClick}
+                                    disabled={disabled}
                                 >
                                     <Icon
                                         src={CloudDowloadArrow}
@@ -196,7 +218,8 @@ export const FileItem = memo(
                                 {onDelete && (
                                     <MyButton
                                         className="file-menu-item"
-                                        onClick={onDelete}
+                                        onClick={handleDeleteClick}
+                                        disabled={disabled}
                                     >
                                         Удалить
                                     </MyButton>

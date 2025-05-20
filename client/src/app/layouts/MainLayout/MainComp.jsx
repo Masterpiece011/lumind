@@ -21,6 +21,9 @@ import { ChatPage } from "@/features/chat/ui/ChatComp";
 import { SchedulePage } from "@/features/schedule/ui/SheduleComp";
 
 import "./MainComp.scss";
+import { InstructorAssignmentFlow } from "@/features/instructor";
+import { InstructorAssignmentDetail } from "@/features/instructor/ui/InstructorDetail/InstructorAssignmentDetail";
+import { InstructorStudentsList } from "@/features/instructor/ui/InstructorList/InstructorStudentsList";
 
 const MainComp = () => {
     const router = useRouter();
@@ -82,6 +85,29 @@ const MainComp = () => {
     const handleUsersCardClick = () => handleCardClick("users");
     const handleFilesCardClick = () => handleCardClick("files");
 
+    const renderAssignmentsSection = () => {
+        if (pathname.startsWith("/assignments/students-assignments")) {
+            return <InstructorAssignmentFlow />;
+        } else if (pathname.startsWith("/assignments/") && params.id) {
+            return <AssignmentDetailPage id={params.id} />;
+        }
+        return (
+            <AssignmentsPage
+                userId={userId}
+                onSelectAssignment={(assignmentId) => {
+                    if (userRole === "INSTRUCTOR") {
+                        // Сначала переходим к списку студентов
+                        router.push("/assignments/students-assignments");
+                        // Затем в useEffect InstructorAssignmentFlow загрузим данные
+                    } else {
+                        // Для студентов сразу переходим к деталям
+                        router.push(`/assignments/${assignmentId}`);
+                    }
+                }}
+            />
+        );
+    };
+
     return (
         <div className="main">
             {isConnected ? (
@@ -141,23 +167,11 @@ const MainComp = () => {
                                     )
                                 }
                             />
-                        ) : pathname.startsWith("/assignments/") &&
-                          params.id ? (
-                            <AssignmentDetailPage id={params.id} />
                         ) : pathname.startsWith("/teams") && userId ? (
                             <TeamsPage
                                 userId={userId}
                                 onSelectTeam={(teamId) =>
                                     handleNavigation(`/teams/${teamId}`)
-                                }
-                            />
-                        ) : pathname.startsWith("/assignments") ? (
-                            <AssignmentsPage
-                                userId={userId}
-                                onSelectAssignment={(assignmentId) =>
-                                    handleNavigation(
-                                        `/assignments/${assignmentId}`,
-                                    )
                                 }
                             />
                         ) : pathname.startsWith("/users") ? (
@@ -166,7 +180,9 @@ const MainComp = () => {
                             <FilesPage />
                         ) : pathname.startsWith("/schedule") ? (
                             <SchedulePage />
-                        ) : null}
+                        ) : (
+                            renderAssignmentsSection()
+                        )}
                     </div>
                 </section>
             </div>

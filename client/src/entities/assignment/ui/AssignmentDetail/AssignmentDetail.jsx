@@ -1,8 +1,8 @@
 "use client";
-
 import "./AssignmentDetail.scss";
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { uploadFiles, downloadFile, deleteFile } from "@/shared/api/filesAPI";
 import {
     getAssignmentById,
@@ -15,11 +15,9 @@ import { ASSIGNMENTS_STATUSES } from "@/shared/constants/assignments";
 import Text from "@/shared/ui/Text";
 import { useSelector } from "react-redux";
 
-import { StatusSelector } from "@/features/instructor/ui/StatusSelector/StatusSelector";
-import { InstructorAssignmentFlow } from "@/features/instructor/ui/InstructorAssignmentFlow/InstructorAssignmentFlow";
-
 const AssignmentDetailPage = () => {
     const { id } = useParams();
+    const router = useRouter();
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -30,7 +28,7 @@ const AssignmentDetailPage = () => {
     const [status, setStatus] = useState("");
 
     const userRole = useSelector((state) => state.user.user?.role);
-    const userId = useSelector((state) => state.user.user?.id);
+
     const isInstructor = userRole === "INSTRUCTOR";
 
     const fetchAssignment = async () => {
@@ -41,7 +39,8 @@ const AssignmentDetailPage = () => {
             console.log("ass", response.assignment);
 
             setComment(response.assignment.comment || "");
-            setFiles(response.assignment.assignment_files || []);
+            setFiles(response.assignment.files || []);
+            setFiles(response.assignment.files || []);
             setError(null);
         } catch (err) {
             setError(err.message || "Ошибка загрузки назначения");
@@ -49,7 +48,6 @@ const AssignmentDetailPage = () => {
             setLoading(false);
         }
     };
-
     useEffect(() => {
         if (id) fetchAssignment();
     }, [id]);
@@ -105,8 +103,8 @@ const AssignmentDetailPage = () => {
 
     const handleDeleteFile = async (fileId) => {
         try {
-            await deleteFile(fileId);
-
+            await deleteFile({ fileId });
+            await deleteFile({ fileId });
             setFiles(files.filter((file) => file.id !== fileId));
         } catch (err) {
             setError("Ошибка удаления файла: " + err.message);
@@ -125,11 +123,14 @@ const AssignmentDetailPage = () => {
         try {
             setLoading(true);
             const response = await updateAssignment({
-                assignmentId: assignment.id,
+                assignment_id: assignment.id,
+                assignment_id: assignment.id,
                 status: ASSIGNMENTS_STATUSES.SUBMITTED,
                 comment: comment,
             });
 
+            setFiles(response.assignment.assignment_files || []);
+            setFiles(response.assignment.assignment_files || []);
             setAssignment(response.assignment);
         } catch (err) {
             setError(
@@ -144,10 +145,15 @@ const AssignmentDetailPage = () => {
         try {
             setLoading(true);
             const response = await updateAssignment({
-                assignmentId: id,
+                assignment_id: id,
+                assignment_id: id,
                 status: ASSIGNMENTS_STATUSES.ASSIGNED,
                 comment: "",
             });
+
+            setFiles(response.assignment.assignment_files || []);
+
+            setFiles(response.assignment.assignment_files || []);
             setAssignment(response.assignment);
         } catch (err) {
             setError(
@@ -220,9 +226,6 @@ const AssignmentDetailPage = () => {
     if (loading) return <ClockLoader />;
     if (error) return <Text tag="p">Ошибка: {error}</Text>;
     if (!assignment) return <Text tag="p">Задание не найдено</Text>;
-    if (isInstructor) {
-        return <InstructorAssignmentFlow assignmentId={id} />;
-    }
 
     return (
         <main className="assignment-detail">
@@ -303,7 +306,7 @@ const AssignmentDetailPage = () => {
                         </section>
                     )}
 
-                    {assignment.task_files?.length > 0 && (
+                    {assignment.task?.files?.length > 0 && (
                         <section>
                             <Text
                                 tag="h2"
@@ -312,10 +315,11 @@ const AssignmentDetailPage = () => {
                                 Файлы задания:
                             </Text>
                             <ul className="files-list">
-                                {assignment.task_files.map((file) => (
+                                {assignment.task.files.map((file) => (
                                     <li key={file.id}>
                                         <FileItem
                                             fileUrl={file.file_url}
+                                            fileName={file.original_name}
                                             onDownload={() =>
                                                 handleDownloadFile(
                                                     file.id,
@@ -360,14 +364,6 @@ const AssignmentDetailPage = () => {
                             </div>
                         )}
 
-                    {assignment.status === ASSIGNMENTS_STATUSES.SUBMITTED && (
-                        <StatusSelector
-                            currentStatus={assignment.status}
-                            onStatusChange={handleStatusChange}
-                            isLoading={loading}
-                        />
-                    )}
-
                     <form className="submission-form">
                         <div className="submission-form__group">
                             <label htmlFor="comment">Комментарий:</label>
@@ -406,10 +402,11 @@ const AssignmentDetailPage = () => {
                                     </div>
                                 )}
                                 <div className="submission-form__files">
-                                    {files.map((file) => (
+                                    {(files || []).map((file) => (
                                         <FileItem
                                             key={file.id}
                                             fileUrl={file.file_url}
+                                            fileName={file.original_name}
                                             onDownload={() =>
                                                 handleDownloadFile(
                                                     file.id,

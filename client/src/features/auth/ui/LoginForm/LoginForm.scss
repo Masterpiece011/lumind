@@ -50,6 +50,11 @@
         justify-content: center;
         flex: 1;
         margin-top: 26px;
+
+        & img {
+            width: 200px;
+            height: 200px;
+        }
     }
 
     &__input-wrapper {
@@ -81,15 +86,15 @@
 
     &__options {
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 10px;
+        flex-direction: column; 
+        align-items: flex-end; 
+        gap: 20px; 
     }
 
     &__checkbox-wrapper {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 10px;
     }
 
     &__label {
@@ -108,6 +113,7 @@
         color: #aeaeae;
         text-decoration: none;
         @include fontOptions(16px, 400, 16px);
+        margin-bottom: 20px;
     }
 
     &__checkbox {

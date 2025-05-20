@@ -6,8 +6,10 @@ import { AssignmentsList } from "../AssignmentsList";
 import "./AssignmentsComp.scss";
 import Text from "@/shared/ui/Text";
 import { getUserAssignments } from "@/shared/api/assignmentsAPI";
+import { useRouter } from "next/navigation";
 
 const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
+    const router = useRouter();
     const dispatch = useDispatch();
     const {
         data: allAssignments,
@@ -19,6 +21,20 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const [filter, setFilter] = useState("all");
     const [isFilterLoading, setIsFilterLoading] = useState(false);
     const [filteredAssignments, setFilteredAssignments] = useState([]);
+
+    const userRole = useSelector((state) => state.user.user?.role);
+    const isInstructor = userRole === "INSTRUCTOR";
+    const [selectedAssignmentId, setSelectedAssignmentId] = useState(null);
+
+    const handleSelectAssignment = (assignmentId) => {
+        if (isInstructor) {
+            router.push(
+                `/assignments/students-assignments?assignmentId=${assignmentId}`,
+            );
+        } else {
+            router.push(`/assignments/${assignmentId}`);
+        }
+    };
 
     useEffect(() => {
         if (allAssignments) {
@@ -73,7 +89,7 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
                             ? assignmentsTotal
                             : filteredAssignments.length
                     }
-                    onSelect={onSelectAssignment}
+                    onSelect={handleSelectAssignment}
                     isLoading={loading}
                     isFilterLoading={isFilterLoading}
                 />

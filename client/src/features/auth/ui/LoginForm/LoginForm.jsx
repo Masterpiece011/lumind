@@ -16,7 +16,7 @@ import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
 
 import UserIcon from "@/app/assets/icons/user-icon.png";
 import LockIcon from "@/app/assets/icons/lock-icon.png";
-import Logo from "@/app/assets/img/logo.svg";
+import Logo from "@/shared/assets/icons/logo.svg";
 
 function LoginForm() {
     const dispatch = useDispatch();
@@ -135,12 +135,10 @@ function LoginForm() {
                                     Забыли пароль? Восстановить
                                 </a>
 
-                                <div>
-                                    <MyButton
-                                        text="Войти"
-                                        className={buttonStyles.loginButton}
-                                    />
-                                </div>
+                                <MyButton
+                                    text="Войти"
+                                    className={buttonStyles.loginButton}
+                                />
                             </div>
                         </div>
                         <div className="login__logo-wrapper">
