@@ -1,12 +1,21 @@
 import ApiError from "../../../error/ApiError.js";
-
+import path from "path";
 import fs from "fs/promises";
+import { Files } from "../../../models/models.js";
+import { fileConfig } from "../../../multer/multerConfig.js";
 
 export default async function downloadFile(req, res, next) {
     try {
+        const fileId = req.params.id;
+        const file = await Files.findByPk(fileId);
+
+        if (!file) {
+            throw ApiError.notFound("File not found");
+        }
+
         const filePath = path.join(
             fileConfig.UPLOADS_BASE_DIR,
-            req.params.path
+            file.file_url.replace(/^\/uploads\//, "")
         );
 
         if (
@@ -15,11 +24,16 @@ export default async function downloadFile(req, res, next) {
                 .then(() => true)
                 .catch(() => false))
         ) {
-            throw ApiError.notFound("File not found");
+            throw ApiError.notFound("File not found on server");
         }
 
-        res.download(filePath);
+        // Устанавливаем правильные заголовки
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${file.original_name}"`
+        );
+        res.download(filePath, file.original_name);
     } catch (error) {
-        next(ApiError.internal("Ошибка скачания файла"));
+        next(error);
     }
 }

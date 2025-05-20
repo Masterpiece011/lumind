@@ -2,7 +2,6 @@
 import "./AssignmentDetail.scss";
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useParams, useRouter } from "next/navigation";
 import { uploadFiles, downloadFile, deleteFile } from "@/shared/api/filesAPI";
 import {
     getAssignmentById,
@@ -25,7 +24,6 @@ const AssignmentDetailPage = () => {
     const [comment, setComment] = useState("");
     const [uploadProgress, setUploadProgress] = useState(0);
     const [assessment, setAssessment] = useState("");
-    const [status, setStatus] = useState("");
 
     const userRole = useSelector((state) => state.user.user?.role);
 
@@ -104,7 +102,6 @@ const AssignmentDetailPage = () => {
     const handleDeleteFile = async (fileId) => {
         try {
             await deleteFile({ fileId });
-            await deleteFile({ fileId });
             setFiles(files.filter((file) => file.id !== fileId));
         } catch (err) {
             setError("Ошибка удаления файла: " + err.message);
@@ -124,12 +121,10 @@ const AssignmentDetailPage = () => {
             setLoading(true);
             const response = await updateAssignment({
                 assignment_id: assignment.id,
-                assignment_id: assignment.id,
                 status: ASSIGNMENTS_STATUSES.SUBMITTED,
                 comment: comment,
             });
 
-            setFiles(response.assignment.assignment_files || []);
             setFiles(response.assignment.assignment_files || []);
             setAssignment(response.assignment);
         } catch (err) {
@@ -146,14 +141,12 @@ const AssignmentDetailPage = () => {
             setLoading(true);
             const response = await updateAssignment({
                 assignment_id: id,
-                assignment_id: id,
                 status: ASSIGNMENTS_STATUSES.ASSIGNED,
                 comment: "",
             });
 
             setFiles(response.assignment.assignment_files || []);
 
-            setFiles(response.assignment.assignment_files || []);
             setAssignment(response.assignment);
         } catch (err) {
             setError(
@@ -176,22 +169,6 @@ const AssignmentDetailPage = () => {
             return;
         }
         await handleSubmitWork();
-    };
-
-    const handleStatusChange = async (newStatus) => {
-        try {
-            setLoading(true);
-            const response = await updateAssignment({
-                assignment_id: id,
-                status: newStatus,
-                assessment: assessment,
-            });
-            setAssignment(response.assignment);
-        } catch (err) {
-            setError(err.message || "Ошибка при обновлении статуса");
-        } finally {
-            setLoading(false);
-        }
     };
 
     const getStatusText = () => {
@@ -433,7 +410,16 @@ const AssignmentDetailPage = () => {
                             <ul className="files-list">
                                 {assignment.assignment_files.map((file) => (
                                     <li key={file.id}>
-                                        <FileItem fileUrl={file.file_url} />
+                                        <FileItem
+                                            fileUrl={file.file_url}
+                                            fileName={file.original_name}
+                                            onDownload={() =>
+                                                handleDownloadFile(
+                                                    file.id,
+                                                    file.original_name,
+                                                )
+                                            }
+                                        />
                                     </li>
                                 ))}
                             </ul>
