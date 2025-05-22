@@ -38,7 +38,6 @@ const AssignmentDetailPage = () => {
 
             setComment(response.assignment.comment || "");
             setFiles(response.assignment.files || []);
-            setFiles(response.assignment.files || []);
             setError(null);
         } catch (err) {
             setError(err.message || "Ошибка загрузки назначения");
@@ -406,9 +405,9 @@ const AssignmentDetailPage = () => {
                         <Text tag="h3" className="files-title">
                             Прикреплённые файлы:
                         </Text>
-                        {assignment.assignment_files?.length > 0 ? (
+                        {files.length > 0 ? (
                             <ul className="files-list">
-                                {assignment.assignment_files.map((file) => (
+                                {files.map((file) => (
                                     <li key={file.id}>
                                         <FileItem
                                             fileUrl={file.file_url}
