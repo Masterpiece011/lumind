@@ -22,8 +22,8 @@ import { SchedulePage } from "@/features/schedule/ui/SheduleComp";
 
 import "./MainComp.scss";
 import { InstructorAssignmentFlow } from "@/features/instructor";
-import { InstructorAssignmentDetail } from "@/features/instructor/ui/InstructorDetail/InstructorAssignmentDetail";
-import { InstructorStudentsList } from "@/features/instructor/ui/InstructorList/InstructorStudentsList";
+import { TaskCreateForm } from "@/features/instructor/ui/TaskCreateForm/TaskCreateForm";
+import { AssignmentCreateForm } from "@/features/instructor/ui/AssignmentCreateForm/AssignmentCreateForm";
 
 const MainComp = () => {
     const router = useRouter();
@@ -180,6 +180,10 @@ const MainComp = () => {
                             <FilesPage />
                         ) : pathname.startsWith("/schedule") ? (
                             <SchedulePage />
+                        ) : pathname.startsWith("/assignments/create") ? (
+                            <AssignmentCreateForm />
+                        ) : pathname.startsWith("/tasks/create") ? (
+                            <TaskCreateForm />
                         ) : (
                             renderAssignmentsSection()
                         )}
