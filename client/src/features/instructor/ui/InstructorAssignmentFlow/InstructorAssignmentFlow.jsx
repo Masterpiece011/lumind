@@ -53,9 +53,11 @@ export const InstructorAssignmentFlow = () => {
     return (
         <div className="instructor-assignment-flow">
             {!isDetailView ? (
-                <InstructorStudentsList
-                    onSelectAssignment={handleSelectAssignment}
-                />
+                <>
+                    <InstructorStudentsList
+                        onSelectAssignment={handleSelectAssignment}
+                    />
+                </>
             ) : (
                 <>
                     <MyButton

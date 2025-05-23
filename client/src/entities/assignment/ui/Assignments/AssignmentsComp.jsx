@@ -7,6 +7,7 @@ import "./AssignmentsComp.scss";
 import Text from "@/shared/ui/Text";
 import { getUserAssignments } from "@/shared/api/assignmentsAPI";
 import { useRouter } from "next/navigation";
+import { MyButton } from "@/shared/uikit/MyButton";
 
 const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
     const router = useRouter();
@@ -66,9 +67,18 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
 
     return (
         <div className="assignments">
-            <Text tag="h1" className="assignments__title">
-                Мои задания
-            </Text>
+            <div className="assignments__header">
+                <Text tag="h1" className="assignments__title">
+                    Мои задания
+                </Text>
+
+                {isInstructor && (
+                    <MyButton
+                        text="Создать назначение"
+                        onClick={() => router.push("/assignments/create")}
+                    />
+                )}
+            </div>
 
             <Filters
                 currentFilter={filter}

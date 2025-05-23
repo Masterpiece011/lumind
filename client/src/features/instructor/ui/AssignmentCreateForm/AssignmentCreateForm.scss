@@ -1,0 +1,71 @@
+@use "../../../../shared/styles/variables/variables" as *;
+@use "../../../../shared/styles/mixins/mixins" as *;
+
+.assignment-create {
+  @include apply-theme;
+  border-radius: 16px;
+  box-shadow: 0px 0px 0px 0px var(--shadow-color);
+  padding: 40px 60px;
+  background-color: var(--card-bg);
+  box-shadow: 0 2px 8px var(--shadow-color);
+
+  &__title {
+    @include fontOptions(24px, 600, 1.2);
+    margin-bottom: 24px;
+    color: var(--text-color);
+    text-align: center;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+      @include fontOptions(16px, 500, 1.4);
+      color: var(--text-secondary);
+    }
+
+    select,
+    input[type="date"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--input-border);
+      border-radius: var(--border-radius);
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      @include fontOptions(16px, 400, 1.5);
+      transition: var(--transition);
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-accent);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.243);
+      }
+
+      option {
+        background-color: rgba(0, 0, 0, 0.243);
+        color: var(--text-color);
+      }
+    }
+  }
+
+  &__error {
+    @include fontOptions(14px, 500, 1.4);
+    color: var(--error-color);
+    margin-top: 8px;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 24px;
+  }
+}
