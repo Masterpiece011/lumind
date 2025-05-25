@@ -1,7 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createAssignment } from "@/shared/api/assignmentsAPI";
+import {
+    createAssignment,
+    getUserAssignments,
+} from "@/shared/api/assignmentsAPI";
 import { MyButton } from "@/shared/uikit/MyButton";
 import Text from "@/shared/ui/Text";
 import "./AssignmentCreateForm.scss";
@@ -10,6 +13,7 @@ import { getTeams } from "@/shared/api/teamAPI";
 import { getTasks } from "@/shared/api/taskAPI";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { useFilteredUsers } from "@/entities/user/model/useFilteredUsers";
+import { formatUserName } from "@/shared/lib/utils/formatUserName";
 
 export const AssignmentCreateForm = () => {
     const router = useRouter();
@@ -44,10 +48,8 @@ export const AssignmentCreateForm = () => {
     useEffect(() => {
         const fetchTeamsAndTasks = async () => {
             try {
-                // Загружаем команды через Redux
                 await dispatch(getTeams());
 
-                // Загружаем задачи напрямую
                 const tasksResponse = await getTasks();
                 setTasks(tasksResponse?.tasks?.tasks || []);
             } catch (err) {
@@ -73,14 +75,15 @@ export const AssignmentCreateForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log("Начало отправки формы", formData);
         setLoading((prev) => ({ ...prev, submit: true }));
         setError(null);
 
         try {
-            if (!currentUser?.id) {
+            if (!currentUser?.id)
                 throw new Error("Пользователь не авторизован");
-            }
 
+            // 1. Создаем назначение
             await createAssignment({
                 ...formData,
                 creator_id: currentUser.id,
@@ -88,9 +91,18 @@ export const AssignmentCreateForm = () => {
                 status: "assigned",
             });
 
+            // 2. Обновляем список назначений, созданных текущим пользователем
+            const updateResult = await dispatch(
+                getUserAssignments({
+                    userId: currentUser.id, // Может быть null, если хотим только по creator_id
+                    creator_id: currentUser.id, // Основной фильтр
+                }),
+            );
+
+            console.log("Результат обновления:", updateResult);
             router.push("/assignments");
         } catch (err) {
-            console.error("Error creating assignment:", err);
+            console.error("Ошибка:", err);
             setError(
                 err.response?.data?.message || "Ошибка при создании назначения",
             );
@@ -122,7 +134,7 @@ export const AssignmentCreateForm = () => {
                         <option value="">Выберите студента</option>
                         {students.map((student) => (
                             <option key={student.id} value={student.id}>
-                                {student.last_name} {student.first_name}
+                                {formatUserName(student)}
                             </option>
                         ))}
                     </select>

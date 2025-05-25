@@ -79,7 +79,7 @@ export const InstructorStudentsList = ({ onSelectAssignment }) => {
     return (
         <div className="instructor-students">
             <Text tag="h2" className="instructor-students__title">
-                Студенты с назначениями
+                Студенты с назначением
             </Text>
 
             <div className="instructor-students__students-list">

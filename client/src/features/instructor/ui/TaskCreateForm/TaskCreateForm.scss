@@ -3,12 +3,10 @@
 
 .task-create {
   @include apply-theme;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 24px;
-  border-radius: var(--border-radius);
+  border-radius: 16px;
+  box-shadow: 0px 0px 0px 0px var(--shadow-color);
+  padding: 40px 60px;
   background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
   box-shadow: 0 2px 8px var(--shadow-color);
 
   &__title {
