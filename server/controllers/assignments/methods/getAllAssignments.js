@@ -1,5 +1,11 @@
-import { Tasks, Assignments, Users_Teams, Teams_Tasks } from "../../../models/models.js";
+import {
+    Tasks,
+    Assignments,
+    Users_Teams,
+    Teams_Tasks,
+} from "../../../models/models.js";
 import ApiError from "../../../error/ApiError.js";
+import { Op } from "sequelize";
 
 export default async function getAllAssignments(req, res, next) {
     try {

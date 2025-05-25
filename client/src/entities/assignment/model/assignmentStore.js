@@ -38,14 +38,16 @@ const assignmentSlice = createSlice({
                 state.userAssignments.error = null;
             })
             .addCase(getUserAssignments.fulfilled, (state, { payload }) => {
-                state.userAssignments.data = payload.assignments;
-                state.userAssignments.total = payload.total;
+                // Сохраняем новые данные и обновляем timestamp
+                state.userAssignments.data = payload.assignments || [];
+                state.userAssignments.total = payload.total || 0;
                 state.userAssignments.loading = false;
+                state.userAssignments.error = null;
                 state.userAssignments.lastUpdated = Date.now();
             })
-            .addCase(getUserAssignments.rejected, (state, { payload }) => {
-                state.userAssignments.error = payload;
+            .addCase(getUserAssignments.rejected, (state, { error }) => {
                 state.userAssignments.loading = false;
+                state.userAssignments.error = error.message;
             })
 
             // Обработка командных назначений
