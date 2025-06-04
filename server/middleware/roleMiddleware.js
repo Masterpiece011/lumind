@@ -110,7 +110,12 @@ const roleRequirements = {
         ROLES.INSTRUCTOR,
         ROLES.USER,
     ],
-    "GET /api/assignments/instructor/students": [
+    "POST /api/assignments/instructor/assignments": [
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    "POST /api/assignments/instructor/students": [
         ROLES.ADMIN,
         ROLES.MODERATOR,
         ROLES.INSTRUCTOR,

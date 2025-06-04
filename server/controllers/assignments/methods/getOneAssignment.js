@@ -12,11 +12,9 @@ export default async function getOneAssignment(req, res, next) {
             include: [
                 {
                     model: Tasks,
-                    as: "task",
                     include: [
                         {
                             model: Files,
-                            as: "files",
                             where: { entity_type: "task" },
                             required: false,
                         },
@@ -24,7 +22,6 @@ export default async function getOneAssignment(req, res, next) {
                 },
                 {
                     model: Files,
-                    as: "files",
                     where: { entity_type: "assignment" },
                     required: false,
                 },
@@ -45,7 +42,7 @@ export default async function getOneAssignment(req, res, next) {
         }
 
         // Получаем данные пользователей
-        const [student, creator] = await Promise.all([
+        const [user, creator] = await Promise.all([
             Users.findByPk(assignment.user_id, {
                 attributes: ["id", "first_name", "last_name", "email"],
             }),
@@ -57,12 +54,14 @@ export default async function getOneAssignment(req, res, next) {
         // Формируем ответ
         const response = {
             ...assignment.get({ plain: true }),
+            user, // Добавляем данные студента
             creator,
             task: {
                 ...(assignment.task?.get({ plain: true }) || {}),
                 files: assignment.task?.files || [],
             },
-            assignment_files: assignment.files || [],
+            files: assignment.files || [],
+            plan_date: assignment.plan_date, // Явно включаем plan_date в ответ
         };
 
         return res.json({ assignment: response });

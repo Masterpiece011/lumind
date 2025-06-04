@@ -15,11 +15,10 @@ import "./InstructorAssignmentDetail.scss";
 import { StatusSelector } from "../StatusSelector/StatusSelector";
 import { ASSIGNMENTS_STATUSES } from "@/shared/constants/assignments";
 import { downloadFile } from "@/shared/api/filesAPI";
-import { useParams } from "react-router-dom";
+import { formatUserName } from "@/shared/lib/utils/formatUserName";
 import { useRouter } from "next/navigation";
 
 export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
-    // const {id: assignment.id} = useParams()
     const router = useRouter();
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -32,25 +31,36 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
             setLoading(true);
             const response = await getAssignmentById(assignmentId);
 
-            console.log("Полученные данные:", {
-                assignment: response.assignment,
-                student: response.student,
-            });
+            console.log("Полученные данные:", response);
 
-            // Проверяем, что user_id и creator_id разные
-            if (
-                response.assignment.user_id === response.assignment.creator_id
-            ) {
-                console.error("Ошибка: назначение самому себе!");
+            if (!response.assignment) {
+                throw new Error("Назначение не найдено");
             }
+
+            // Форматируем имя студента
+            const formattedStudent = response.assignment.user
+                ? {
+                      ...response.assignment.user,
+                      formattedName: formatUserName(response.assignment.user),
+                  }
+                : null;
 
             setAssignment({
                 ...response.assignment,
-                user: response.student,
-                creator: {
+                user: formattedStudent,
+                creator: response.assignment.creator || {
                     id: response.assignment.creator_id,
+                    first_name: "",
+                    last_name: "",
+                    middle_name: "",
+                    email: "",
                 },
+                plan_date: response.assignment.plan_date, // Убедимся, что дата передается
             });
+
+            // Устанавливаем текущие значения оценки и комментария
+            setAssessment(response.assignment.assessment || "");
+            setComment(response.assignment.comment || "");
         } catch (err) {
             console.error("Ошибка загрузки:", err);
             setError(err.message || "Ошибка загрузки задания");
@@ -58,7 +68,6 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
             setLoading(false);
         }
     };
-
     useEffect(() => {
         if (assignmentId) {
             // Добавляем проверку на наличие assignmentId
@@ -70,7 +79,7 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
         try {
             setLoading(true);
             const response = await updateAssignment({
-                assignment_id: assignmentId, 
+                assignment_id: assignmentId,
                 status: newStatus,
                 assessment: assessment,
                 comment: comment,
@@ -129,13 +138,13 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
                 <div className="meta">
                     <Text tag="p">
                         Студент:{" "}
-                        {assignment.user
-                            ? `${assignment.user.last_name || ""} ${assignment.user.first_name || ""}`
-                            : "Неизвестный студент"}
+                        {assignment.user?.formattedName ||
+                            "Неизвестный студент"}
                     </Text>
                     <Text tag="p">
                         Срок: {formatDate(assignment.plan_date)}
                     </Text>
+
                     <Text tag="p">Статус: {getStatusText()}</Text>
                     {assignment.assessment && (
                         <Text tag="p">Оценка: {assignment.assessment}</Text>

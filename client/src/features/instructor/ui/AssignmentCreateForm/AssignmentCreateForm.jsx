@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
     createAssignment,
-    getUserAssignments,
+    getInstructorAssignments,
 } from "@/shared/api/assignmentsAPI";
 import { MyButton } from "@/shared/uikit/MyButton";
 import Text from "@/shared/ui/Text";
@@ -14,6 +14,7 @@ import { getTasks } from "@/shared/api/taskAPI";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { useFilteredUsers } from "@/entities/user/model/useFilteredUsers";
 import { formatUserName } from "@/shared/lib/utils/formatUserName";
+import { addAssignment } from "@/entities/assignment/model/assignmentStore";
 
 export const AssignmentCreateForm = () => {
     const router = useRouter();
@@ -33,10 +34,7 @@ export const AssignmentCreateForm = () => {
         user_id: "",
         task_id: "",
         team_id: "",
-        title: "",
-        description: "",
         due_date: "",
-        comment: "",
     });
     const [loading, setLoading] = useState({
         teams: true,
@@ -49,17 +47,17 @@ export const AssignmentCreateForm = () => {
         const fetchTeamsAndTasks = async () => {
             try {
                 await dispatch(getTeams());
-
                 const tasksResponse = await getTasks();
                 setTasks(tasksResponse?.tasks?.tasks || []);
             } catch (err) {
                 console.error("Error fetching data:", err);
                 setError(err.message || "Ошибка загрузки данных");
             } finally {
-                setLoading({
+                setLoading((prev) => ({
+                    ...prev,
                     teams: false,
                     tasks: false,
-                });
+                }));
             }
         };
         fetchTeamsAndTasks();
@@ -75,37 +73,41 @@ export const AssignmentCreateForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Начало отправки формы", formData);
         setLoading((prev) => ({ ...prev, submit: true }));
-        setError(null);
 
         try {
-            if (!currentUser?.id)
-                throw new Error("Пользователь не авторизован");
-
-            // 1. Создаем назначение
-            await createAssignment({
-                ...formData,
+            const payload = {
+                user_id: formData.user_id,
+                task_id: formData.task_id,
                 creator_id: currentUser.id,
-                due_date: formData.due_date || null,
+                plan_date: formData.due_date || null,
                 status: "assigned",
-            });
+                team_id: formData.team_id || null,
+            };
 
-            // 2. Обновляем список назначений, созданных текущим пользователем
-            const updateResult = await dispatch(
-                getUserAssignments({
-                    userId: currentUser.id, // Может быть null, если хотим только по creator_id
-                    creator_id: currentUser.id, // Основной фильтр
+            const response = await createAssignment(payload);
+
+            // Оптимистичное обновление
+            const selectedTask = tasks.find((t) => t.id === formData.task_id);
+            const selectedStudent = students.find(
+                (s) => s.id === formData.user_id,
+            );
+            const selectedTeam = teams.find((t) => t.id === formData.team_id);
+
+            dispatch(
+                addAssignment({
+                    assignment: {
+                        ...response.assignment,
+                        task: selectedTask,
+                        user: selectedStudent,
+                        team: selectedTeam,
+                    },
                 }),
             );
 
-            console.log("Результат обновления:", updateResult);
             router.push("/assignments");
         } catch (err) {
-            console.error("Ошибка:", err);
-            setError(
-                err.response?.data?.message || "Ошибка при создании назначения",
-            );
+            setError(err.message);
         } finally {
             setLoading((prev) => ({ ...prev, submit: false }));
         }
@@ -145,15 +147,16 @@ export const AssignmentCreateForm = () => {
                 </div>
 
                 <div className="assignment-create__group">
-                    <label>Команда*</label>
+                    <label>Команда</label>
                     <select
                         name="team_id"
                         value={formData.team_id}
                         onChange={handleChange}
-                        required
                         disabled={isLoading || teams.length === 0}
                     >
-                        <option value="">Выберите команду</option>
+                        <option value="">
+                            Выберите команду (необязательно)
+                        </option>
                         {teams.map((team) => (
                             <option key={team.id} value={team.id}>
                                 {team.name}
@@ -194,11 +197,14 @@ export const AssignmentCreateForm = () => {
                         value={formData.due_date}
                         onChange={handleChange}
                         disabled={isLoading}
+                        min={new Date().toISOString().split("T")[0]}
                     />
                 </div>
 
                 {error && (
-                    <div className="assignment-create__error">{error}</div>
+                    <div className="assignment-create__error">
+                        <Text color="danger">{error}</Text>
+                    </div>
                 )}
 
                 <div className="assignment-create__actions">
@@ -219,9 +225,8 @@ export const AssignmentCreateForm = () => {
                         disabled={
                             isLoading ||
                             loading.submit ||
-                            students.length === 0 ||
-                            teams.length === 0 ||
-                            tasks.length === 0
+                            !formData.user_id ||
+                            !formData.task_id
                         }
                     />
                 </div>
