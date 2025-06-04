@@ -9,7 +9,8 @@ export const AssignmentsList = memo(
         isLoading,
         isFilterLoading,
         onSelect,
-    }) => (
+    } ) => (
+        
         <ul className="assignments__cards-list">
             {isLoading || isFilterLoading ? (
                 <div className="assignments__loading">

@@ -1,6 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter, usePathname } from "next/navigation";
+import {
+    useParams,
+    useRouter,
+    usePathname,
+    useSearchParams,
+} from "next/navigation";
 import { MyButton } from "@/shared/uikit/MyButton";
 import "./InstructorAssignmentFlow.scss";
 import Text from "@/shared/ui/Text";
@@ -9,10 +14,11 @@ import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { InstructorStudentsList } from "../InstructorList/InstructorStudentsList";
 import { InstructorAssignmentDetail } from "../InstructorDetail/InstructorAssignmentDetail";
 
-export const InstructorAssignmentFlow = () => {
+export const InstructorAssignmentFlow = ({ taskId }) => {
     const router = useRouter();
     const params = useParams();
-    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const currentTaskId = taskId || searchParams.get("taskId");
 
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -40,11 +46,17 @@ export const InstructorAssignmentFlow = () => {
     }, [assignmentId, isDetailView, router]);
 
     const handleSelectAssignment = (assignment) => {
-        router.push(`/assignments/students-assignments/${assignment.id}`);
+        if (assignment && assignment.id) {
+            router.push(
+                `/assignments/students-assignments/${assignment.id}${taskId ? `?taskId=${taskId}` : ""}`,
+            );
+        }
     };
 
     const handleBackToList = () => {
-        router.push("/assignments/students-assignments");
+        router.push(
+            `/assignments/students-assignments${currentTaskId ? `?taskId=${currentTaskId}` : ""}`,
+        );
     };
 
     if (loading) return <ClockLoader />;
@@ -56,6 +68,7 @@ export const InstructorAssignmentFlow = () => {
                 <>
                     <InstructorStudentsList
                         onSelectAssignment={handleSelectAssignment}
+                        taskId={currentTaskId}
                     />
                 </>
             ) : (

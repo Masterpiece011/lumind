@@ -101,6 +101,7 @@
     &__team {
         font-style: italic;
         @include fontOptions(14px, 600, 14px);
+        
     }
 
     &__name {

@@ -20,6 +20,7 @@ import getOneAssignment from "./methods/getOneAssignment.js";
 import updateAssignment from "./methods/updateAssignment.js";
 import deleteAssignment from "./methods/deleteAssignment.js";
 import getStudentsWithAssignments from "./methods/getStudentsWithAssignments.js";
+import getInstructorAssignments from "./methods/getInstructorAssignments.js";
 
 import ApiError from "../../error/ApiError.js";
 
@@ -39,6 +40,10 @@ class AssignmentController {
     // Получение собственных назначений, В РАМКАХ ОДНОЙ КОМАНДЫ
 
     getAllSelfTeamAssignments = getAllSelfTeamAssignments;
+
+    // Получение созданных назначений преподавателя
+    
+    getInstructorAssignments = getInstructorAssignments;
 
     // Получение задания по ID и команде
 
