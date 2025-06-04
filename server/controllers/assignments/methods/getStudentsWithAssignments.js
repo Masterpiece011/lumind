@@ -6,55 +6,31 @@ import {
     Teams,
     Users,
 } from "../../../models/models.js";
-
 import ApiError from "../../../error/ApiError.js";
 
 export default async function getStudentsWithAssignments(req, res, next) {
     try {
         const userId = req.user.id;
-        const { taskId } = req.query;
+        const { task_id } = req.body; // Берём из тела запроса
+        const taskId = task_id ? Number(task_id) : null;
 
-        // 1. Формируем условия запроса
-        const where = { creator_id: userId };
-
-        if (taskId) where.task_id = taskId;
-
-        // 2. Получаем все назначения
-        const assignments = await Assignments.findAll({
-            where,
-            include: [
-                {
-                    model: Tasks,
-                    attributes: ["id", "title", "description"],
-                    include: [
-                        {
-                            model: Files,
-                            where: { entity_type: "task" },
-                            required: false,
-                            attributes: ["id", "file_url", "original_name"],
-                        },
-                    ],
-                },
-                {
-                    model: Files,
-                    where: { entity_type: "assignment" },
-                    required: false,
-                    attributes: ["id", "file_url", "original_name"],
-                },
-            ],
-            order: [["created_at", "DESC"]],
+        // 1. Получаем уникальных студентов с назначенными заданиями от этого преподавателя
+        const studentAssignments = await Assignments.findAll({
+            where: { creator_id: userId },
+            attributes: ["user_id"],
+            group: ["user_id"],
+            raw: true,
         });
 
-        // 3. Получаем ID всех студентов (исключая самого преподавателя)
-        const studentIds = [
-            ...new Set(assignments.map((a) => a.user_id)),
-        ].filter((id) => id !== userId); // Исключаем преподавателя
-
-        if (studentIds.length === 0) {
+        if (studentAssignments.length === 0) {
             return res.json({ students: [] });
         }
 
-        // 4. Получаем информацию о студентах с группами и командами
+        const studentIds = studentAssignments
+            .map((a) => a.user_id)
+            .filter((id) => id !== userId);
+
+        // 2. Получаем студентов с их данными и группами/командами
         const students = await Users.findAll({
             where: { id: studentIds },
             attributes: [
@@ -79,37 +55,89 @@ export default async function getStudentsWithAssignments(req, res, next) {
             ],
         });
 
-        // 5. Создаем и заполняем маппинг студентов
-        const studentsMap = new Map();
-        students.forEach((student) => {
-            studentsMap.set(student.id, {
-                ...student.get({ plain: true }),
-                assignments: [],
-            });
-        });
+        // 3. Для каждого студента получаем их задания с инфо о задании (task)
+        const studentsWithAssignments = await Promise.all(
+            students.map(async (student) => {
+                const where = {
+                    creator_id: userId,
+                    user_id: student.id,
+                };
 
-        assignments.forEach((assignment) => {
-            if (studentsMap.has(assignment.user_id)) {
-                studentsMap.get(assignment.user_id).assignments.push({
-                    id: assignment.id,
-                    status: assignment.status,
-                    assessment: assignment.assessment,
-                    comment: assignment.comment,
-                    plan_date: assignment.plan_date,
-                    created_at: assignment.created_at,
-                    task: {
-                        id: assignment.task.id,
-                        title: assignment.task.title,
-                        description: assignment.task.description,
-                        files: assignment.task.files || [],
-                    },
-                    files: assignment.files || [],
+                if (taskId) where.task_id = taskId;
+
+                const assignments = await Assignments.findAll({
+                    where,
+                    attributes: [
+                        "id",
+                        "status",
+                        "assessment",
+                        "comment",
+                        "plan_date",
+                        "created_at",
+                        "task_id",
+                        "user_id",
+                    ],
+                    include: [
+                        {
+                            model: Tasks,
+                            attributes: ["id", "title", "description"],
+                            include: [
+                                {
+                                    model: Files,
+                                    where: { entity_type: "task" },
+                                    required: false,
+                                    attributes: [
+                                        "id",
+                                        "file_url",
+                                        "original_name",
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            model: Files,
+                            where: { entity_type: "assignment" },
+                            required: false,
+                            attributes: ["id", "file_url", "original_name"],
+                        },
+                    ],
+                    order: [["created_at", "DESC"]],
                 });
-            }
-        });
+
+                // 4. Оставляем только последние по каждой задаче
+                const uniqueAssignments = [];
+                const taskMap = new Map();
+
+                assignments.forEach((assignment) => {
+                    if (!taskMap.has(assignment.task_id)) {
+                        taskMap.set(assignment.task_id, true);
+                        uniqueAssignments.push(assignment);
+                    }
+                });
+
+                return {
+                    ...student.get({ plain: true }),
+                    assignments: uniqueAssignments.map((a) => ({
+                        id: a.id,
+                        status: a.status,
+                        assessment: a.assessment,
+                        comment: a.comment,
+                        plan_date: a.plan_date, // Убедимся, что дата включена
+                        created_at: a.created_at,
+                        task: {
+                            id: a.task.id,
+                            title: a.task.title,
+                            description: a.task.description,
+                            files: a.task.files || [],
+                        },
+                        files: a.files || [],
+                    })),
+                };
+            })
+        );
 
         return res.json({
-            students: Array.from(studentsMap.values()),
+            students: studentsWithAssignments,
             taskId: taskId || null,
         });
     } catch (error) {

@@ -1,66 +1,136 @@
-import React, { useEffect, useState, memo } from "react";
+import React, { useEffect, useState, memo, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { Filters } from "../Filters";
 import { AssignmentsList } from "../AssignmentsList";
 import "./AssignmentsComp.scss";
 import Text from "@/shared/ui/Text";
-import { getUserAssignments } from "@/shared/api/assignmentsAPI";
+import {
+    getInstructorAssignments,
+    getUserAssignments,
+} from "@/shared/api/assignmentsAPI";
 import { useRouter } from "next/navigation";
 import { MyButton } from "@/shared/uikit/MyButton";
 
-const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
+const AssignmentsPage = memo(({ userId }) => {
     const router = useRouter();
     const dispatch = useDispatch();
+    const currentUser = useSelector((state) => state.user.user);
+    const isInstructor = currentUser?.role === "INSTRUCTOR";
+
+    const assignmentsState = useSelector((state) =>
+        isInstructor
+            ? state.assignments.instructorAssignments
+            : state.assignments.userAssignments,
+    );
+
     const {
-        data: allAssignments,
-        total: assignmentsTotal,
+        data: allAssignments = isInstructor
+            ? { assignmentsByTask: [], total: 0 }
+            : [],
         loading,
         error,
-    } = useSelector((state) => state.assignments.userAssignments);
+    } = assignmentsState;
 
     const [filter, setFilter] = useState("all");
     const [isFilterLoading, setIsFilterLoading] = useState(false);
-    const [filteredAssignments, setFilteredAssignments] = useState([]);
 
-    const userRole = useSelector((state) => state.user.user?.role);
-    const isInstructor = userRole === "INSTRUCTOR";
-    const [selectedAssignmentId, setSelectedAssignmentId] = useState(null);
-
-    const handleSelectAssignment = (assignmentId) => {
+    // Подготовка данных
+    const { preparedAssignments, totalToShow } = useMemo(() => {
         if (isInstructor) {
-            router.push(
-                `/assignments/students-assignments?assignmentId=${assignmentId}`,
-            );
+            const assignmentsByTask = allAssignments.assignmentsByTask || [];
+            const taskCards = [];
+            let totalAssignments = 0;
+
+            assignmentsByTask.forEach((taskGroup) => {
+                const assignments = taskGroup.assignments || [];
+                const filteredAssignments =
+                    filter === "all"
+                        ? assignments
+                        : assignments.filter((a) => a.status === filter);
+
+                if (filteredAssignments.length > 0) {
+                    taskCards.push({
+                        id: taskGroup.task.id,
+                        task: taskGroup.task,
+                        status: "assigned",
+                        isInstructorView: true,
+                        assignmentsCount: filteredAssignments.length,
+                        team: taskGroup.team,
+                    });
+                    totalAssignments += filteredAssignments.length;
+                }
+            });
+
+            return {
+                preparedAssignments: taskCards,
+                totalToShow: totalAssignments,
+            };
         } else {
-            router.push(`/assignments/${assignmentId}`);
-        }
-    };
+            const assignments = Array.isArray(allAssignments)
+                ? allAssignments
+                : [];
 
-    useEffect(() => {
-        if (allAssignments) {
-            if (filter === "all") {
-                setFilteredAssignments(allAssignments);
-            } else {
-                setFilteredAssignments(
-                    allAssignments.filter((a) => a.status === filter),
-                );
-            }
-        }
-    }, [allAssignments, filter]);
+            // Фильтрация с учетом реальных статусов из API
+            const filtered = assignments.filter((assignment) => {
+                if (filter === "all") return true;
 
-    useEffect(() => {
-        if (userId) {
-            setIsFilterLoading(true);
-            dispatch(getUserAssignments({ userId })).finally(() =>
-                setIsFilterLoading(false),
+                // Приводим статусы к единому формату
+                const statusMap = {
+                    assigned: "assigned",
+                    submitted: "submitted",
+                    completed: "completed",
+                    failed: "failed",
+                    in_progress: "in_progress",
+                };
+
+                const normalizedStatus =
+                    statusMap[assignment.status] || assignment.status;
+                return normalizedStatus === filter;
+            });
+
+            return {
+                preparedAssignments: filtered,
+                totalToShow: filtered.length,
+            };
+        }
+    }, [allAssignments, filter, isInstructor]);
+
+    // Остальной код без изменений
+    const handleSelectAssignment = useCallback(
+        (taskId) => {
+            if (!taskId) return;
+            router.push(
+                isInstructor
+                    ? `/assignments/students-assignments?taskId=${taskId}`
+                    : `/assignments/${taskId}`,
             );
-        }
-    }, [dispatch, userId]);
+        },
+        [isInstructor, router],
+    );
 
-    const handleSetNewFilter = (newFilter) => {
+    useEffect(() => {
+        if (!userId) return;
+
+        const fetchData = async () => {
+            setIsFilterLoading(true);
+            try {
+                if (isInstructor) {
+                    await dispatch(getInstructorAssignments(userId));
+                } else {
+                    await dispatch(getUserAssignments({ userId }));
+                }
+            } finally {
+                setIsFilterLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [dispatch, userId, isInstructor]);
+
+    const handleSetNewFilter = useCallback((newFilter) => {
         setFilter(newFilter);
-    };
+    }, []);
 
     if (loading) return <ClockLoader className="assignments__loading" />;
     if (error) return <div className="assignments__error">Ошибка: {error}</div>;
@@ -69,9 +139,8 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
         <div className="assignments">
             <div className="assignments__header">
                 <Text tag="h1" className="assignments__title">
-                    Мои задания
+                    {isInstructor ? "Мои задания" : "Назначенные задания"}
                 </Text>
-
                 {isInstructor && (
                     <MyButton
                         text="Создать назначение"
@@ -84,7 +153,6 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
                 currentFilter={filter}
                 onFilterChange={handleSetNewFilter}
             />
-
             <div className="assignments__divider"></div>
 
             {isFilterLoading ? (
@@ -93,14 +161,9 @@ const AssignmentsPage = memo(({ userId, onSelectAssignment }) => {
                 </div>
             ) : (
                 <AssignmentsList
-                    assignments={filteredAssignments}
-                    assignmentsTotal={
-                        filter === "all"
-                            ? assignmentsTotal
-                            : filteredAssignments.length
-                    }
+                    assignments={preparedAssignments}
+                    assignmentsTotal={totalToShow}
                     onSelect={handleSelectAssignment}
-                    isLoading={loading}
                     isFilterLoading={isFilterLoading}
                 />
             )}

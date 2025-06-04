@@ -19,7 +19,7 @@ const getStatusText = (status) => {
     return statusMap[status] || status;
 };
 
-export const InstructorStudentsList = ({ onSelectAssignment }) => {
+export const InstructorStudentsList = ({ onSelectAssignment, taskId }) => {
     const router = useRouter();
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -31,7 +31,8 @@ export const InstructorStudentsList = ({ onSelectAssignment }) => {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await getStudentsWithAssignments();
+                console.log("Fetching with taskId:", taskId); // Добавьте лог
+                const response = await getStudentsWithAssignments(taskId);
 
                 if (!response?.students) {
                     throw new Error("Неверный формат данных");
@@ -48,11 +49,18 @@ export const InstructorStudentsList = ({ onSelectAssignment }) => {
         };
 
         fetchStudents();
-    }, []);
+    }, [taskId]);
 
     const handleSelectUser = (userId, assignment) => {
-        if (assignment && assignment.id) {
-            router.push(`/assignments/students-assignments/${assignment.id}`);
+        if (onSelectAssignment) {
+            onSelectAssignment(assignment);
+        } else {
+            // Фолбэк, если пропс не передан
+            if (assignment && assignment.id) {
+                router.push(
+                    `/assignments/students-assignments/${assignment.id}${taskId ? `?taskId=${taskId}` : ""}`,
+                );
+            }
         }
     };
 
@@ -79,61 +87,71 @@ export const InstructorStudentsList = ({ onSelectAssignment }) => {
     return (
         <div className="instructor-students">
             <Text tag="h2" className="instructor-students__title">
-                Студенты с назначением
+                {taskId
+                    ? `Студенты с назначением по заданию`
+                    : `Все студенты с назначениями`}
             </Text>
 
             <div className="instructor-students__students-list">
                 {students.length > 0 ? (
-                    students.map((student) => {
-                        const firstAssignment = student.assignments[0];
-                        const status =
-                            firstAssignment?.status || "not_assigned";
+                    students
+                        // Фильтруем студентов, у которых есть назначения
+                        .filter((student) => student.assignments.length > 0)
+                        .map((student) => {
+                            // Берем первое назначение (самое свежее)
+                            const assignment = student.assignments[0];
+                            const status = assignment?.status || "not_assigned";
 
-                        const firstTeam = student.teams?.[0];
-                        const teamName = firstTeam?.name || "Без команды";
-                        const groupName = student.group?.title || "Без группы";
+                            const firstTeam = student.teams?.[0];
+                            const teamName = firstTeam?.name || "Без команды";
+                            const groupName =
+                                student.group?.title || "Без группы";
 
-                        return (
-                            <div
-                                key={student.id}
-                                className={`instructor-students__student-item ${
-                                    selectedUserId === student.id
-                                        ? "instructor-students__student-item--active"
-                                        : ""
-                                }`}
-                                onClick={() =>
-                                    handleSelectUser(
-                                        student.id,
-                                        student.assignments[0],
-                                    )
-                                }
-                            >
-                                <div className="student-info">
-                                    <Text tag="p" className="student-name">
-                                        {formatUserName(student)}
-                                    </Text>
-                                    <div className="student-meta">
-                                        <Text
-                                            tag="span"
-                                            className="student-group"
-                                        >
-                                            {groupName}
+                            return (
+                                <div
+                                    key={student.id}
+                                    className={`instructor-students__student-item ${
+                                        selectedUserId === student.id
+                                            ? "instructor-students__student-item--active"
+                                            : ""
+                                    }`}
+                                    onClick={() =>
+                                        handleSelectUser(student.id, assignment)
+                                    }
+                                >
+                                    <div className="student-info">
+                                        <Text tag="p" className="student-name">
+                                            {formatUserName(student)}
                                         </Text>
-                                        <Text
-                                            tag="span"
-                                            className="student-team"
-                                        >
-                                            {teamName}
-                                        </Text>
+                                        <div className="student-meta">
+                                            <Text
+                                                tag="span"
+                                                className="student-group"
+                                            >
+                                                {groupName}
+                                            </Text>
+                                            <Text
+                                                tag="span"
+                                                className="student-team"
+                                            >
+                                                {teamName}
+                                            </Text>
+                                        </div>
                                     </div>
+                                    {getStatusBadge(status)}
+                                    {taskId && (
+                                        <div className="assignment-task">
+                                            Задание: {assignment.task.title}
+                                        </div>
+                                    )}
                                 </div>
-                                {getStatusBadge(status)}
-                            </div>
-                        );
-                    })
+                            );
+                        })
                 ) : (
                     <Text tag="p" className="instructor-students__empty">
-                        Нет студентов с назначениями
+                        {taskId
+                            ? "Нет студентов с назначением по этому заданию"
+                            : "Нет студентов с назначениями"}
                     </Text>
                 )}
             </div>

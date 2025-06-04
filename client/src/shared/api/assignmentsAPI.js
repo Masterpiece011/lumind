@@ -39,6 +39,25 @@ export const getUserAssignments = createAsyncThunk(
     },
 );
 
+export const getInstructorAssignments = createAsyncThunk(
+    "assignments/getInstructorAssignments",
+    async (creatorId, { rejectWithValue }) => {
+        try {
+            const { data } = await $authHost.post(
+                "/api/assignments/instructor/assignments",
+                { creator_id: creatorId },
+            );
+            console.log("getInstructorAssignments data:", data);
+            return data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                    "Ошибка получения назначений преподавателя",
+            );
+        }
+    },
+);
+
 export const getUserTeamAssignments = createAsyncThunk(
     "assignments/getUserTeamAssignments",
     async ({ userId, teamId, status }, { rejectWithValue }) => {
@@ -102,10 +121,34 @@ export const createAssignment = async (assignmentData) => {
             "/api/assignments/",
             assignmentData,
         );
-        return response.data;
+
+        // Check if response has data
+        if (!response.data || typeof response.data !== "object") {
+            throw new Error("Неверный формат ответа сервера");
+        }
+
+        // Handle both possible response formats
+        if (response.data.assignment) {
+            // New format: {message: "...", assignment: {...}}
+            return response.data;
+        } else if (response.data.assignments) {
+            // Old format: {assignments: [...], total: X}
+            // Extract the last created assignment
+            const lastAssignment =
+                response.data.assignments[response.data.assignments.length - 1];
+            return {
+                message: "Назначение успешно создано",
+                assignment: lastAssignment,
+            };
+        } else {
+            throw new Error("Неверный формат ответа сервера");
+        }
     } catch (error) {
+        console.error("Ошибка создания назначения:", error);
         throw new Error(
-            error.response?.data?.message || "Ошибка создания задания",
+            error.response?.data?.message ||
+                error.message ||
+                "Ошибка создания задания",
         );
     }
 };
@@ -152,14 +195,14 @@ export const deleteAssignment = async (assignmentId) => {
     }
 };
 
-export const getStudentsWithAssignments = async (taskId = null) => {
+export const getStudentsWithAssignments = async (taskId) => {
     try {
-        const params = {};
-        if (taskId) params.taskId = taskId;
+        // Преобразуем taskId в число, если он есть
+        const numericTaskId = taskId ? Number(taskId) : undefined;
 
-        const response = await $authHost.get(
+        const response = await $authHost.post(
             "/api/assignments/instructor/students",
-            { params },
+            { task_id: numericTaskId },
         );
         return response.data;
     } catch (error) {

@@ -47,11 +47,18 @@ assignmentRouter.delete(
     assignmentController.delete
 );
 
-assignmentRouter.get(
+assignmentRouter.post(
     "/instructor/students",
     authMiddleware,
     roleMiddleware(),
     assignmentController.getStudentsWithAssignments
+);
+
+assignmentRouter.post(
+    "/instructor/assignments",
+    authMiddleware,
+    roleMiddleware(),
+    assignmentController.getInstructorAssignments
 );
 
 assignmentRouter.get(
