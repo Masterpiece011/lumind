@@ -28,6 +28,7 @@ import { AssignmentCreateForm } from "@/features/instructor/ui/AssignmentCreateF
 const MainComp = () => {
     const router = useRouter();
     const pathname = usePathname();
+    const isAuth = useSelector((state) => state.user.isAuth);
     const params = useParams();
     const searchMenuRef = useRef(null);
 
@@ -61,6 +62,18 @@ const MainComp = () => {
             chatId: "123",
         });
     };
+
+    // Защита роутов
+    useEffect(() => {
+        if (!isAuth && pathname !== "/login") {
+            router.replace("/login");
+        }
+    }, [isAuth, pathname, router]);
+
+    // Блокируем рендер для неавторизованных пользователей
+    if (!isAuth) {
+        return null;
+    }
 
     useEffect(() => {
         setShowSearchMenu(false);

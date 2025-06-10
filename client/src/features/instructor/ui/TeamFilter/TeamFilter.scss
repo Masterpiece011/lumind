@@ -1,0 +1,35 @@
+@use "../../../../shared/styles/variables/variables" as *;
+@use "../../../../shared/styles/mixins/mixins" as *;
+
+.team-filter {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+
+    &__buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+
+        button {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--primary-accent);
+            background-color: transparent;
+            color: var(--primary-accent);
+            transition: all 0.3s ease;
+
+            &.active {
+                background-color: var(--primary-accent);
+                color: white;
+            }
+
+            &:hover {
+                opacity: 0.9;
+            }
+        }
+    }
+}

@@ -22,6 +22,7 @@ import deleteAssignment from "./methods/deleteAssignment.js";
 import getStudentsWithAssignments from "./methods/getStudentsWithAssignments.js";
 import getInstructorAssignments from "./methods/getInstructorAssignments.js";
 
+
 import ApiError from "../../error/ApiError.js";
 
 class AssignmentController {
@@ -42,8 +43,9 @@ class AssignmentController {
     getAllSelfTeamAssignments = getAllSelfTeamAssignments;
 
     // Получение созданных назначений преподавателя
-    
+
     getInstructorAssignments = getInstructorAssignments;
+
 
     // Получение задания по ID и команде
 

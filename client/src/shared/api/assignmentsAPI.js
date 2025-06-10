@@ -167,7 +167,6 @@ export const updateAssignment = async ({
             comment,
         });
 
-        // Убедитесь, что ответ содержит актуальные файлы
         return {
             ...response.data,
             assignment: {
@@ -195,14 +194,21 @@ export const deleteAssignment = async (assignmentId) => {
     }
 };
 
-export const getStudentsWithAssignments = async (taskId) => {
+export const getStudentsWithAssignments = async (
+    taskId,
+    teamId,
+    page = 1,
+    quantity = 10,
+) => {
     try {
-        // Преобразуем taskId в число, если он есть
-        const numericTaskId = taskId ? Number(taskId) : undefined;
-
         const response = await $authHost.post(
             "/api/assignments/instructor/students",
-            { task_id: numericTaskId },
+            {
+                task_id: taskId ? Number(taskId) : undefined,
+                team_id: teamId,
+                page,
+                quantity,
+            },
         );
         return response.data;
     } catch (error) {

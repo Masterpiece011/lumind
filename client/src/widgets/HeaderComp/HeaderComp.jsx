@@ -22,6 +22,7 @@ import { getTeams } from "@/shared/api/teamAPI";
 import { logout } from "@/entities/user/model/userStore";
 import Logo from "@/shared/assets/icons/logo.svg";
 import Logout from "@/app/assets/icons/logout-icon.svg";
+import clearAssignments from "@/entities/assignment/model/assignmentStore";
 
 function HeaderComp({ onSearchFocus, onSearchChange }) {
     const router = useRouter();
@@ -50,10 +51,17 @@ function HeaderComp({ onSearchFocus, onSearchChange }) {
         router.push("/login");
     };
 
-    const handleLogoutClick = () => {
-        dispatch(logout());
-        window.history.replaceState(null, "", "/login");
-        router.replace("/login");
+    const handleLogoutClick = async () => {
+        try {
+            router.replace("/login");
+
+            dispatch(clearAssignments());
+            dispatch(logout());
+
+            window.history.replaceState(null, "", "/login");
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
     };
 
     const handleSearchChange = (e) => {

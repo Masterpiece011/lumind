@@ -14,6 +14,20 @@ teamRouter.post(
 );
 teamRouter.get("/:id", authMiddleware, teamController.getOne);
 teamRouter.post("/", authMiddleware, teamController.getAll);
+teamRouter.post(
+    "/instructor/assignments",
+    authMiddleware,
+    roleMiddleware(),
+    teamController.getTeamInstructorAssignments
+);
+
+teamRouter.post(
+    "/students-with-assignments",
+    authMiddleware,
+    roleMiddleware(),
+    teamController.getTeamStudentsWithAssignments
+);
+
 teamRouter.put("/", authMiddleware, roleMiddleware(), teamController.update);
 teamRouter.delete(
     "/:id",
