@@ -28,11 +28,7 @@ export default async function getUserFiles(req, res, next) {
                 ...(search_text && {
                     [Op.or]: [
                         { file_url: { [Op.iLike]: `%${search_text}%` } },
-                        {
-                            "$assignment.title$": {
-                                [Op.iLike]: `%${search_text}%`,
-                            },
-                        },
+                        { original_name: { [Op.iLike]: `%${search_text}%` } },
                         {
                             "$assignment.task.title$": {
                                 [Op.iLike]: `%${search_text}%`,
@@ -47,7 +43,7 @@ export default async function getUserFiles(req, res, next) {
                     as: "assignment",
                     required: true,
                     where: { user_id },
-                    attributes: ["id", "title", "created_at"],
+                    attributes: ["id", "created_at"],
                     include: [
                         {
                             model: Tasks,
@@ -66,9 +62,9 @@ export default async function getUserFiles(req, res, next) {
         const formattedFiles = userFiles.map((file) => ({
             id: file.id,
             file_url: file.file_url,
-            original_name: file.file_url.split("/").pop(),
+            original_name: file.original_name,
             created_at: file.created_at,
-            assignmentTitle: file.assignment?.title || "Ответ на задание",
+            assignmentTitle: file.assignment?.task?.title || "Ответ на задание", // Используем title задачи
             taskTitle: file.assignment?.task?.title || "Неизвестное задание",
         }));
 

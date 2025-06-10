@@ -31,34 +31,11 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
             setLoading(true);
             const response = await getAssignmentById(assignmentId);
 
-            console.log("Полученные данные:", response);
-
             if (!response.assignment) {
                 throw new Error("Назначение не найдено");
             }
 
-            // Форматируем имя студента
-            const formattedStudent = response.assignment.user
-                ? {
-                      ...response.assignment.user,
-                      formattedName: formatUserName(response.assignment.user),
-                  }
-                : null;
-
-            setAssignment({
-                ...response.assignment,
-                user: formattedStudent,
-                creator: response.assignment.creator || {
-                    id: response.assignment.creator_id,
-                    first_name: "",
-                    last_name: "",
-                    middle_name: "",
-                    email: "",
-                },
-                plan_date: response.assignment.plan_date, // Убедимся, что дата передается
-            });
-
-            // Устанавливаем текущие значения оценки и комментария
+            setAssignment(response.assignment);
             setAssessment(response.assignment.assessment || "");
             setComment(response.assignment.comment || "");
         } catch (err) {
@@ -70,7 +47,6 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
     };
     useEffect(() => {
         if (assignmentId) {
-            // Добавляем проверку на наличие assignmentId
             fetchAssignment();
         }
     }, [assignmentId]);
@@ -84,7 +60,15 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
                 assessment: assessment,
                 comment: comment,
             });
-            setAssignment(response.assignment);
+
+            const currentUser = assignment.user;
+
+            setAssignment({
+                ...response.assignment,
+                user: response.assignment.user || currentUser,
+                task: response.assignment.task || assignment.task,
+                files: response.assignment.files || assignment.files,
+            });
         } catch (err) {
             setError(err.message || "Ошибка при обновлении статуса");
         } finally {
@@ -138,13 +122,13 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
                 <div className="meta">
                     <Text tag="p">
                         Студент:{" "}
-                        {assignment.user?.formattedName ||
-                            "Неизвестный студент"}
+                        {assignment.user
+                            ? formatUserName(assignment.user)
+                            : "Неизвестный студент"}
                     </Text>
                     <Text tag="p">
                         Срок: {formatDate(assignment.plan_date)}
                     </Text>
-
                     <Text tag="p">Статус: {getStatusText()}</Text>
                     {assignment.assessment && (
                         <Text tag="p">Оценка: {assignment.assessment}</Text>
@@ -195,8 +179,8 @@ export const InstructorAssignmentDetail = ({ assignmentId, userId }) => {
                         <label>Оценка:</label>
                         <input
                             type="number"
-                            min="1"
-                            max="10"
+                            min="0"
+                            max="5"
                             value={assessment}
                             onChange={(e) => setAssessment(e.target.value)}
                         />

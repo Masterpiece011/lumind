@@ -1,7 +1,7 @@
 "use client";
 import "./AssignmentDetail.scss";
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { uploadFiles, downloadFile, deleteFile } from "@/shared/api/filesAPI";
 import {
     getAssignmentById,
@@ -12,30 +12,21 @@ import { FileItem } from "@/shared/ui/FileComp";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { ASSIGNMENTS_STATUSES } from "@/shared/constants/assignments";
 import Text from "@/shared/ui/Text";
-import { useSelector } from "react-redux";
 
 const AssignmentDetailPage = () => {
     const { id } = useParams();
-    const router = useRouter();
     const [assignment, setAssignment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [files, setFiles] = useState([]);
     const [comment, setComment] = useState("");
     const [uploadProgress, setUploadProgress] = useState(0);
-    const [assessment, setAssessment] = useState("");
-
-    const userRole = useSelector((state) => state.user.user?.role);
-
-    const isInstructor = userRole === "INSTRUCTOR";
 
     const fetchAssignment = async () => {
         try {
             setLoading(true);
             const response = await getAssignmentById(id);
             setAssignment(response.assignment);
-            console.log("ass", response.assignment);
-
             setComment(response.assignment.comment || "");
             setFiles(response.assignment.files || []);
             setError(null);
@@ -45,6 +36,7 @@ const AssignmentDetailPage = () => {
             setLoading(false);
         }
     };
+
     useEffect(() => {
         if (id) fetchAssignment();
     }, [id]);
@@ -124,8 +116,12 @@ const AssignmentDetailPage = () => {
                 comment: comment,
             });
 
-            setFiles(response.assignment.assignment_files || []);
-            setAssignment(response.assignment);
+            const currentCreator = assignment.creator;
+            setAssignment({
+                ...response.assignment,
+                creator: response.assignment.creator || currentCreator,
+            });
+            setFiles(response.assignment.files || []);
         } catch (err) {
             setError(
                 err.response?.data?.message || "Ошибка при отправке работы",
@@ -144,9 +140,12 @@ const AssignmentDetailPage = () => {
                 comment: "",
             });
 
-            setFiles(response.assignment.assignment_files || []);
-
-            setAssignment(response.assignment);
+            const currentCreator = assignment.creator;
+            setAssignment({
+                ...response.assignment,
+                creator: response.assignment.creator || currentCreator,
+            });
+            setFiles(response.assignment.files || []);
         } catch (err) {
             setError(
                 err.response?.data?.message || "Ошибка при отмене отправки",
@@ -164,7 +163,6 @@ const AssignmentDetailPage = () => {
             ].includes(assignment.status)
         ) {
             await handleCancelSubmission();
-
             return;
         }
         await handleSubmitWork();
@@ -223,15 +221,12 @@ const AssignmentDetailPage = () => {
                         Срок:{" "}
                         {new Date(assignment.plan_date).toLocaleDateString()}
                     </Text>
-
                     <Text tag="p">Статус: {getStatusText()}</Text>
-
                     {assignment.assessment && (
                         <Text tag="p" className="score">
                             Оценка: {assignment.assessment}
                         </Text>
                     )}
-
                     <MyButton
                         className="assignment-detail__submit-btn"
                         text={getSubmitButtonText()}
@@ -247,12 +242,12 @@ const AssignmentDetailPage = () => {
                             tag="h2"
                             className="assignment-detail__info-caption"
                         >
-                            {isInstructor ? "Студент:" : "Преподаватель:"}
+                            Преподаватель:
                         </Text>
                         <Text tag="p">
-                            {isInstructor
-                                ? `${assignment.user?.last_name || ""} ${assignment.user?.first_name || ""}`
-                                : `${assignment.creator?.last_name || ""} ${assignment.creator?.first_name || ""}`}
+                            {assignment.creator
+                                ? `${assignment.creator.last_name || ""} ${assignment.creator.first_name || ""}`
+                                : "Не указан"}
                         </Text>
                     </section>
 
@@ -312,33 +307,12 @@ const AssignmentDetailPage = () => {
 
                 <div className="assignment-detail__work">
                     <div className="work-header">
-                        <Text tag="h2">
-                            {isInstructor ? "Работа студента" : "Моя работа"}
-                        </Text>
+                        <Text tag="h2">Моя работа</Text>
                     </div>
 
                     {error && (
                         <div className="submission-form__error">{error}</div>
                     )}
-
-                    {isInstructor &&
-                        assignment.status ===
-                            ASSIGNMENTS_STATUSES.SUBMITTED && (
-                            <div className="assessment-form">
-                                <div className="assessment-form__group">
-                                    <label>Оценка:</label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="10"
-                                        value={assessment}
-                                        onChange={(e) =>
-                                            setAssessment(e.target.value)
-                                        }
-                                    />
-                                </div>
-                            </div>
-                        )}
 
                     <form className="submission-form">
                         <div className="submission-form__group">
