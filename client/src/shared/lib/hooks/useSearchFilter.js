@@ -6,9 +6,12 @@ export const useSearchFilter = (searchQuery, usersArray, teams, userFiles) => {
 
         if (!query) {
             return {
-                filteredUsers: usersArray,
-                filteredTeams: teams,
-                filteredFiles: userFiles || [],
+                // Берем только первые 8 пользователей
+                filteredUsers: usersArray.slice(0, 8),
+                // Берем только первые 4 команды
+                filteredTeams: teams.slice(0, 4),
+                // Берем только первые 6 файлов
+                filteredFiles: (userFiles || []).slice(0, 6),
             };
         }
 

@@ -16,7 +16,12 @@ const AssignmentsPage = memo(({ userId }) => {
     const router = useRouter();
     const dispatch = useDispatch();
     const currentUser = useSelector((state) => state.user.user);
+    const isAuth = useSelector((state) => state.user.isAuth);
     const isInstructor = currentUser?.role === "INSTRUCTOR";
+
+    if (!isAuth) {
+        return null;
+    }
 
     const assignmentsState = useSelector((state) =>
         isInstructor
@@ -32,34 +37,46 @@ const AssignmentsPage = memo(({ userId }) => {
         error,
     } = assignmentsState;
 
-    const [filter, setFilter] = useState("all");
+    const [filter, setFilter] = useState(isInstructor ? "all" : "all");
     const [isFilterLoading, setIsFilterLoading] = useState(false);
 
-    // Подготовка данных
     const { preparedAssignments, totalToShow } = useMemo(() => {
         if (isInstructor) {
             const assignmentsByTask = allAssignments.assignmentsByTask || [];
             const taskCards = [];
             let totalAssignments = 0;
 
-            assignmentsByTask.forEach((taskGroup) => {
-                const assignments = taskGroup.assignments || [];
-                const filteredAssignments =
-                    filter === "all"
-                        ? assignments
-                        : assignments.filter((a) => a.status === filter);
+            const taskTeamsMap = new Map();
 
-                if (filteredAssignments.length > 0) {
-                    taskCards.push({
-                        id: taskGroup.task.id,
+            assignmentsByTask.forEach((taskGroup) => {
+                const taskId = taskGroup.task.id;
+
+                if (!taskTeamsMap.has(taskId)) {
+                    taskTeamsMap.set(taskId, {
                         task: taskGroup.task,
-                        status: "assigned",
-                        isInstructorView: true,
-                        assignmentsCount: filteredAssignments.length,
-                        team: taskGroup.team,
+                        teams: [],
+                        totalAssignments: 0,
                     });
-                    totalAssignments += filteredAssignments.length;
                 }
+
+                const taskData = taskTeamsMap.get(taskId);
+                taskData.teams.push({
+                    team: taskGroup.team,
+                    assignmentsCount: taskGroup.assignments?.length || 0,
+                });
+                taskData.totalAssignments += taskGroup.assignments?.length || 0;
+            });
+
+            taskTeamsMap.forEach((taskData, taskId) => {
+                taskCards.push({
+                    id: taskId,
+                    task: taskData.task,
+                    isInstructorView: true,
+                    teams: taskData.teams,
+                    totalAssignments: taskData.totalAssignments,
+                    team: taskData.teams[0]?.team,
+                });
+                totalAssignments += taskData.totalAssignments;
             });
 
             return {
@@ -71,11 +88,9 @@ const AssignmentsPage = memo(({ userId }) => {
                 ? allAssignments
                 : [];
 
-            // Фильтрация с учетом реальных статусов из API
             const filtered = assignments.filter((assignment) => {
                 if (filter === "all") return true;
 
-                // Приводим статусы к единому формату
                 const statusMap = {
                     assigned: "assigned",
                     submitted: "submitted",
@@ -96,7 +111,6 @@ const AssignmentsPage = memo(({ userId }) => {
         }
     }, [allAssignments, filter, isInstructor]);
 
-    // Остальной код без изменений
     const handleSelectAssignment = useCallback(
         (taskId) => {
             if (!taskId) return;
@@ -128,9 +142,14 @@ const AssignmentsPage = memo(({ userId }) => {
         fetchData();
     }, [dispatch, userId, isInstructor]);
 
-    const handleSetNewFilter = useCallback((newFilter) => {
-        setFilter(newFilter);
-    }, []);
+    const handleSetNewFilter = useCallback(
+        (newFilter) => {
+            if (!isInstructor) {
+                setFilter(newFilter);
+            }
+        },
+        [isInstructor],
+    );
 
     if (loading) return <ClockLoader className="assignments__loading" />;
     if (error) return <div className="assignments__error">Ошибка: {error}</div>;
@@ -149,11 +168,15 @@ const AssignmentsPage = memo(({ userId }) => {
                 )}
             </div>
 
-            <Filters
-                currentFilter={filter}
-                onFilterChange={handleSetNewFilter}
-            />
-            <div className="assignments__divider"></div>
+            {!isInstructor && (
+                <>
+                    <Filters
+                        currentFilter={filter}
+                        onFilterChange={handleSetNewFilter}
+                    />
+                    <div className="assignments__divider"></div>
+                </>
+            )}
 
             {isFilterLoading ? (
                 <div className="assignments__loader">

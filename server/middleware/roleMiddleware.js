@@ -20,6 +20,16 @@ const roleRequirements = {
         ROLES.MODERATOR,
         ROLES.INSTRUCTOR,
     ],
+    "POST /api/teams/instructor/assignments": [
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
+    "POST /api/assignments/students-with-assignments": [
+        ROLES.ADMIN,
+        ROLES.MODERATOR,
+        ROLES.INSTRUCTOR,
+    ],
     "GET /api/teams/:id": [
         ROLES.USER,
         ROLES.ADMIN,

@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 const initialState = {
     isAuth: false,
     user: null,
+    isLoggingOut: false,
 };
 
 export const userStore = createSlice({
@@ -16,13 +17,17 @@ export const userStore = createSlice({
         setUser: (state, action) => {
             state.user = action.payload;
         },
+        startLogout: (state) => {
+            state.isLoggingOut = true;
+        },
         logout: (state) => {
             state.isAuth = false;
-            state.user = {};
+            state.user = null;
+            state.isLoggingOut = false;
             Cookies.remove("token");
         },
     },
 });
 
-export const { setIsAuth, setUser, logout } = userStore.actions;
+export const { setIsAuth, setUser, logout, startLogout } = userStore.actions;
 export default userStore.reducer;

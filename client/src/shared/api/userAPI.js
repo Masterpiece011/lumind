@@ -38,7 +38,7 @@ export const getUsers = createAsyncThunk(
     async ({
         page = 1,
         quantity = 100,
-        order = "ASC",
+        order = "DESC",
         search_text = "",
         role = "",
         group_id = null,

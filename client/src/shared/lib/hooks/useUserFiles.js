@@ -27,7 +27,7 @@ const useUserFiles = (userId) => {
                 getUserFiles({
                     userId,
                     page: 1,
-                    quantity: 8,
+                    quantity: 6,
                 }),
             );
         }
@@ -39,7 +39,7 @@ const useUserFiles = (userId) => {
                 getUserFiles({
                     userId,
                     page: page + 1,
-                    quantity: 8,
+                    quantity: 6,
                 }),
             );
         }

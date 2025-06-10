@@ -29,6 +29,8 @@ import getOneTeam from "./methods/getOneTeam.js";
 import getAllTeams from "./methods/getAllTeams.js";
 import updateTeam from "./methods/updateTeam.js";
 import deleteTeam from "./methods/deleteTeam.js";
+import getTeamInstructorAssignments from "./methods/getTeamInstructorAssignments.js";
+import getTeamStudentsWithAssignments from "./methods/getTeamStudentsWithAssignments.js";
 
 class TeamController {
     // Создание команды
@@ -42,6 +44,10 @@ class TeamController {
     // Получение всех команд с пользователями и группами
 
     getAll = getAllTeams;
+
+    getTeamInstructorAssignments = getTeamInstructorAssignments;
+
+    getTeamStudentsWithAssignments = getTeamStudentsWithAssignments;
 
     // Обновление данных команды
 
