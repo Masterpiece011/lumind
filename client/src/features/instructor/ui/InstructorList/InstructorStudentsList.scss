@@ -78,35 +78,35 @@
     }
 
     .status-badge {
-        @include fontOptions(13px, 600, 16px);
-        padding: 4px 8px;
-        border-radius: 12px;
-        color: white;
+    @include fontOptions(13px, 600, 16px);
+    padding: 4px 8px;
+    border-radius: 12px;
+    color: white;
 
-        &--assigned {
-            background-color: #2196f3;
-        }
-
-        &--submitted {
-            background-color: #ff9800;
-        }
-
-        &--completed {
-            background-color: #4caf50;
-        }
-
-        &--failed {
-            background-color: #f44336;
-        }
-
-        &--in-progress {
-            background-color: #9c27b0;
-        }
-
-        &--not-assigned {
-            background-color: #9e9e9e;
-        }
+    &.status--assigned {
+        background-color: #2196f3;
     }
+
+    &.status--submitted {
+        background-color: #ff9800;
+    }
+
+    &.status--completed {
+        background-color: #4caf50;
+    }
+
+    &.status--failed {
+        background-color: #f44336;
+    }
+
+    &.status--in-progress {
+        background-color: #9c27b0;
+    }
+
+    &.status--not-assigned {
+        background-color: #9e9e9e;
+    }
+}
 
     &__empty {
         @include fontOptions(14px, 400, 18px);

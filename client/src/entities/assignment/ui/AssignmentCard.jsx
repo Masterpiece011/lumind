@@ -63,9 +63,26 @@ export const AssignmentCard = memo(({ assignment, onSelect }) => {
                                 : "Не указан"}
                         </Text>
                     </div>
+                    {/* Добавляем блок с информацией о команде для студента */}
+                    {assignment.team && (
+                        <div className="assignments__team">
+                            <Text tag="p" className="text-medium">
+                                Команда:{" "}
+                                <span
+                                    style={{
+                                        color:
+                                            assignment.team.avatar_color ||
+                                            "#000000",
+                                    }}
+                                >
+                                    {assignment.team.name || "Без названия"}
+                                </span>
+                            </Text>
+                        </div>
+                    )}
                 </>
             ) : (
-                // Рендер для преподавателя
+                // Рендер для преподавателя (без изменений)
                 <>
                     <Text tag="h2" className="assignments__name">
                         {assignment.task?.title || "Неизвестное задание"}

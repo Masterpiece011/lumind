@@ -156,7 +156,15 @@ export const FileItem = memo(
 
         return (
             <div className={`file-item ${compact ? "file-item--compact" : ""}`}>
-                <div className="file-icon">{getFileIcon(fileType)}</div>
+                <div
+                    className="file-icon"
+                    style={{
+                        width: compact ? "20px" : "24px",
+                        height: compact ? "20px" : "24px",
+                    }}
+                >
+                    {getFileIcon(fileType)}
+                </div>
                 <div className="file-info">
                     <span className="file-name" title={fullFileName}>
                         {compact
