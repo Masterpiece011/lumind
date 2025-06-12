@@ -13,37 +13,51 @@ export const TeamButton = memo(({ text, isActive, onClick }) => {
     );
 });
 
-export const TeamFilter = memo(({ teams, currentTeam, onTeamChange }) => {
-    const handleTeamChange = useCallback(
-        (teamId) => {
-            onTeamChange(teamId);
-        },
-        [onTeamChange],
-    );
+export const TeamFilter = memo(
+    ({
+        teams,
+        currentTeam,
+        onTeamChange,
+        taskTitle, 
+    }) => {
+        const handleTeamChange = useCallback(
+            (teamId) => {
+                onTeamChange(teamId);
+            },
+            [onTeamChange],
+        );
 
-    return (
-        <div className="team-filter">
-            <Text tag="h3">Фильтр по команде</Text>
-            <div className="team-filter__buttons">
-                <TeamButton
-                    text="Все"
-                    isActive={!currentTeam}
-                    onClick={() => handleTeamChange(null)}
-                />
-                {teams.map((team) => (
+        return (
+            <div className="team-filter">
+                <div className="team-filter__header">
+                    <Text tag="h3">Фильтр по заданию</Text>
+                    {taskTitle && (
+                        <Text tag="h3" className="team-filter__task-title">
+                            {taskTitle}
+                        </Text>
+                    )}
+                </div>
+                <div className="team-filter__buttons">
                     <TeamButton
-                        key={team.id}
-                        text={team.name}
-                        isActive={currentTeam === team.id}
-                        onClick={() => handleTeamChange(team.id)}
+                        text="Все"
+                        isActive={!currentTeam}
+                        onClick={() => handleTeamChange(null)}
                     />
-                ))}
-                <TeamButton
-                    text="Остальные"
-                    isActive={currentTeam === "other"}
-                    onClick={() => handleTeamChange("other")}
-                />
+                    {teams.map((team) => (
+                        <TeamButton
+                            key={team.id}
+                            text={team.name}
+                            isActive={currentTeam === team.id}
+                            onClick={() => handleTeamChange(team.id)}
+                        />
+                    ))}
+                    <TeamButton
+                        text="Остальные"
+                        isActive={currentTeam === "other"}
+                        onClick={() => handleTeamChange("other")}
+                    />
+                </div>
             </div>
-        </div>
-    );
-});
+        );
+    },
+);

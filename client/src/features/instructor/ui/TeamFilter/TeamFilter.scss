@@ -7,7 +7,21 @@
     background-color: var(--card-bg);
     border-radius: 8px;
     border: 1px solid var(--card-border);
+    
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
 
+    &__task-info {
+        @include fontOptions(14px, 500, 18px);
+        color: var(--text-muted);
+        margin: 0;
+    }
+    
     &__buttons {
         display: flex;
         flex-wrap: wrap;

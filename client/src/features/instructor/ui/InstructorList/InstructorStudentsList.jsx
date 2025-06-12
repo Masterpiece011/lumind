@@ -27,8 +27,10 @@ export const InstructorStudentsList = ({ onSelectAssignment, taskId }) => {
     const [allTeams, setAllTeams] = useState([]);
     const [filteredTeams, setFilteredTeams] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [taskTittle, setTaskTitle] = useState(""); // Добавляем состояние для названия задания
     const [error, setError] = useState(null);
     const [selectedUserId, setSelectedUserId] = useState(null);
+
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [pagination, setPagination] = useState({
         page: 1,
@@ -51,6 +53,9 @@ export const InstructorStudentsList = ({ onSelectAssignment, taskId }) => {
                     selectedTeam,
                     pagination.page,
                 );
+                if (taskId && response.task) {
+                    setTaskTitle(response.task.title);
+                }
 
                 const allUniqueTeams = new Map();
                 const filteredUniqueTeams = new Map();
@@ -138,6 +143,9 @@ export const InstructorStudentsList = ({ onSelectAssignment, taskId }) => {
     if (loading || teamsLoading) return <ClockLoader />;
     if (error) return <Text className="error-message">{error}</Text>;
 
+    const taskTitle =
+        students.length > 0 && students[0].assignments[0]?.task?.title;
+
     return (
         <div className="instructor-students">
             <Text tag="h2" className="instructor-students__title">
@@ -148,6 +156,7 @@ export const InstructorStudentsList = ({ onSelectAssignment, taskId }) => {
                 teams={allTeams}
                 currentTeam={selectedTeam}
                 onTeamChange={handleTeamChange}
+                taskTitle={taskTitle} 
             />
 
             <div className="instructor-students__students-list">
@@ -195,11 +204,7 @@ export const InstructorStudentsList = ({ onSelectAssignment, taskId }) => {
                                         </div>
                                     </div>
                                     {getStatusBadge(status)}
-                                    {taskId && (
-                                        <div className="assignment-task">
-                                            Задание: {assignment.task.title}
-                                        </div>
-                                    )}
+                                    {/* Убрали div с assignment-task */}
                                 </div>
                             );
                         })

@@ -104,9 +104,14 @@ const AssignmentsPage = memo(({ userId }) => {
                 return normalizedStatus === filter;
             });
 
+            const assignmentsWithTeam = filtered.map((assignment) => ({
+                ...assignment,
+                team: assignment.team || null,
+            }));
+
             return {
-                preparedAssignments: filtered,
-                totalToShow: filtered.length,
+                preparedAssignments: assignmentsWithTeam,
+                totalToShow: assignmentsWithTeam.length,
             };
         }
     }, [allAssignments, filter, isInstructor]);
