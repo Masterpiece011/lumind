@@ -85,10 +85,10 @@
     }
 
     .status-badge {
-        @include fontOptions(13px, 600, 16px);
-        padding: 4px 8px;
-        border-radius: 12px;
-        color: white;
+    @include fontOptions(13px, 600, 16px);
+    padding: 4px 8px;
+    border-radius: 12px;
+    color: white;
 
         &.status--assigned {
             background-color: #2196f3;
