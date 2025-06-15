@@ -24,6 +24,7 @@ import "./MainComp.scss";
 import { InstructorAssignmentFlow } from "@/features/instructor";
 import { TaskCreateForm } from "@/features/instructor/ui/TaskCreateForm/TaskCreateForm";
 import { AssignmentCreateForm } from "@/features/instructor/ui/AssignmentCreateForm/AssignmentCreateForm";
+import { FilesPage } from "@/entities/files/ui/Files/FilesPage";
 
 const MainComp = () => {
     const router = useRouter();

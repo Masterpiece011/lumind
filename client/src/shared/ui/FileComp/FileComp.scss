@@ -43,9 +43,10 @@
         text-overflow: ellipsis;
     }
 
-    .file-actions {
+      .file-actions {
         position: relative;
         margin-left: auto;
+        z-index: 1; 
 
         .file-item-menu {
             background: none;
@@ -54,6 +55,7 @@
             padding: 4px;
             display: flex;
             align-items: center;
+            z-index: 1;
 
             & img {
                 width: 20px;
@@ -70,7 +72,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            z-index: 100;
+            z-index: 998; 
             min-width: 150px;
             margin-top: 4px;
 

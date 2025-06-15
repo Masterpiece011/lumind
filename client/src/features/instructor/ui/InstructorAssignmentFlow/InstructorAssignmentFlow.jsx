@@ -36,19 +36,21 @@ export const InstructorAssignmentFlow = ({ taskId }) => {
                     setAssignment(data);
                 } catch (err) {
                     setError(err.message || "Ошибка загрузки задания");
-                    router.push("/assignments/students-assignments");
+                    router.push(
+                        `/assignments/students-assignments${currentTaskId ? `?taskId=${currentTaskId}` : ""}`,
+                    );
                 } finally {
                     setLoading(false);
                 }
             };
             loadAssignment();
         }
-    }, [assignmentId, isDetailView, router]);
+    }, [assignmentId, isDetailView, router, currentTaskId]);
 
     const handleSelectAssignment = (assignment) => {
         if (assignment && assignment.id) {
             router.push(
-                `/assignments/students-assignments/${assignment.id}${taskId ? `?taskId=${taskId}` : ""}`,
+                `/assignments/students-assignments/${assignment.id}${currentTaskId ? `?taskId=${currentTaskId}` : ""}`,
             );
         }
     };

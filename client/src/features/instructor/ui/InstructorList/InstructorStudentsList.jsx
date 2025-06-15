@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useSelector } from "react-redux";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import Text from "@/shared/ui/Text";
 import "./InstructorStudentsList.scss";
@@ -25,93 +25,104 @@ export const InstructorStudentsList = ({ onSelectAssignment, taskId }) => {
     const router = useRouter();
     const [students, setStudents] = useState([]);
     const [allTeams, setAllTeams] = useState([]);
-    const [filteredTeams, setFilteredTeams] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [taskTittle, setTaskTitle] = useState(""); // Добавляем состояние для названия задания
+    const [taskTitle, setTaskTitle] = useState("");
     const [error, setError] = useState(null);
     const [selectedUserId, setSelectedUserId] = useState(null);
-
     const [selectedTeam, setSelectedTeam] = useState(null);
-    const [pagination, setPagination] = useState({
-        page: 1,
-        total: 0,
-        totalPages: 1,
-    });
+    const [isLoading, setIsLoading] = useState(true);
+    const [isFilterLoading, setIsFilterLoading] = useState(false);
 
     const { loading: teamsLoading } = useSelector((state) => ({
         loading: state.teams.loading,
     }));
 
-    useEffect(() => {
-        const fetchData = async () => {
+    const fetchStudents = useCallback(
+        async (teamId = null, page = 1) => {
             try {
-                setLoading(true);
-                setError(null);
-
                 const response = await getStudentsWithAssignments(
                     taskId,
-                    selectedTeam,
-                    pagination.page,
+                    teamId,
+                    page,
                 );
-                if (taskId && response.task) {
+
+                if (taskId && response?.task?.title) {
                     setTaskTitle(response.task.title);
+                } else {
+                    setTaskTitle("");
                 }
 
-                const allUniqueTeams = new Map();
-                const filteredUniqueTeams = new Map();
-
-                if (!selectedTeam && allTeams.length === 0) {
-                    const allResponse = await getStudentsWithAssignments(
-                        taskId,
-                        null,
-                        1,
-                    );
-                    allResponse.students.forEach((student) => {
-                        student.teams?.forEach((team) => {
-                            if (!allUniqueTeams.has(team.id)) {
-                                allUniqueTeams.set(team.id, team);
-                            }
-                        });
-                    });
-                    setAllTeams(Array.from(allUniqueTeams.values()));
-                }
-
-                response.students.forEach((student) => {
-                    student.teams?.forEach((team) => {
-                        if (!filteredUniqueTeams.has(team.id)) {
-                            filteredUniqueTeams.set(team.id, team);
-                        }
-                    });
-                });
-
-                setFilteredTeams(Array.from(filteredUniqueTeams.values()));
-                setStudents(response.students);
-                setPagination({
-                    page: response.currentPage,
-                    total: response.total,
-                    totalPages: response.totalPages,
-                });
+                return {
+                    students: response.students,
+                    teams: response.students.flatMap(
+                        (student) => student.teams || [],
+                    ),
+                    taskTitle: response?.task?.title || "",
+                    pagination: {
+                        page: response.currentPage,
+                        total: response.total,
+                        totalPages: response.totalPages,
+                    },
+                };
             } catch (err) {
                 console.error("Fetch error:", err);
-                setError(err.message || "Ошибка загрузки данных");
-                setStudents([]);
-                setFilteredTeams([]);
-            } finally {
-                setLoading(false);
+                throw err;
             }
-        };
+        },
+        [taskId],
+    );
 
-        fetchData();
-    }, [taskId, selectedTeam, pagination.page]);
+    const loadInitialData = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
 
-    const handleTeamChange = useCallback((teamId) => {
-        setSelectedTeam(teamId);
-        setPagination((prev) => ({ ...prev, page: 1 }));
-    }, []);
+            const [initialData, allTeamsData] = await Promise.all([
+                fetchStudents(),
+                fetchStudents(null, 1),
+            ]);
 
-    const handlePageChange = (newPage) => {
-        setPagination((prev) => ({ ...prev, page: newPage }));
-    };
+            const uniqueTeams = Array.from(
+                new Map(
+                    allTeamsData.teams.map((team) => [team.id, team]),
+                ).values(),
+            );
+
+            setAllTeams(uniqueTeams);
+            setStudents(initialData.students);
+            if (initialData.taskTitle) {
+                setTaskTitle(initialData.taskTitle);
+            }
+        } catch (err) {
+            setError(err.message || "Ошибка загрузки данных");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [fetchStudents]);
+
+    const handleTeamChange = useCallback(
+        async (teamId) => {
+            try {
+                setIsFilterLoading(true);
+                setSelectedTeam(teamId);
+
+                const { students, taskTitle: newTaskTitle } =
+                    await fetchStudents(teamId);
+                setStudents(students);
+                if (newTaskTitle) {
+                    setTaskTitle(newTaskTitle);
+                }
+            } catch (err) {
+                setError(err.message || "Ошибка фильтрации");
+            } finally {
+                setIsFilterLoading(false);
+            }
+        },
+        [fetchStudents],
+    );
+
+    useEffect(() => {
+        loadInitialData();
+    }, [loadInitialData]);
 
     const handleSelectUser = (userId, assignment) => {
         if (onSelectAssignment) {
@@ -140,11 +151,17 @@ export const InstructorStudentsList = ({ onSelectAssignment, taskId }) => {
         );
     };
 
-    if (loading || teamsLoading) return <ClockLoader />;
-    if (error) return <Text className="error-message">{error}</Text>;
+    const filteredStudents = useMemo(() => {
+        return students.filter((student) => student.assignments.length > 0);
+    }, [students]);
 
-    const taskTitle =
-        students.length > 0 && students[0].assignments[0]?.task?.title;
+    if (isLoading || teamsLoading) {
+        return <ClockLoader />;
+    }
+
+    if (error) {
+        return <Text className="error-message">{error}</Text>;
+    }
 
     return (
         <div className="instructor-students">
@@ -156,58 +173,58 @@ export const InstructorStudentsList = ({ onSelectAssignment, taskId }) => {
                 teams={allTeams}
                 currentTeam={selectedTeam}
                 onTeamChange={handleTeamChange}
-                taskTitle={taskTitle} 
+                taskTitle={taskTitle}
+                isLoading={isFilterLoading}
             />
 
             <div className="instructor-students__students-list">
-                {students.length > 0 ? (
-                    students
-                        .filter((student) => student.assignments.length > 0)
-                        .map((student) => {
-                            const assignment = student.assignments[0];
-                            const status = assignment?.status || "not_assigned";
+                {isFilterLoading ? (
+                    <div className="instructor-students__loading">
+                        <ClockLoader size={24} />
+                    </div>
+                ) : filteredStudents.length > 0 ? (
+                    filteredStudents.map((student) => {
+                        const assignment = student.assignments[0];
+                        const status = assignment?.status || "not_assigned";
+                        const firstTeam = student.teams?.[0];
+                        const teamName = firstTeam?.name || "Без команды";
+                        const groupName = student.group?.title || "Без группы";
 
-                            const firstTeam = student.teams?.[0];
-                            const teamName = firstTeam?.name || "Без команды";
-                            const groupName =
-                                student.group?.title || "Без группы";
-
-                            return (
-                                <div
-                                    key={student.id}
-                                    className={`instructor-students__student-item ${
-                                        selectedUserId === student.id
-                                            ? "instructor-students__student-item--active"
-                                            : ""
-                                    }`}
-                                    onClick={() =>
-                                        handleSelectUser(student.id, assignment)
-                                    }
-                                >
-                                    <div className="student-info">
-                                        <Text tag="p" className="student-name">
-                                            {formatUserName(student)}
+                        return (
+                            <div
+                                key={student.id}
+                                className={`instructor-students__student-item ${
+                                    selectedUserId === student.id
+                                        ? "instructor-students__student-item--active"
+                                        : ""
+                                }`}
+                                onClick={() =>
+                                    handleSelectUser(student.id, assignment)
+                                }
+                            >
+                                <div className="student-info">
+                                    <Text tag="p" className="student-name">
+                                        {formatUserName(student)}
+                                    </Text>
+                                    <div className="student-meta">
+                                        <Text
+                                            tag="span"
+                                            className="student-group"
+                                        >
+                                            {groupName}
                                         </Text>
-                                        <div className="student-meta">
-                                            <Text
-                                                tag="span"
-                                                className="student-group"
-                                            >
-                                                {groupName}
-                                            </Text>
-                                            <Text
-                                                tag="span"
-                                                className="student-team"
-                                            >
-                                                {teamName}
-                                            </Text>
-                                        </div>
+                                        <Text
+                                            tag="span"
+                                            className="student-team"
+                                        >
+                                            {teamName}
+                                        </Text>
                                     </div>
-                                    {getStatusBadge(status)}
-                                    {/* Убрали div с assignment-task */}
                                 </div>
-                            );
-                        })
+                                {getStatusBadge(status)}
+                            </div>
+                        );
+                    })
                 ) : (
                     <Text tag="p" className="instructor-students__empty">
                         {taskId

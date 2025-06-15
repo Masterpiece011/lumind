@@ -24,6 +24,7 @@ const SearchMenu = ({
     menuRef,
     onTeamsCardClick,
     onUsersCardClick,
+    onFilesCardClick,
 }) => {
     const dispatch = useDispatch();
     const { teams = [] } = useSelector((state) => state.teams);
@@ -108,7 +109,13 @@ const SearchMenu = ({
                     </div>
                 </div>
 
-                <div className="search-menu__card">
+                <div
+                    className="search-menu__card"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onFilesCardClick();
+                    }}
+                >
                     <h2 className="search-menu__section-title">
                         <span className="search-menu__title-icon">
                             <Icon src={FilesIcon} alt="files-icon" />
