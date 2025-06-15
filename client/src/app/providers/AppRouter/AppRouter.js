@@ -24,7 +24,8 @@ const AppRouter = ({ children }) => {
         pathname.startsWith("/assignments") ||
         pathname.startsWith("/chats") ||
         pathname.startsWith("/schedule") ||
-        pathname.startsWith("/users");
+        pathname.startsWith("/users") ||
+        pathname.startsWith("/files");
 
     useEffect(() => {
         const verifyAuth = async () => {

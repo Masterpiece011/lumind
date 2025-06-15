@@ -88,6 +88,7 @@ export const FileItem = memo(
         additionalInfo,
         simpleView = false,
         compact = false,
+        showDownloadButton = true,
     }) => {
         const [isMenuOpen, setIsMenuOpen] = useState(false);
         const menuRef = useRef(null);
@@ -180,28 +181,7 @@ export const FileItem = memo(
                     )}
                 </div>
 
-                {compact ? (
-                    <MyButton
-                        className="file-download-compact"
-                        onClick={handleDownloadClick}
-                        disabled={disabled}
-                        style={{
-                            minWidth: "20px",
-                            width: "20px",
-                            height: "20px",
-                            padding: "2px",
-                        }}
-                    >
-                        <Icon
-                            src={CloudDowloadArrow}
-                            alt="download"
-                            style={{
-                                width: "12px",
-                                height: "12px",
-                            }}
-                        />
-                    </MyButton>
-                ) : (
+                {!compact && (
                     <div className="file-actions" ref={buttonRef}>
                         <MyButton
                             className="file-item-menu"
