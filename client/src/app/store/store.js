@@ -17,6 +17,6 @@ export const store = configureStore({
         assignments: assignmentReducer,
         submissions: submissionReducer,
         theme: themeReducer,
-        file: fileReducer,
+        files: fileReducer,
     },
 });

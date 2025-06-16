@@ -79,10 +79,16 @@
             border-color: transparent;
         }
 
-        p,
-        span,
+       
         h2 {
             color: var(--text-color);
+        }
+
+         p,
+        span {
+            color: var(--text-color);
+            white-space: nowrap;
+
         }
     }
 
@@ -92,6 +98,12 @@
         margin-bottom: 10px;
         @include fontOptions(14px, 400, 14px);
         color: var(--text-muted);
+    }
+    
+    &__header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
     }
 
     &__status {

@@ -1,6 +1,7 @@
 @use "@/shared/styles/mixins/mixins" as *;
 
 .file-item {
+    max-width: 450px;
     display: flex;
     align-items: center;
     padding: 4px 8px;
@@ -31,7 +32,7 @@
     }
 
     .file-name {
-        @include fontOptions(18px, 400, 18px);
+        @include fontOptions(16px, 400, 18px);
         color: #aeaeae;
     }
 
@@ -43,19 +44,20 @@
         text-overflow: ellipsis;
     }
 
-      .file-actions {
-        position: relative;
-        margin-left: auto;
-        z-index: 1; 
+     .file-actions {
+  position: relative;
+  margin-left: auto;
+  z-index: 1; 
 
-        .file-item-menu {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            z-index: 1;
+  .file-item-menu {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    z-index: 1; 
+    position: relative; 
 
             & img {
                 width: 20px;
@@ -66,7 +68,8 @@
 
         .file-menu {
             position: absolute;
-            right: -26%;
+            right: 0;
+            transform: translateY(4px); 
             top: 100%;
             background: white;
             border: 1px solid #ddd;

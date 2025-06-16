@@ -36,6 +36,7 @@ const fileSlice = createSlice({
                 state.error = null;
             })
             .addCase(getTeamFiles.fulfilled, (state, action) => {
+                console.log("Saving to Redux:", action.payload.files);
                 state.loading = false;
                 state.teamFiles =
                     action.payload.page === 1

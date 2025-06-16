@@ -8,14 +8,11 @@ const Text = ({
     children,
     className: parentClassName,
 }) => {
-    const className = classNames(
-        parentClassName, // Классы от родителя
-        {
-            "text-high": accent === "high",
-            "text-medium": accent === "medium",
-            "text-disabled": accent === "disabled",
-        },
-    );
+    const className = classNames(parentClassName, {
+        "text-high": accent === "high",
+        "text-medium": accent === "medium",
+        "text-disabled": accent === "disabled",
+    });
 
     return <Tag className={className}>{children}</Tag>;
 };

@@ -163,3 +163,64 @@
     color: var(--primary-color, #4914a5);
     transition: filter 0.2s ease;
 }
+
+.assignmentsButton {
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: var(--primary-accent);
+    color: white;
+    border: none;
+    @include fontOptions(16px, 500, 1.2);
+    cursor: pointer;
+    transition: all var(--transition);
+    min-width: 180px;
+    text-align: center;
+    
+    &:hover {
+        background: var(--primary-hover);
+    }
+    
+    &:active {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+    
+    &--outlined {
+        background: transparent;
+        border: 1px solid var(--primary-accent);
+        color: var(--primary-accent);
+        
+        &:hover {
+            background: rgba(159, 112, 253, 0.1);
+        }
+    }
+}
+
+.backButton {
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--card-border);
+    @include fontOptions(16px, 500, 1.2);
+    cursor: pointer;
+    transition: all var(--transition);
+    margin-bottom: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    
+    &:hover {
+        background: var(--hover-color);
+        border-color: var(--primary-accent);
+    }
+    
+    &:active {
+        transform: translateY(1px);
+    }
+    
+    &::before {
+        content: "←";
+        font-size: 18px;
+    }
+}

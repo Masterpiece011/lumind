@@ -194,9 +194,9 @@ const MainComp = () => {
                             <FilesPage />
                         ) : pathname.startsWith("/schedule") ? (
                             <SchedulePage />
-                        ) : pathname.startsWith("/assignments/create") ? (
+                        ) : pathname === "/assignments/create" ? (
                             <AssignmentCreateForm />
-                        ) : pathname.startsWith("/tasks/create") ? (
+                        ) : pathname === "/assignments/create-task" ? (
                             <TaskCreateForm />
                         ) : (
                             renderAssignmentsSection()

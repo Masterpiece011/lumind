@@ -7,7 +7,10 @@ import {
     useSearchParams,
 } from "next/navigation";
 import { MyButton } from "@/shared/uikit/MyButton";
+
 import "./InstructorAssignmentFlow.scss";
+import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
+
 import Text from "@/shared/ui/Text";
 import { getAssignmentById } from "@/shared/api/assignmentsAPI";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
@@ -78,7 +81,7 @@ export const InstructorAssignmentFlow = ({ taskId }) => {
                     <MyButton
                         text="Назад к списку"
                         onClick={handleBackToList}
-                        className="back-button"
+                        className={buttonStyles.backButton}
                     />
                     <InstructorAssignmentDetail
                         assignmentId={assignmentId}

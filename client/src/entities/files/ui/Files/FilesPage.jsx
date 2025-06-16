@@ -52,15 +52,26 @@ const FilesPage = () => {
                 {filteredFiles.length > 0 ? (
                     filteredFiles.map((file) => (
                         <div key={file.id} className="files__item">
-                            <FileItem
-                                fileUrl={file.file_url}
-                                fileName={file.original_name}
-                                additionalInfo={file.assignmentTitle}
-                                onDownload={() =>
-                                    handleDownload(file.id, file.original_name)
-                                }
-                                showDownloadButton={false}
-                            />
+                            <div className="files__item-header">
+                                <FileItem
+                                    fileUrl={file.file_url}
+                                    fileName={file.original_name}
+                                    onDownload={() =>
+                                        handleDownload(
+                                            file.id,
+                                            file.original_name,
+                                        )
+                                    }
+                                    showDownloadButton={false}
+                                />
+                            </div>
+                            {file.assignmentTitle && (
+                                <div className="files__assignment-info">
+                                    <span className="files__assignment-title">
+                                        Задание: {file.assignmentTitle}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     ))
                 ) : (
