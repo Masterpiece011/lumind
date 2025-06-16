@@ -118,8 +118,7 @@ export const getUserFiles = async () => {
         throw error;
     }
 };
-
-export const getTeamFiles = async (teamId) => {
+export const getTeamFiles = async ({ teamId, page, quantity }) => {
     const token = getAuthToken();
     const config = {
         withCredentials: true,
@@ -129,9 +128,16 @@ export const getTeamFiles = async (teamId) => {
     try {
         const { data } = await $authHost.post(
             `/api/files/team/${teamId}`,
-            {},
+            { page, quantity },
             config,
         );
+
+        // Ensure the response contains the files array
+        if (!data.files) {
+            console.warn("API response missing files array:", data);
+            return { ...data, files: [] };
+        }
+
         return data;
     } catch (error) {
         console.error("Ошибка получения файлов команды:", error);

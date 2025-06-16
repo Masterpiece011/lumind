@@ -3,7 +3,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { ClockLoader } from "@/shared/ui/Loaders/ClockLoader";
 import { Filters } from "../Filters";
 import { AssignmentsList } from "../AssignmentsList";
+
 import "./AssignmentsComp.scss";
+import * as buttonStyles from "@/shared/uikit/MyButton/MyButton.module.scss";
+
 import Text from "@/shared/ui/Text";
 import {
     getInstructorAssignments,
@@ -166,10 +169,21 @@ const AssignmentsPage = memo(({ userId }) => {
                     {isInstructor ? "Мои задания" : "Назначенные задания"}
                 </Text>
                 {isInstructor && (
-                    <MyButton
-                        text="Создать назначение"
-                        onClick={() => router.push("/assignments/create")}
-                    />
+                    <div className="assignments__header-actions">
+                        <MyButton
+                            text="Создать задание"
+                            onClick={() =>
+                                router.push("/assignments/create-task")
+                            }
+                            className={buttonStyles.assignmentsButton}
+                        />
+                        <MyButton
+                            text="Создать назначение"
+                            onClick={() => router.push("/assignments/create")}
+                            className={`${buttonStyles.assignmentsButton} ${buttonStyles.assignmentsButtonOutlined}`}
+                            variant="outlined"
+                        />
+                    </div>
                 )}
             </div>
 

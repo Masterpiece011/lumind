@@ -11,11 +11,11 @@ const useUserFiles = (userId) => {
         total = 0,
         page = 1,
     } = useSelector((state) => ({
-        userFiles: state.file?.userFiles || [],
-        loading: state.file?.loading || false,
-        error: state.file?.error || null,
-        total: state.file?.total || 0,
-        page: state.file?.page || 1,
+        userFiles: state.files?.userFiles || [],
+        loading: state.files?.loading || false,
+        error: state.files?.error || null,
+        total: state.files?.total || 0,
+        page: state.files?.page || 1,
     }));
 
     const initialLoadDone = useRef(false);

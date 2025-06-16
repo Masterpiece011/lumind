@@ -187,28 +187,51 @@ const MembersTabContent = ({ users }) => (
     </div>
 );
 
-const FilesTabContent = ({ files, loading, onSelectAssignment }) => (
-    <div className="team-files">
-        <h3>Файлы заданий команды</h3>
-        {loading ? (
-            <div>Загрузка файлов...</div>
-        ) : files.length > 0 ? (
+const FilesTabContent = ({ onSelectAssignment }) => {
+    const files = useSelector((state) => state.files?.teamFiles || []);
+    const loading = useSelector((state) => state.files?.loading || false);
+
+    if (loading) {
+        return (
+            <div className="team-files">
+                <h3>Файлы заданий команды</h3>
+                <div>Загрузка файлов...</div>
+            </div>
+        );
+    }
+
+    if (!files || files.length === 0) {
+        return (
+            <div className="team-files">
+                <h3>Файлы заданий команды</h3>
+                <p>Нет файлов заданий</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="team-files">
+            <h3>Файлы команды</h3>
             <div className="file-list">
                 {files.map((file) => (
-                    <FileItem
-                        key={file.id}
-                        fileUrl={file.file_url}
-                        fileName={file.original_name}
-                        additionalInfo={file.taskTitle}
-                        onClick={() => onSelectAssignment(file.taskId)}
-                    />
+                    <div key={file.id} className="file-item-wrapper">
+                        <FileItem
+                            fileUrl={file.file_url}
+                            fileName={
+                                file.original_name ||
+                                file.file_url.split("/").pop()
+                            }
+                            additionalInfo={file.taskTitle}
+                            onClick={() =>
+                                file.taskId && onSelectAssignment(file.taskId)
+                            }
+                        />
+                    </div>
                 ))}
             </div>
-        ) : (
-            <p>Нет файлов заданий</p>
-        )}
-    </div>
-);
+        </div>
+    );
+};
 
 const PublicationsTabContent = ({
     publications,

@@ -99,7 +99,7 @@ export const TaskCreateForm = ({ onClose }) => {
                 </div>
 
                 <div className="task-create__group">
-                    <label>Описание</label>
+                    <label>Описание задания</label>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -108,7 +108,7 @@ export const TaskCreateForm = ({ onClose }) => {
                 </div>
 
                 <div className="task-create__group">
-                    <label>Комментарий для преподавателя</label>
+                    <label>Комментарий к заданию</label>
                     <textarea
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}

@@ -29,7 +29,14 @@ const useTeamFiles = (teamId) => {
                     page: 1,
                     quantity: 10,
                 }),
-            );
+            )
+                .unwrap()
+                .then((data) => {
+                    console.log("Received files data:", data);
+                })
+                .catch((err) => {
+                    console.error("Failed to load team files:", err);
+                });
         }
     }, [teamId, dispatch]);
 
