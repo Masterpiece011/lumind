@@ -102,7 +102,8 @@ export const Chats = sequelize.define(
     "chats",
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        chat_members: { type: DataTypes.JSON },
+        name: { type: DataTypes.STRING, allowNull: true },
+        type: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
         created_at: { type: DataTypes.DATE, defaultValue: now() },
     },
     {
@@ -121,6 +122,22 @@ export const Chat_Messages = sequelize.define(
         message: { type: DataTypes.STRING },
         chat_id: { type: DataTypes.INTEGER, allowNull: false },
         user_id: { type: DataTypes.INTEGER, allowNull: false },
+        created_at: { type: DataTypes.DATE, defaultValue: now() },
+    },
+    {
+        timestamps: true,
+        createdAt: "created_at",
+        updatedAt: "updated_at",
+    }
+);
+
+//Типы чата SINGLE или MULTIPLE
+
+export const Chat_Types = sequelize.define(
+    "chat_types",
+    {
+        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        type: { type: DataTypes.STRING, defaultValue: "single" },
         created_at: { type: DataTypes.DATE, defaultValue: now() },
     },
     {
@@ -449,32 +466,32 @@ Teams.belongsToMany(Users, { through: Users_Teams, foreignKey: "team_id" });
 
 //Связка Пользователя с Чатом через Chat_Members
 
-Chats.belongsToMany(Users, {
-    through: Chat_Members,
-    foreignKey: "chat_id",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
+Chat_Members.belongsTo(Users, {
+    foreignKey: "user_id",
 });
 
-Users.belongsToMany(Chats, {
-    through: Chat_Members,
+Users.hasMany(Chat_Members, {
     foreignKey: "user_id",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
+});
+
+//Связка Чата с Сообщениями чата
+
+Chats.hasMany(Chat_Members, {
+    foreignKey: "chat_id",
+});
+
+Chat_Members.belongsTo(Chats, {
+    foreignKey: "chat_id",
 });
 
 //Связка Чата с Сообщениями чата
 
 Chats.hasMany(Chat_Messages, {
     foreignKey: "chat_id",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
 });
 
 Chat_Messages.belongsTo(Chats, {
     foreignKey: "chat_id",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
 });
 
 //Связка Публикации с Конференцией
@@ -627,3 +644,26 @@ Files.belongsTo(Assignments, {
     foreignKey: "entity_id",
     constraints: false,
 });
+
+// В модели Chats добавим методы
+Chats.prototype.getMembers = async function () {
+    return await Chat_Members.findAll({
+        where: { chat_id: this.id },
+        include: [Users],
+    });
+};
+
+Chats.prototype.addMember = async function (userId) {
+    return await Chat_Members.create({
+        chat_id: this.id,
+        user_id: userId,
+    });
+};
+
+// В модели Users добавим методы
+Users.prototype.getChats = async function () {
+    return await Chat_Members.findAll({
+        where: { user_id: this.id },
+        include: [Chats],
+    });
+};

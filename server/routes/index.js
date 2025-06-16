@@ -17,6 +17,7 @@ import teamRouter from "./teamRouter.js";
 import usersTeamsRouter from "./usersTeamsRouter.js";
 import teamsTasksRouter from "./teamsTasksRouter.js";
 import taskRouter from "./taskRouter.js";
+import chatRouter from "./chatRouter.js";
 
 router.use("/users", userRouter);
 router.use("/roles", roleRouter);
@@ -33,5 +34,6 @@ router.use("/users-teams", usersTeamsRouter);
 router.use("/teams-tasks", teamsTasksRouter);
 router.use("/tasks", taskRouter);
 router.use("/files", fileRouter);
+router.use("/chats", chatRouter);
 
 export default router;
